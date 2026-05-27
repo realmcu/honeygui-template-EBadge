@@ -1,0 +1,29 @@
+{
+  "_comment": [
+    "资源转换配置文件 - 用于配置图片、视频等资源的转换参数",
+    "",
+    "【图片默认值】",
+    "  format: adaptive16 (自适应16位: 有透明度→ARGB8565, 无透明度→RGB565)",
+    "  compression: none (不压缩)",
+    "  可选格式: RGB565, RGB888, ARGB8565, ARGB8888, I8, adaptive16, adaptive24",
+    "  可选压缩: none, rle, fastlz, yuv, adaptive",
+    "",
+    "【视频默认值】",
+    "  format: MJPEG",
+    "  quality: 5 (MJPEG/AVI范围1-31, 1为最高质量; H264范围0-51)",
+    "  frameRate: 保持原始帧率",
+    "  可选格式: MJPEG, AVI, H264",
+    "",
+    "【字体默认值】",
+    "  输出格式: 位图字体 (.bin)",
+    "",
+    "【3D模型默认值】",
+    "  输出格式: HoneyGUI 3D格式 (.bin)"
+  ],
+  "version": "1.0",
+  "defaultSettings": {
+    "format": "adaptive16",
+    "compression": "none"
+  },
+  "items": {}
+}

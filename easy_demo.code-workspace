@@ -1,0 +1,17 @@
+{
+  "folders": [
+    {
+      "path": "."
+    }
+  ],
+  "settings": {
+    "files.associations": {
+      "*.hml": "xml"
+    }
+  },
+  "extensions": {
+    "recommendations": [
+      "realmcu.honeygui-visual-designer"
+    ]
+  }
+}

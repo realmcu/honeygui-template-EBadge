@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<hml>
+    <meta>
+        <project name="easy_demo" appId="com.example.easy_demo" resolution="360X360" minSdk="API 2: HoneyGUI V1.1.0" pixelMode="RGB565" />
+        <author name="Anonymous" />
+    </meta>
+    <view>
+        <hg_view id="easy_demoMainView" x="0" y="0" width="360" height="360" backgroundColor="#000000" entry="false" timers="[{&quot;id&quot;:&quot;timer_0&quot;,&quot;name&quot;:&quot;动画 1&quot;,&quot;enabled&quot;:false,&quot;interval&quot;:10,&quot;reload&quot;:true,&quot;mode&quot;:&quot;custom&quot;,&quot;callback&quot;:&quot;easy_demoMainView_timer_0_cb&quot;,&quot;duration&quot;:1000,&quot;stopOnComplete&quot;:true,&quot;delayStart&quot;:0,&quot;actions&quot;:[],&quot;segments&quot;:[]},{&quot;id&quot;:&quot;timer_1&quot;,&quot;name&quot;:&quot;动画 2&quot;,&quot;enabled&quot;:true,&quot;interval&quot;:1,&quot;reload&quot;:true,&quot;mode&quot;:&quot;custom&quot;,&quot;callback&quot;:&quot;easy_demoMainView_timer_init_cb&quot;,&quot;duration&quot;:1000,&quot;stopOnComplete&quot;:true,&quot;delayStart&quot;:0,&quot;actions&quot;:[],&quot;segments&quot;:[],&quot;runImmediately&quot;:true}]" zIndex="0">
+            <events>
+                <event type="onClick">
+                    <action type="switchView" target="view_1" switchOutStyle="SWITCH_OUT_NONE_ANIMATION" switchInStyle="SWITCH_IN_NONE_ANIMATION" />
+                </event>
+            </events>
+            <hg_window id="win_1" x="0" y="0" width="360" height="360" showBackground="false" backgroundColor="#808080" enableBlur="false" blurDegree="225" zIndex="0">
+                <hg_video id="vid_1" x="0" y="0" width="320" height="240" autoPlay="true" loop="true" src="assets/wallpaper_1.mp4" zIndex="0" />
+            </hg_window>
+            <hg_image id="img_1" x="50" y="-310" width="260" height="260" src="assets/top_menu.png" zIndex="2" />
+        </hg_view>
+        <hg_view id="view_1" x="543" y="-21" width="360" height="360" backgroundColor="#000000" borderRadius="20" padding="12" overflow="auto" entry="true" zIndex="1">
+            <events>
+                <event type="onClick">
+                    <action type="switchView" target="easy_demoMainView" switchOutStyle="SWITCH_OUT_NONE_ANIMATION" switchInStyle="SWITCH_IN_NONE_ANIMATION" />
+                </event>
+            </events>
+            <hg_image id="img_2" x="50" y="50" width="260" height="260" transform="{&quot;focusX&quot;:130,&quot;focusY&quot;:130}" src="assets/app_photo_icon.png" timers="[{&quot;id&quot;:&quot;timer_0&quot;,&quot;name&quot;:&quot;动画 1&quot;,&quot;enabled&quot;:true,&quot;interval&quot;:10,&quot;reload&quot;:true,&quot;mode&quot;:&quot;preset&quot;,&quot;callback&quot;:&quot;img_2_timer_0_cb&quot;,&quot;duration&quot;:1000,&quot;stopOnComplete&quot;:false,&quot;delayStart&quot;:0,&quot;actions&quot;:[],&quot;segments&quot;:[{&quot;duration&quot;:500,&quot;actions&quot;:[{&quot;type&quot;:&quot;scale&quot;,&quot;from&quot;:255,&quot;to&quot;:128,&quot;zoomXOrigin&quot;:1,&quot;zoomXTarget&quot;:0.5,&quot;zoomYOrigin&quot;:1,&quot;zoomYTarget&quot;:0.5}]},{&quot;duration&quot;:500,&quot;actions&quot;:[{&quot;type&quot;:&quot;scale&quot;,&quot;from&quot;:255,&quot;to&quot;:128,&quot;zoomXOrigin&quot;:0.5,&quot;zoomXTarget&quot;:1,&quot;zoomYOrigin&quot;:0.5,&quot;zoomYTarget&quot;:1}]}],&quot;runImmediately&quot;:true}]" highQuality="true" zIndex="1" />
+        </hg_view>
+    </view>
+</hml>
