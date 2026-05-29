@@ -5,24 +5,32 @@
         <author name="Anonymous" />
     </meta>
     <view>
-        <hg_view id="easy_demoMainView" x="0" y="0" width="360" height="360" backgroundColor="#000000" entry="false" timers="[{&quot;id&quot;:&quot;timer_0&quot;,&quot;name&quot;:&quot;动画 1&quot;,&quot;enabled&quot;:false,&quot;interval&quot;:10,&quot;reload&quot;:true,&quot;mode&quot;:&quot;custom&quot;,&quot;callback&quot;:&quot;easy_demoMainView_timer_0_cb&quot;,&quot;duration&quot;:1000,&quot;stopOnComplete&quot;:true,&quot;delayStart&quot;:0,&quot;actions&quot;:[],&quot;segments&quot;:[]},{&quot;id&quot;:&quot;timer_1&quot;,&quot;name&quot;:&quot;动画 2&quot;,&quot;enabled&quot;:true,&quot;interval&quot;:1,&quot;reload&quot;:true,&quot;mode&quot;:&quot;custom&quot;,&quot;callback&quot;:&quot;easy_demoMainView_timer_init_cb&quot;,&quot;duration&quot;:1000,&quot;stopOnComplete&quot;:true,&quot;delayStart&quot;:0,&quot;actions&quot;:[],&quot;segments&quot;:[],&quot;runImmediately&quot;:true}]" zIndex="0">
-            <events>
-                <event type="onClick">
-                    <action type="switchView" target="view_1" switchOutStyle="SWITCH_OUT_NONE_ANIMATION" switchInStyle="SWITCH_IN_NONE_ANIMATION" />
-                </event>
-            </events>
+        <hg_view id="easy_demoMainView" x="0" y="0" width="360" height="360" backgroundColor="#000000" entry="true" timers="[{&quot;id&quot;:&quot;timer_0&quot;,&quot;name&quot;:&quot;动画 1&quot;,&quot;enabled&quot;:false,&quot;interval&quot;:10,&quot;reload&quot;:true,&quot;mode&quot;:&quot;custom&quot;,&quot;callback&quot;:&quot;easy_demoMainView_timer_0_cb&quot;,&quot;duration&quot;:1000,&quot;stopOnComplete&quot;:true,&quot;delayStart&quot;:0,&quot;actions&quot;:[],&quot;segments&quot;:[]},{&quot;id&quot;:&quot;timer_1&quot;,&quot;name&quot;:&quot;动画 2&quot;,&quot;enabled&quot;:true,&quot;interval&quot;:1,&quot;reload&quot;:true,&quot;mode&quot;:&quot;custom&quot;,&quot;callback&quot;:&quot;easy_demoMainView_timer_init_cb&quot;,&quot;duration&quot;:1000,&quot;stopOnComplete&quot;:true,&quot;delayStart&quot;:0,&quot;actions&quot;:[],&quot;segments&quot;:[],&quot;runImmediately&quot;:true}]" zIndex="0">
             <hg_window id="win_1" x="0" y="0" width="360" height="360" showBackground="false" backgroundColor="#808080" enableBlur="false" blurDegree="225" zIndex="0">
-                <hg_video id="vid_1" x="0" y="0" width="320" height="240" autoPlay="true" loop="true" src="assets/wallpaper_1.mp4" zIndex="0" />
+                <hg_video id="vid_1" x="0" y="0" width="365" height="360" autoPlay="true" loop="true" src="assets/wallpaper_1.mp4" useMsv1="true" zIndex="0" />
             </hg_window>
-            <hg_image id="img_1" x="50" y="-310" width="260" height="260" src="assets/top_menu.png" zIndex="2" />
-        </hg_view>
-        <hg_view id="view_1" x="543" y="-21" width="360" height="360" backgroundColor="#000000" borderRadius="20" padding="12" overflow="auto" entry="true" zIndex="1">
-            <events>
-                <event type="onClick">
-                    <action type="switchView" target="easy_demoMainView" switchOutStyle="SWITCH_OUT_NONE_ANIMATION" switchInStyle="SWITCH_IN_NONE_ANIMATION" />
-                </event>
-            </events>
-            <hg_image id="img_2" x="50" y="50" width="260" height="260" transform="{&quot;focusX&quot;:130,&quot;focusY&quot;:130}" src="assets/app_photo_icon.png" timers="[{&quot;id&quot;:&quot;timer_0&quot;,&quot;name&quot;:&quot;动画 1&quot;,&quot;enabled&quot;:true,&quot;interval&quot;:10,&quot;reload&quot;:true,&quot;mode&quot;:&quot;preset&quot;,&quot;callback&quot;:&quot;img_2_timer_0_cb&quot;,&quot;duration&quot;:1000,&quot;stopOnComplete&quot;:false,&quot;delayStart&quot;:0,&quot;actions&quot;:[],&quot;segments&quot;:[{&quot;duration&quot;:500,&quot;actions&quot;:[{&quot;type&quot;:&quot;scale&quot;,&quot;from&quot;:255,&quot;to&quot;:128,&quot;zoomXOrigin&quot;:1,&quot;zoomXTarget&quot;:0.5,&quot;zoomYOrigin&quot;:1,&quot;zoomYTarget&quot;:0.5}]},{&quot;duration&quot;:500,&quot;actions&quot;:[{&quot;type&quot;:&quot;scale&quot;,&quot;from&quot;:255,&quot;to&quot;:128,&quot;zoomXOrigin&quot;:0.5,&quot;zoomXTarget&quot;:1,&quot;zoomYOrigin&quot;:0.5,&quot;zoomYTarget&quot;:1}]}],&quot;runImmediately&quot;:true}]" highQuality="true" zIndex="1" />
+            <hg_window id="win_menu" x="0" y="0" width="360" height="360" showBackground="false" backgroundColor="#808080" enableBlur="false" blurDegree="225" zIndex="1">
+                <hg_image id="bg_circle" x="0" y="0" width="360" height="360" transform="{&quot;opacity&quot;:100}" src="assets/image/A8/circle_360_bg.png" blendMode="IMG_2D_SW_FIX_A8_FG" fgColor="0xFF000000" zIndex="1" />
+                <hg_image id="icon_del" x="244" y="109" width="100" height="100" src="assets/image/A8/delete_iocn.png" blendMode="IMG_2D_SW_FIX_A8_FG" zIndex="2" />
+                <hg_image id="icon_fl" x="17" y="109" width="100" height="100" src="assets/image/A8/flashlight_icon.png" blendMode="IMG_2D_SW_FIX_A8_FG" zIndex="3" />
+                <hg_image id="icon_connect" x="194" y="225" width="100" height="100" src="assets/image/A8/connect_icon.png" blendMode="IMG_2D_SW_FIX_A8_FG" zIndex="4" />
+                <hg_image id="icon_bat" x="151" y="142" width="58" height="34" src="assets/image/A8/bat_100_icon.png" blendMode="IMG_2D_SW_FIX_A8_FG" timers="[{&quot;id&quot;:&quot;timer_0&quot;,&quot;name&quot;:&quot;动画 1&quot;,&quot;enabled&quot;:true,&quot;interval&quot;:1000,&quot;reload&quot;:true,&quot;mode&quot;:&quot;custom&quot;,&quot;callback&quot;:&quot;icon_bat_timer_0_cb&quot;,&quot;duration&quot;:1000,&quot;stopOnComplete&quot;:true,&quot;delayStart&quot;:0,&quot;actions&quot;:[],&quot;segments&quot;:[],&quot;runImmediately&quot;:true}]" zIndex="5" />
+                <hg_image id="icon_sl" x="67" y="225" width="100" height="100" src="assets/image/screen_light_6_icon.png" blendMode="IMG_SRC_OVER_MODE" zIndex="6">
+                    <events>
+                        <event type="onClick">
+                            <action type="callFunction" functionName="click_screen_light_icon" />
+                        </event>
+                    </events>
+                </hg_image>
+                <hg_image id="icon_as" x="130" y="9" width="100" height="100" src="assets/image/auto_sleep_off_icon.png" blendMode="IMG_SRC_OVER_MODE" zIndex="7">
+                    <events>
+                        <event type="onClick">
+                            <action type="callFunction" message="click_auto_sleep" functionName="click_auto_sleep_icon" />
+                        </event>
+                    </events>
+                </hg_image>
+            </hg_window>
+            <hg_label id="lbl_1" x="111" y="194" width="144" height="24" hAlign="LEFT" vAlign="TOP" color="#ffffff" letterSpacing="0" lineSpacing="0" wordWrap="false" wordBreak="false" text="Auto sleep mode" fontFile="/font/Inter_24pt_Regular.ttf" fontSize="18" timers="[{&quot;id&quot;:&quot;timer_0&quot;,&quot;name&quot;:&quot;动画 1&quot;,&quot;enabled&quot;:true,&quot;interval&quot;:10,&quot;reload&quot;:false,&quot;mode&quot;:&quot;custom&quot;,&quot;callback&quot;:&quot;lbl_1_timer_0_cb&quot;,&quot;duration&quot;:1000,&quot;stopOnComplete&quot;:true,&quot;delayStart&quot;:0,&quot;actions&quot;:[],&quot;segments&quot;:[],&quot;runImmediately&quot;:true}]" characterSets="[{&quot;type&quot;:&quot;range&quot;,&quot;value&quot;:&quot;0x20-0x7E&quot;}]" zIndex="1" />
         </hg_view>
     </view>
 </hml>

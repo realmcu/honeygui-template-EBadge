@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<hml>
+    <meta>
+        <project name="bt" appId="com.example.easy_demo" resolution="360X360" minSdk="API 2: HoneyGUI V1.1.0" pixelMode="RGB565" />
+        <author name="Anonymous" />
+    </meta>
+    <view>
+        <hg_view id="view_1" x="565" y="0" width="360" height="360" backgroundColor="#000000" borderRadius="20" padding="12" overflow="auto" entry="false" zIndex="1">
+            <events>
+                <event type="onClick">
+                    <action type="switchView" target="easy_demoMainView" switchOutStyle="SWITCH_OUT_NONE_ANIMATION" switchInStyle="SWITCH_IN_NONE_ANIMATION" />
+                </event>
+            </events>
+            <hg_image id="img_2" x="50" y="50" width="260" height="260" transform="{&quot;focusX&quot;:130,&quot;focusY&quot;:130}" src="assets/app_photo_icon.png" timers="[{&quot;id&quot;:&quot;timer_0&quot;,&quot;name&quot;:&quot;动画 1&quot;,&quot;enabled&quot;:true,&quot;interval&quot;:10,&quot;reload&quot;:true,&quot;mode&quot;:&quot;preset&quot;,&quot;callback&quot;:&quot;img_2_timer_0_cb&quot;,&quot;duration&quot;:1000,&quot;stopOnComplete&quot;:false,&quot;delayStart&quot;:0,&quot;actions&quot;:[],&quot;segments&quot;:[{&quot;duration&quot;:500,&quot;actions&quot;:[{&quot;type&quot;:&quot;scale&quot;,&quot;from&quot;:255,&quot;to&quot;:128,&quot;zoomXOrigin&quot;:1,&quot;zoomXTarget&quot;:0.5,&quot;zoomYOrigin&quot;:1,&quot;zoomYTarget&quot;:0.5}]},{&quot;duration&quot;:500,&quot;actions&quot;:[{&quot;type&quot;:&quot;scale&quot;,&quot;from&quot;:255,&quot;to&quot;:128,&quot;zoomXOrigin&quot;:0.5,&quot;zoomXTarget&quot;:1,&quot;zoomYOrigin&quot;:0.5,&quot;zoomYTarget&quot;:1}]}],&quot;runImmediately&quot;:true}]" highQuality="true" zIndex="1" />
+        </hg_view>
+    </view>
+</hml>
