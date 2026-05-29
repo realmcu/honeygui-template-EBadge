@@ -47,12 +47,22 @@
 
 /* ----------------------------------------------------*/
 uint8_t mainface_idx = 0;
-uint8_t mainface_num = 3;
+uint8_t mainface_num = 5;
+MAINFACE_SRC_TYPE mainface_src_t[MAINFACE_NUM] =
+{
+    SRC_VIDEO,
+    SRC_VIDEO,
+    SRC_VIDEO,
+    SRC_IMG,
+    SRC_IMG,
+};
 void *mainface_list[MAINFACE_NUM] = 
 {
     "/wallpaper_1.avi", 
     "/wallpaper_2.avi",
-    "/wallpaper_3.avi", 
+    "/wallpaper_3.avi",
+    "/image/wallpaper_4.bin",
+    "/image/wallpaper_5.bin",
 };
 bool is_auto_sleep_mode = false;
 bool is_delete_mode = false;
@@ -60,6 +70,23 @@ bool is_delete_mode = false;
 uint8_t soc_val = 100;
 uint8_t screen_light_idx = 5; // 0~5
 
+void switch_mainface(void)
+{
+    gui_obj_child_free((void *)win_mainface);
+    if (mainface_num == 0) return;
+    if (mainface_src_t[mainface_idx] == SRC_VIDEO)
+    {
+        vid_1 = gui_msv1_create_from_fs(win_mainface, "vid_1", mainface_list[mainface_idx], 0, 0, SCREEN_H, SCREEN_H);
+        gui_msv1_set_frame_rate((gui_msv1_t *)vid_1, 30.f);
+        gui_msv1_set_repeat_count((gui_msv1_t *)vid_1, GUI_VIDEO_REPEAT_INFINITE);
+        gui_msv1_set_state((gui_msv1_t *)vid_1, GUI_VIDEO_STATE_PLAYING);
+    }
+    else
+    {
+        gui_img_t *img = gui_img_create_from_fs(win_mainface, 0, mainface_list[mainface_idx], 0, 0, SCREEN_H, SCREEN_H);
+        gui_img_set_mode(img, IMG_SRC_OVER_MODE);
+    }
+}
 
 void click_auto_sleep_icon(void *obj, gui_event_t *e)
 {
@@ -162,9 +189,11 @@ void mainface_list_delete(void)
     for (uint8_t i = mainface_idx; i < mainface_num - 1; i++)
     {
         mainface_list[i] = mainface_list[i + 1];
+        mainface_src_t[i] = mainface_src_t[i + 1];
     }
     mainface_num--;
-    if (mainface_idx == mainface_num && mainface_num != 0) mainface_idx--;
+
+    if (mainface_num != 0) mainface_idx %= mainface_num;
     switch_mainface();
 }
 

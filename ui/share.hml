@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<hml>
+    <meta>
+        <project name="share" appId="com.example.easy_demo" resolution="360X360" minSdk="API 2: HoneyGUI V1.1.0" pixelMode="RGB565" />
+        <author name="Anonymous" />
+    </meta>
+    <view>
+        <hg_view id="shareMainView" x="0" y="0" width="360" height="360" backgroundColor="#000000" entry="true" zIndex="0">
+            <hg_window id="win_share_1" x="0" y="0" width="360" height="360" showBackground="false" backgroundColor="#808080" enableBlur="false" blurDegree="225" zIndex="0">
+                <hg_image id="img_4" x="46" y="108" width="268" height="70" src="assets/image/A8/rect_268_70_bg.png" blendMode="IMG_2D_SW_FIX_A8_FG" fgColor="0xFF0077FF" zIndex="0" />
+                <hg_image id="img_5" x="46" y="208" width="268" height="70" src="assets/image/A8/rect_268_70_bg.png" blendMode="IMG_2D_SW_FIX_A8_FG" fgColor="0xFF0077FF" zIndex="1" />
+                <hg_label id="lbl_2" x="107" y="129" width="146" height="34" hAlign="CENTER" vAlign="TOP" color="#000000" letterSpacing="0" lineSpacing="0" wordWrap="false" wordBreak="false" text="Share image" fontFile="/font/Inter_24pt_SemiBold.ttf" fontSize="24" zIndex="2" />
+                <hg_label id="lbl_3" x="88" y="230" width="185" height="34" hAlign="CENTER" vAlign="TOP" color="#000000" letterSpacing="0" lineSpacing="0" wordWrap="false" wordBreak="false" text="Receive image" fontFile="/font/Inter_24pt_SemiBold.ttf" fontSize="24" characterSets="[{&quot;type&quot;:&quot;range&quot;,&quot;value&quot;:&quot;0x20-0x7E&quot;}]" zIndex="3" />
+            </hg_window>
+        </hg_view>
+    </view>
+</hml>

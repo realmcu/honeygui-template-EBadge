@@ -23,7 +23,6 @@ void icon_bat_timer_0_cb(void *obj);
 void lbl_1_timer_0_cb(void *obj);
 
 // Custom function declarations (auto-extracted from callbacks.c protected area)
-void switch_mainface(void);
 void easy_demoMainView_timer_init_cb(void *obj);
 void easy_demoMainView_timer_0_cb(void *obj);
 void lbl_1_timer_0_cb(void *obj);

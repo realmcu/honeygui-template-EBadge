@@ -46,16 +46,6 @@ void icon_as_clicked_cb(void *obj, gui_event_t *e)
 
 int16_t y_rec = -SCREEN_H;
 
-void switch_mainface(void)
-{
-    gui_obj_child_free((void *)win_mainface);
-    if (mainface_num == 0) return;
-    vid_1 = gui_msv1_create_from_fs(win_mainface, "vid_1", mainface_list[mainface_idx], 0, 0, SCREEN_H, SCREEN_H);
-    gui_msv1_set_frame_rate((gui_msv1_t *)vid_1, 30.f);
-    gui_msv1_set_repeat_count((gui_msv1_t *)vid_1, GUI_VIDEO_REPEAT_INFINITE);
-    gui_msv1_set_state((gui_msv1_t *)vid_1, GUI_VIDEO_STATE_PLAYING);
-}
-
 void easy_demoMainView_timer_init_cb(void *obj)
 {
     GUI_UNUSED(obj);

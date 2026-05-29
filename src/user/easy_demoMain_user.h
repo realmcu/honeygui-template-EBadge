@@ -13,8 +13,18 @@
 #define  SCREEN_H  360
 #define  MAINFACE_NUM  10
 
+
+typedef enum
+{
+    SRC_IMG = 0,
+    SRC_VIDEO,
+
+    SRC_DEFAULT,
+} MAINFACE_SRC_TYPE;
+
 uint8_t mainface_idx;
 uint8_t mainface_num;
+MAINFACE_SRC_TYPE mainface_src_type;
 void *mainface_list[MAINFACE_NUM];
 
 int16_t y_rec;
