@@ -12,6 +12,20 @@ uint16_t lbl_1_timer_cnt = 0;
 
 // Event callback function implementations
 
+void icon_del_clicked_cb(void *obj, gui_event_t *e)
+{
+    GUI_UNUSED(obj);
+    GUI_UNUSED(e);
+    click_delete_icon(obj, e);
+}
+
+void icon_fl_clicked_cb(void *obj, gui_event_t *e)
+{
+    GUI_UNUSED(obj);
+    GUI_UNUSED(e);
+    gui_view_switch_direct(gui_view_get_current(), "view_fl", SWITCH_INIT_STATE, SWITCH_IN_NONE_ANIMATION);
+}
+
 void icon_sl_clicked_cb(void *obj, gui_event_t *e)
 {
     GUI_UNUSED(obj);
@@ -30,14 +44,13 @@ void icon_as_clicked_cb(void *obj, gui_event_t *e)
 // Custom functions
 #include "tp_algo.h"
 
-static int16_t y_rec = -SCREEN_H;
+int16_t y_rec = -SCREEN_H;
 
-void switch_mainface(void *obj)
+void switch_mainface(void)
 {
-    GUI_UNUSED(obj);
-    gui_obj_tree_free(vid_1);
-
-    vid_1 = gui_msv1_create_from_fs(win_1, "vid_1", mainface_list[mainface_idx], 0, 0, SCREEN_H, SCREEN_H);
+    gui_obj_child_free((void *)win_mainface);
+    if (mainface_num == 0) return;
+    vid_1 = gui_msv1_create_from_fs(win_mainface, "vid_1", mainface_list[mainface_idx], 0, 0, SCREEN_H, SCREEN_H);
     gui_msv1_set_frame_rate((gui_msv1_t *)vid_1, 30.f);
     gui_msv1_set_repeat_count((gui_msv1_t *)vid_1, GUI_VIDEO_REPEAT_INFINITE);
     gui_msv1_set_state((gui_msv1_t *)vid_1, GUI_VIDEO_STATE_PLAYING);
@@ -48,7 +61,7 @@ void easy_demoMainView_timer_init_cb(void *obj)
     GUI_UNUSED(obj);
     y_rec = -SCREEN_H;
     win_menu->base.y = -SCREEN_H;
-    switch_mainface(win_1);
+    switch_mainface();
     gui_obj_create_timer(obj, 10, true, easy_demoMainView_timer_0_cb);
     gui_obj_start_timer(obj);
 }
@@ -60,6 +73,7 @@ void easy_demoMainView_timer_0_cb(void *obj)
     
     if (tp->pressing && tp->type == TOUCH_HOLD_Y)
     {
+        if (is_delete_mode) return;
         int16_t y = y_rec + tp->deltaY;
         gui_obj_hidden(GUI_BASE(win_menu), false);
         if (y < -SCREEN_H)
@@ -72,22 +86,23 @@ void easy_demoMainView_timer_0_cb(void *obj)
             y = 0;
         }
         gui_obj_move(GUI_BASE(win_menu), 0, y);
+        gui_fb_change();
         // gui_log("win_menu.y = %d\n", y);
     }
     else if (tp->type == TOUCH_LEFT_SLIDE_QUICK || tp->type == TOUCH_LEFT_SLIDE)
     {
-        if (win_menu->base.y != -SCREEN_H) return;
+        if (win_menu->base.y != -SCREEN_H || mainface_num == 0) return;
         mainface_idx++;
         mainface_idx %= mainface_num;
-        switch_mainface(win_1);
+        switch_mainface();
     }
     else if (tp->type == TOUCH_RIGHT_SLIDE_QUICK || tp->type == TOUCH_RIGHT_SLIDE)
     {
-        if (win_menu->base.y != -SCREEN_H) return;
+        if (win_menu->base.y != -SCREEN_H || mainface_num == 0) return;
         mainface_idx += mainface_num;
         mainface_idx--;
         mainface_idx %= mainface_num;
-        switch_mainface(win_1);
+        switch_mainface();
     }
     else if ((int16_t)(win_menu->base.y) % SCREEN_H != 0)
     {
@@ -112,6 +127,7 @@ void easy_demoMainView_timer_0_cb(void *obj)
         }
         y_rec = y;
         gui_obj_move(GUI_BASE(win_menu), 0, y);
+        gui_fb_change();
         // gui_log("win_menu.y = %d\n", y);
     }
 }

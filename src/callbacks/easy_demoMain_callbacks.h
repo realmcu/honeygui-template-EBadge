@@ -12,6 +12,8 @@ extern uint16_t lbl_1_timer_cnt;
 
 // Event callback function declarations
 void icon_as_clicked_cb(void *obj, gui_event_t *e);
+void icon_del_clicked_cb(void *obj, gui_event_t *e);
+void icon_fl_clicked_cb(void *obj, gui_event_t *e);
 void icon_sl_clicked_cb(void *obj, gui_event_t *e);
 
 // User-configured timer callback function declarations
@@ -21,7 +23,7 @@ void icon_bat_timer_0_cb(void *obj);
 void lbl_1_timer_0_cb(void *obj);
 
 // Custom function declarations (auto-extracted from callbacks.c protected area)
-void switch_mainface(void *obj);
+void switch_mainface(void);
 void easy_demoMainView_timer_init_cb(void *obj);
 void easy_demoMainView_timer_0_cb(void *obj);
 void lbl_1_timer_0_cb(void *obj);
