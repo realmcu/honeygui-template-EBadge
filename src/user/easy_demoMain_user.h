@@ -33,8 +33,6 @@ uint8_t mainface_num;
 MAINFACE_SRC_TYPE mainface_src_type;
 void *mainface_list[MAINFACE_NUM];
 
-int16_t y_rec;
-
 bool is_auto_sleep_mode;
 bool is_bt_connect;
 MODE_TYPE mode;
@@ -42,7 +40,7 @@ MODE_TYPE mode;
 uint8_t soc_val;
 uint8_t screen_light_idx;
 
-void switch_mainface(void);
+void switch_mainface(gui_obj_t *parent, uint8_t idx);
 void mainface_list_delete(void);
 
 void click_auto_sleep_icon(void *obj, gui_event_t *e);

@@ -71,22 +71,124 @@ MODE_TYPE mode = MODE_DEFAULT;
 uint8_t soc_val = 100;
 uint8_t screen_light_idx = 5; // 0~5
 
-void switch_mainface(void)
+
+
+void create_win_del(gui_obj_t *parent)
 {
-    gui_obj_child_free((void *)win_mainface);
+    gui_win_t *win_del = gui_win_create((gui_obj_t *)parent, "win_del", 0, 0, 360, 360);
+
+    gui_img_t *img = gui_img_create_from_fs(win_del, 0, "/image/A8/circle_360_bg.bin", 0, 180, 360, 360);
+    gui_img_set_mode(img, IMG_2D_SW_FIX_A8_FG);
+    gui_img_a8_recolor(img, 0xFF000000);
+    gui_img_set_opacity(img, 122);
+
+    img = gui_img_create_from_fs(win_del, 0, "/image/A8/delete_iocn.bin", 63, 231, 100, 100);
+    gui_img_set_mode(img, IMG_2D_SW_FIX_A8_FG);
+    gui_img_a8_recolor(img, 0xFFFFFFFF);
+    gui_obj_add_event_cb(img, (gui_event_cb_t)click_delete_icon_detail, GUI_EVENT_TOUCH_CLICKED, NULL);
+
+    img = gui_img_create_from_fs(win_del, 0, "/image/A8/back_icon.bin", 198, 231, 100, 100);
+    gui_img_set_mode(img, IMG_2D_SW_FIX_A8_FG);
+    gui_img_a8_recolor(img, 0xFFFFFFFF);
+    gui_obj_add_event_cb(img, (gui_event_cb_t)click_back_icon, GUI_EVENT_TOUCH_CLICKED, NULL);
+}
+
+void switch_mainface(gui_obj_t *parent, uint8_t idx)
+{
     if (mainface_num == 0) return;
-    if (mainface_src_t[mainface_idx] == SRC_VIDEO)
+    if (mainface_src_t[idx] == SRC_VIDEO)
     {
-        vid_1 = gui_msv1_create_from_fs(win_mainface, "vid_1", mainface_list[mainface_idx], 0, 0, SCREEN_H, SCREEN_H);
-        gui_msv1_set_frame_rate((gui_msv1_t *)vid_1, 30.f);
-        gui_msv1_set_repeat_count((gui_msv1_t *)vid_1, GUI_VIDEO_REPEAT_INFINITE);
-        gui_msv1_set_state((gui_msv1_t *)vid_1, GUI_VIDEO_STATE_PLAYING);
+        gui_lite_video_t *vid_1 = gui_lite_video_create_from_fs(parent, 0, mainface_list[idx], 0, 0, SCREEN_H, SCREEN_H);
+        gui_lite_video_set_frame_rate((gui_lite_video_t *)vid_1, 30.f);
+        gui_lite_video_set_repeat_count((gui_lite_video_t *)vid_1, GUI_VIDEO_REPEAT_INFINITE);
+        gui_lite_video_set_state((gui_lite_video_t *)vid_1, GUI_VIDEO_STATE_PLAYING);
     }
     else
     {
-        gui_img_t *img = gui_img_create_from_fs(win_mainface, 0, mainface_list[mainface_idx], 0, 0, SCREEN_H, SCREEN_H);
+        gui_img_t *img = gui_img_create_from_fs(parent, 0, mainface_list[idx], 0, 0, SCREEN_H, SCREEN_H);
         gui_img_set_mode(img, IMG_SRC_OVER_MODE);
     }
+    void *view_first = "easy_demoMainView";
+    void *view_last = NULL;
+    switch (mainface_num)
+    {
+    case 1:
+        return;
+        break;
+    case 2:
+        view_last = "mainface_view_1";
+        break;
+    case 3:
+        view_last = "mainface_view_2";
+        break;
+    case 4:
+        view_last = "mainface_view_3";
+        break;
+    case 5:
+        view_last = "mainface_view_4";
+        break;
+    case 6:
+        view_last = "mainface_view_5";
+        break;
+    case 7:
+        view_last = "mainface_view_6";
+        break;
+    case 8:
+        view_last = "mainface_view_7";
+        break;
+
+    default:
+        break;
+    }
+
+    void *view_left = view_first;
+    void *view_right = view_first;
+    switch (idx)
+    {
+    case 0:
+        view_left = view_last;
+        view_right = "mainface_view_1";
+        break;
+    case 1:
+        view_left = view_first;
+        view_right = "mainface_view_2";
+        break;
+    case 2:
+        view_left = "mainface_view_1";
+        view_right = "mainface_view_3";
+        break;
+    case 3:
+        view_left = "mainface_view_2";
+        view_right = "mainface_view_4";
+        break;
+    case 4:
+        view_left = "mainface_view_3";
+        view_right = "mainface_view_5";
+        break;
+    case 5:
+        view_left = "mainface_view_4";
+        view_right = "mainface_view_6";
+        break;
+    case 6:
+        view_left = "mainface_view_5";
+        view_right = "mainface_view_7";
+        break;
+    case 7:
+        view_left = "mainface_view_6";
+        view_right = view_first;
+        break;
+        
+    default:
+        break;
+    }
+    if (idx == mainface_num - 1)
+    {
+        view_right = view_first;
+    }
+    gui_view_switch_on_event((void *)parent, view_right, SWITCH_OUT_TO_LEFT_USE_TRANSLATION, SWITCH_IN_FROM_RIGHT_USE_TRANSLATION, GUI_EVENT_TOUCH_MOVE_LEFT);
+    gui_view_switch_on_event((void *)parent, view_left, SWITCH_OUT_TO_RIGHT_USE_TRANSLATION, SWITCH_IN_FROM_LEFT_USE_TRANSLATION, GUI_EVENT_TOUCH_MOVE_RIGHT);
+
+    if (mode == MODE_DELETE) create_win_del(parent);
 }
 
 void click_auto_sleep_icon(void *obj, gui_event_t *e)
@@ -154,28 +256,38 @@ void click_delete_icon(void *obj, gui_event_t *e)
 {
     GUI_UNUSED(obj);
     GUI_UNUSED(e);
+    if (mainface_num == 0) return;
+
     mode = MODE_DELETE;
-    y_rec = -SCREEN_H;
-    win_menu->base.y = y_rec;
+    void *view_mainface = "easy_demoMainView";
+    switch (mainface_idx)
+    {
+    case 1:
+        view_mainface = "mainface_view_1";
+        break;
+    case 2:
+        view_mainface = "mainface_view_2";
+        break;
+    case 3:
+        view_mainface = "mainface_view_3";
+        break;
+    case 4:
+        view_mainface = "mainface_view_4";
+        break;
+    case 5:
+        view_mainface = "mainface_view_5";
+        break;
+    case 6:
+        view_mainface = "mainface_view_6";
+        break;
+    case 7:
+        view_mainface = "mainface_view_7";
+        break;
 
-    gui_obj_t *parent = (void *)gui_view_get_current();
-    gui_win_t *win_del = gui_win_create((gui_obj_t *)parent, "win_del", 0, 0, 360, 360);
-
-    gui_img_t *img = gui_img_create_from_fs(win_del, 0, "/image/A8/circle_360_bg.bin", 0, 180, 360, 360);
-    gui_img_set_mode(img, IMG_2D_SW_FIX_A8_FG);
-    gui_img_a8_recolor(img, 0xFF000000);
-    gui_img_set_opacity(img, 122);
-
-    img = gui_img_create_from_fs(win_del, 0, "/image/A8/delete_iocn.bin", 63, 231, 100, 100);
-    gui_img_set_mode(img, IMG_2D_SW_FIX_A8_FG);
-    gui_img_a8_recolor(img, 0xFFFFFFFF);
-    gui_obj_add_event_cb(img, (gui_event_cb_t)click_delete_icon_detail, GUI_EVENT_TOUCH_CLICKED, NULL);
-
-    img = gui_img_create_from_fs(win_del, 0, "/image/A8/back_icon.bin", 198, 231, 100, 100);
-    gui_img_set_mode(img, IMG_2D_SW_FIX_A8_FG);
-    gui_img_a8_recolor(img, 0xFFFFFFFF);
-    gui_obj_add_event_cb(img, (gui_event_cb_t)click_back_icon, GUI_EVENT_TOUCH_CLICKED, NULL);
-    
+    default:
+        break;
+    }
+    gui_view_switch_direct(gui_view_get_current(), view_mainface, SWITCH_INIT_STATE, SWITCH_IN_NONE_ANIMATION);
 #ifdef _HONEYGUI_SIMULATOR_
     // TODO
 #else
@@ -193,9 +305,48 @@ void mainface_list_delete(void)
         mainface_src_t[i] = mainface_src_t[i + 1];
     }
     mainface_num--;
+    void *view_left = NULL;
+    if (mainface_num != 0) 
+    {
+        if (mainface_idx == mainface_num)
+        {
+            switch (mainface_num)
+            {
+            case 1:
+                view_left = "easy_demoMainView";
+                break;
+            case 2:
+                view_left = "easy_demoMainView";
+                break;  
+            case 3:
+                view_left = "mainface_view_2";
+                break;
+            case 4:
+                view_left = "mainface_view_3";
+                break;
+            case 5:
+                view_left = "mainface_view_4";
+                break;
+            case 6:
+                view_left = "mainface_view_5";
+                break;
+            case 7:
+                view_left = "mainface_view_6";
+                break;
+            case 8:
+                view_left = "mainface_view_7";
+                break;
 
-    if (mainface_num != 0) mainface_idx %= mainface_num;
-    switch_mainface();
+            default:
+                break;
+            }
+            if (mainface_idx != 0) mainface_idx--;
+        }
+    }
+    void *view_rec = view_left? view_left : (void *)gui_view_get_current()->base.name;
+    gui_log("view_rec = %s, view_left = %s, idx = %d, num = %d\n", view_rec, view_left, mainface_idx, mainface_num);
+    gui_obj_child_free(gui_obj_get_root());
+    gui_view_create(gui_obj_get_root(), view_rec, 0, 0, 0, 0);
 }
 
 void click_delete_icon_detail(void *obj, gui_event_t *e)

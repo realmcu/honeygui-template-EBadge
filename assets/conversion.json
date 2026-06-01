@@ -9,8 +9,7 @@
   },
   "items": {
     "wallpaper_2.mp4": {
-      "videoFormat": "MSV1",
-      "videoQuality": 1
+      "videoFormat": "CINEPAK"
     },
     "image": {
       "videoCrop": {
@@ -24,12 +23,10 @@
       "format": "A8"
     },
     "wallpaper_1.mp4": {
-      "videoFormat": "MSV1",
-      "videoQuality": 1
+      "videoFormat": "CINEPAK"
     },
     "wallpaper_3.mp4": {
-      "videoFormat": "MSV1",
-      "videoQuality": 1
+      "videoFormat": "CINEPAK"
     }
   }
 }

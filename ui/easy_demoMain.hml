@@ -5,7 +5,7 @@
         <author name="Anonymous" />
     </meta>
     <view>
-        <hg_view id="easy_demoMainView" x="0" y="0" width="360" height="360" backgroundColor="#000000" entry="true" timers="[{&quot;id&quot;:&quot;timer_0&quot;,&quot;name&quot;:&quot;动画 1&quot;,&quot;enabled&quot;:false,&quot;interval&quot;:10,&quot;reload&quot;:true,&quot;mode&quot;:&quot;custom&quot;,&quot;callback&quot;:&quot;easy_demoMainView_timer_0_cb&quot;,&quot;duration&quot;:1000,&quot;stopOnComplete&quot;:true,&quot;delayStart&quot;:0,&quot;actions&quot;:[],&quot;segments&quot;:[]},{&quot;id&quot;:&quot;timer_1&quot;,&quot;name&quot;:&quot;动画 2&quot;,&quot;enabled&quot;:true,&quot;interval&quot;:1,&quot;reload&quot;:true,&quot;mode&quot;:&quot;custom&quot;,&quot;callback&quot;:&quot;easy_demoMainView_timer_init_cb&quot;,&quot;duration&quot;:1000,&quot;stopOnComplete&quot;:true,&quot;delayStart&quot;:0,&quot;actions&quot;:[],&quot;segments&quot;:[],&quot;runImmediately&quot;:true}]" animateStep="360" zIndex="0">
+        <hg_view id="easy_demoMainView" x="11" y="0" width="360" height="360" backgroundColor="#000000" entry="true" animateStep="360" timers="[{&quot;id&quot;:&quot;timer_0&quot;,&quot;name&quot;:&quot;动画 1&quot;,&quot;enabled&quot;:true,&quot;interval&quot;:1000,&quot;reload&quot;:true,&quot;mode&quot;:&quot;custom&quot;,&quot;callback&quot;:&quot;easy_demoMainView_timer_0_cb&quot;,&quot;duration&quot;:1000,&quot;stopOnComplete&quot;:true,&quot;delayStart&quot;:0,&quot;actions&quot;:[],&quot;segments&quot;:[],&quot;runImmediately&quot;:true}]" zIndex="0">
             <events>
                 <event type="onKeyShortPress" keyName="Menu">
                     <action type="switchView" target="bt_View" switchOutStyle="SWITCH_INIT_STATE" switchInStyle="SWITCH_IN_NONE_ANIMATION" />
@@ -13,11 +13,104 @@
                 <event type="onKeyLongPress" keyName="Power">
                     <action type="switchView" target="menuMainView" switchOutStyle="SWITCH_INIT_STATE" switchInStyle="SWITCH_IN_NONE_ANIMATION" />
                 </event>
+                <event type="onSwipeDown">
+                    <action type="switchView" target="top_view" switchOutStyle="SWITCH_INIT_STATE" switchInStyle="SWITCH_IN_FROM_TOP_USE_TRANSLATION" />
+                </event>
             </events>
-            <hg_window id="win_mainface" x="0" y="0" width="360" height="360" showBackground="false" backgroundColor="#808080" enableBlur="false" blurDegree="225" zIndex="0">
-                <hg_video id="vid_1" x="0" y="0" width="365" height="360" autoPlay="true" loop="true" src="assets/wallpaper_1.mp4" useMsv1="true" zIndex="0" />
-            </hg_window>
-            <hg_window id="win_menu" x="0" y="0" width="360" height="360" showBackground="false" backgroundColor="#808080" enableBlur="false" blurDegree="225" zIndex="1">
+        </hg_view>
+        <hg_view id="mainface_view_1" x="584" y="0" width="360" height="360" backgroundColor="#000000" entry="false" animateStep="360" timers="[{&quot;id&quot;:&quot;timer_0&quot;,&quot;name&quot;:&quot;动画 1&quot;,&quot;enabled&quot;:true,&quot;interval&quot;:1000,&quot;reload&quot;:true,&quot;mode&quot;:&quot;custom&quot;,&quot;callback&quot;:&quot;mainface_view_1_timer_0_cb&quot;,&quot;duration&quot;:1000,&quot;stopOnComplete&quot;:true,&quot;delayStart&quot;:0,&quot;actions&quot;:[],&quot;segments&quot;:[],&quot;runImmediately&quot;:true}]" zIndex="0">
+            <events>
+                <event type="onKeyShortPress" keyName="Menu">
+                    <action type="switchView" target="bt_View" switchOutStyle="SWITCH_INIT_STATE" switchInStyle="SWITCH_IN_NONE_ANIMATION" />
+                </event>
+                <event type="onKeyLongPress" keyName="Power">
+                    <action type="switchView" target="menuMainView" switchOutStyle="SWITCH_INIT_STATE" switchInStyle="SWITCH_IN_NONE_ANIMATION" />
+                </event>
+                <event type="onSwipeDown">
+                    <action type="switchView" target="top_view" switchOutStyle="SWITCH_INIT_STATE" switchInStyle="SWITCH_IN_FROM_TOP_USE_TRANSLATION" />
+                </event>
+            </events>
+        </hg_view>
+        <hg_view id="mainface_view_2" x="1183" y="8" width="360" height="360" backgroundColor="#000000" entry="false" animateStep="360" timers="[{&quot;id&quot;:&quot;timer_0&quot;,&quot;name&quot;:&quot;动画 1&quot;,&quot;enabled&quot;:true,&quot;interval&quot;:1000,&quot;reload&quot;:true,&quot;mode&quot;:&quot;custom&quot;,&quot;callback&quot;:&quot;mainface_view_2_timer_0_cb&quot;,&quot;duration&quot;:1000,&quot;stopOnComplete&quot;:true,&quot;delayStart&quot;:0,&quot;actions&quot;:[],&quot;segments&quot;:[],&quot;runImmediately&quot;:true}]" zIndex="0">
+            <events>
+                <event type="onKeyShortPress" keyName="Menu">
+                    <action type="switchView" target="bt_View" switchOutStyle="SWITCH_INIT_STATE" switchInStyle="SWITCH_IN_NONE_ANIMATION" />
+                </event>
+                <event type="onKeyLongPress" keyName="Power">
+                    <action type="switchView" target="menuMainView" switchOutStyle="SWITCH_INIT_STATE" switchInStyle="SWITCH_IN_NONE_ANIMATION" />
+                </event>
+                <event type="onSwipeDown">
+                    <action type="switchView" target="top_view" switchOutStyle="SWITCH_INIT_STATE" switchInStyle="SWITCH_IN_FROM_TOP_USE_TRANSLATION" />
+                </event>
+            </events>
+        </hg_view>
+        <hg_view id="mainface_view_3" x="1803" y="8" width="360" height="360" backgroundColor="#000000" entry="false" animateStep="360" timers="[{&quot;id&quot;:&quot;timer_0&quot;,&quot;name&quot;:&quot;动画 1&quot;,&quot;enabled&quot;:true,&quot;interval&quot;:1000,&quot;reload&quot;:true,&quot;mode&quot;:&quot;custom&quot;,&quot;callback&quot;:&quot;mainface_view_3_timer_0_cb&quot;,&quot;duration&quot;:1000,&quot;stopOnComplete&quot;:true,&quot;delayStart&quot;:0,&quot;actions&quot;:[],&quot;segments&quot;:[],&quot;runImmediately&quot;:true}]" zIndex="0">
+            <events>
+                <event type="onKeyShortPress" keyName="Menu">
+                    <action type="switchView" target="bt_View" switchOutStyle="SWITCH_INIT_STATE" switchInStyle="SWITCH_IN_NONE_ANIMATION" />
+                </event>
+                <event type="onKeyLongPress" keyName="Power">
+                    <action type="switchView" target="menuMainView" switchOutStyle="SWITCH_INIT_STATE" switchInStyle="SWITCH_IN_NONE_ANIMATION" />
+                </event>
+                <event type="onSwipeDown">
+                    <action type="switchView" target="top_view" switchOutStyle="SWITCH_INIT_STATE" switchInStyle="SWITCH_IN_FROM_TOP_USE_TRANSLATION" />
+                </event>
+            </events>
+        </hg_view>
+        <hg_view id="mainface_view_4" x="2343" y="8" width="360" height="360" backgroundColor="#000000" entry="false" animateStep="360" timers="[{&quot;id&quot;:&quot;timer_0&quot;,&quot;name&quot;:&quot;动画 1&quot;,&quot;enabled&quot;:true,&quot;interval&quot;:1000,&quot;reload&quot;:true,&quot;mode&quot;:&quot;custom&quot;,&quot;callback&quot;:&quot;mainface_view_4_timer_0_cb&quot;,&quot;duration&quot;:1000,&quot;stopOnComplete&quot;:true,&quot;delayStart&quot;:0,&quot;actions&quot;:[],&quot;segments&quot;:[],&quot;runImmediately&quot;:true}]" zIndex="0">
+            <events>
+                <event type="onKeyShortPress" keyName="Menu">
+                    <action type="switchView" target="bt_View" switchOutStyle="SWITCH_INIT_STATE" switchInStyle="SWITCH_IN_NONE_ANIMATION" />
+                </event>
+                <event type="onKeyLongPress" keyName="Power">
+                    <action type="switchView" target="menuMainView" switchOutStyle="SWITCH_INIT_STATE" switchInStyle="SWITCH_IN_NONE_ANIMATION" />
+                </event>
+                <event type="onSwipeDown">
+                    <action type="switchView" target="top_view" switchOutStyle="SWITCH_INIT_STATE" switchInStyle="SWITCH_IN_FROM_TOP_USE_TRANSLATION" />
+                </event>
+            </events>
+        </hg_view>
+        <hg_view id="mainface_view_5" x="2890" y="0" width="360" height="360" backgroundColor="#000000" entry="false" animateStep="360" timers="[{&quot;id&quot;:&quot;timer_0&quot;,&quot;name&quot;:&quot;动画 1&quot;,&quot;enabled&quot;:true,&quot;interval&quot;:1000,&quot;reload&quot;:true,&quot;mode&quot;:&quot;custom&quot;,&quot;callback&quot;:&quot;mainface_view_5_timer_0_cb&quot;,&quot;duration&quot;:1000,&quot;stopOnComplete&quot;:true,&quot;delayStart&quot;:0,&quot;actions&quot;:[],&quot;segments&quot;:[],&quot;runImmediately&quot;:true}]" zIndex="0">
+            <events>
+                <event type="onKeyShortPress" keyName="Menu">
+                    <action type="switchView" target="bt_View" switchOutStyle="SWITCH_INIT_STATE" switchInStyle="SWITCH_IN_NONE_ANIMATION" />
+                </event>
+                <event type="onKeyLongPress" keyName="Power">
+                    <action type="switchView" target="menuMainView" switchOutStyle="SWITCH_INIT_STATE" switchInStyle="SWITCH_IN_NONE_ANIMATION" />
+                </event>
+                <event type="onSwipeDown">
+                    <action type="switchView" target="top_view" switchOutStyle="SWITCH_INIT_STATE" switchInStyle="SWITCH_IN_FROM_TOP_USE_TRANSLATION" />
+                </event>
+            </events>
+        </hg_view>
+        <hg_view id="mainface_view_6" x="3457" y="0" width="360" height="360" backgroundColor="#000000" entry="false" animateStep="360" timers="[{&quot;id&quot;:&quot;timer_0&quot;,&quot;name&quot;:&quot;动画 1&quot;,&quot;enabled&quot;:true,&quot;interval&quot;:1000,&quot;reload&quot;:true,&quot;mode&quot;:&quot;custom&quot;,&quot;callback&quot;:&quot;mainface_view_6_timer_0_cb&quot;,&quot;duration&quot;:1000,&quot;stopOnComplete&quot;:true,&quot;delayStart&quot;:0,&quot;actions&quot;:[],&quot;segments&quot;:[],&quot;runImmediately&quot;:true}]" zIndex="0">
+            <events>
+                <event type="onKeyShortPress" keyName="Menu">
+                    <action type="switchView" target="bt_View" switchOutStyle="SWITCH_INIT_STATE" switchInStyle="SWITCH_IN_NONE_ANIMATION" />
+                </event>
+                <event type="onKeyLongPress" keyName="Power">
+                    <action type="switchView" target="menuMainView" switchOutStyle="SWITCH_INIT_STATE" switchInStyle="SWITCH_IN_NONE_ANIMATION" />
+                </event>
+                <event type="onSwipeDown">
+                    <action type="switchView" target="top_view" switchOutStyle="SWITCH_INIT_STATE" switchInStyle="SWITCH_IN_FROM_TOP_USE_TRANSLATION" />
+                </event>
+            </events>
+        </hg_view>
+        <hg_view id="mainface_view_7" x="4000" y="0" width="360" height="360" backgroundColor="#000000" entry="false" animateStep="360" timers="[{&quot;id&quot;:&quot;timer_0&quot;,&quot;name&quot;:&quot;动画 1&quot;,&quot;enabled&quot;:true,&quot;interval&quot;:1000,&quot;reload&quot;:true,&quot;mode&quot;:&quot;custom&quot;,&quot;callback&quot;:&quot;mainface_view_7_timer_0_cb&quot;,&quot;duration&quot;:1000,&quot;stopOnComplete&quot;:true,&quot;delayStart&quot;:0,&quot;actions&quot;:[],&quot;segments&quot;:[],&quot;runImmediately&quot;:true}]" zIndex="0">
+            <events>
+                <event type="onKeyShortPress" keyName="Menu">
+                    <action type="switchView" target="bt_View" switchOutStyle="SWITCH_INIT_STATE" switchInStyle="SWITCH_IN_NONE_ANIMATION" />
+                </event>
+                <event type="onKeyLongPress" keyName="Power">
+                    <action type="switchView" target="menuMainView" switchOutStyle="SWITCH_INIT_STATE" switchInStyle="SWITCH_IN_NONE_ANIMATION" />
+                </event>
+                <event type="onSwipeDown">
+                    <action type="switchView" target="top_view" switchOutStyle="SWITCH_INIT_STATE" switchInStyle="SWITCH_IN_FROM_TOP_USE_TRANSLATION" />
+                </event>
+            </events>
+        </hg_view>
+        <hg_view id="top_view" x="11" y="-416" width="360" height="360" backgroundColor="#000000" borderRadius="20" padding="12" overflow="auto" entry="false" animateStep="360" timers="[{&quot;id&quot;:&quot;timer_0&quot;,&quot;name&quot;:&quot;动画 1&quot;,&quot;enabled&quot;:true,&quot;interval&quot;:1000,&quot;reload&quot;:true,&quot;mode&quot;:&quot;custom&quot;,&quot;callback&quot;:&quot;top_view_timer_0_cb&quot;,&quot;duration&quot;:1000,&quot;stopOnComplete&quot;:true,&quot;delayStart&quot;:0,&quot;actions&quot;:[],&quot;segments&quot;:[],&quot;runImmediately&quot;:true}]" zIndex="1">
+            <hg_window id="win_menu" x="0" y="0" width="360" height="360" showBackground="false" backgroundColor="#808080" enableBlur="false" blurDegree="225" zIndex="0">
                 <hg_image id="bg_circle" x="0" y="0" width="360" height="360" transform="{&quot;opacity&quot;:100}" src="assets/image/A8/circle_360_bg.png" blendMode="IMG_2D_SW_FIX_A8_FG" fgColor="0xFF000000" zIndex="1">
                     <events>
                         <event type="onKeyShortPress" keyName="Menu">
@@ -55,22 +148,20 @@
                         </event>
                     </events>
                 </hg_image>
+                <hg_label id="lbl_1" x="111" y="194" width="144" height="24" hAlign="LEFT" vAlign="TOP" color="#ffffff" letterSpacing="0" lineSpacing="0" wordWrap="false" wordBreak="false" text="Auto sleep mode" fontFile="/font/Inter_24pt_Regular.ttf" fontSize="18" timers="[{&quot;id&quot;:&quot;timer_0&quot;,&quot;name&quot;:&quot;动画 1&quot;,&quot;enabled&quot;:true,&quot;interval&quot;:10,&quot;reload&quot;:false,&quot;mode&quot;:&quot;custom&quot;,&quot;callback&quot;:&quot;lbl_1_timer_0_cb&quot;,&quot;duration&quot;:1000,&quot;stopOnComplete&quot;:true,&quot;delayStart&quot;:0,&quot;actions&quot;:[],&quot;segments&quot;:[],&quot;runImmediately&quot;:true}]" characterSets="[{&quot;type&quot;:&quot;range&quot;,&quot;value&quot;:&quot;0x20-0x7E&quot;}]" zIndex="99999" />
             </hg_window>
-            <hg_label id="lbl_1" x="111" y="194" width="144" height="24" hAlign="LEFT" vAlign="TOP" color="#ffffff" letterSpacing="0" lineSpacing="0" wordWrap="false" wordBreak="false" text="Auto sleep mode" fontFile="/font/Inter_24pt_Regular.ttf" fontSize="18" timers="[{&quot;id&quot;:&quot;timer_0&quot;,&quot;name&quot;:&quot;动画 1&quot;,&quot;enabled&quot;:true,&quot;interval&quot;:10,&quot;reload&quot;:false,&quot;mode&quot;:&quot;custom&quot;,&quot;callback&quot;:&quot;lbl_1_timer_0_cb&quot;,&quot;duration&quot;:1000,&quot;stopOnComplete&quot;:true,&quot;delayStart&quot;:0,&quot;actions&quot;:[],&quot;segments&quot;:[],&quot;runImmediately&quot;:true}]" characterSets="[{&quot;type&quot;:&quot;range&quot;,&quot;value&quot;:&quot;0x20-0x7E&quot;}]" zIndex="1" />
         </hg_view>
-        <hg_view id="view_fl" x="-510" y="0" width="360" height="360" backgroundColor="#000000" borderRadius="20" padding="12" overflow="auto" entry="false" animateStep="360" zIndex="1">
-            <events>
-                <event type="onClick">
-                    <action type="switchView" target="easy_demoMainView" switchOutStyle="SWITCH_INIT_STATE" switchInStyle="SWITCH_IN_NONE_ANIMATION" />
-                </event>
-            </events>
+        <hg_view id="view_1" x="-1012" y="550" width="360" height="360" backgroundColor="#000000" borderRadius="20" padding="12" overflow="auto" entry="false" zIndex="1">
+            <hg_video id="vid_test" x="0" y="0" width="365" height="360" src="assets/wallpaper_1.mp4" useMsv1="true" loop="true" zIndex="1" />
+        </hg_view>
+        <hg_view id="view_fl" x="-487" y="-416" width="360" height="360" backgroundColor="#000000" borderRadius="20" padding="12" overflow="auto" entry="false" animateStep="360" zIndex="2">
             <hg_image id="img_3" x="0" y="0" width="360" height="360" src="assets/image/A8/circle_360_bg.png" blendMode="IMG_2D_SW_FIX_A8_FG" zIndex="1">
                 <events>
                     <event type="onKeyShortPress" keyName="Menu">
-                        <action type="switchView" target="easy_demoMainView" switchOutStyle="SWITCH_INIT_STATE" switchInStyle="SWITCH_IN_NONE_ANIMATION" />
+                        <action type="switchView" target="top_view" switchOutStyle="SWITCH_INIT_STATE" switchInStyle="SWITCH_IN_NONE_ANIMATION" />
                     </event>
                     <event type="onKeyShortPress" keyName="Power">
-                        <action type="switchView" target="easy_demoMainView" switchOutStyle="SWITCH_INIT_STATE" switchInStyle="SWITCH_IN_NONE_ANIMATION" />
+                        <action type="switchView" target="top_view" switchOutStyle="SWITCH_INIT_STATE" switchInStyle="SWITCH_IN_NONE_ANIMATION" />
                     </event>
                 </events>
             </hg_image>
