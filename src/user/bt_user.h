@@ -10,5 +10,7 @@
  */
 
 // Add custom declarations here
+#include "easy_demoMain_user.h"
+
 
 #endif // BT_USER_H

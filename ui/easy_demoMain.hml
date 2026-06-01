@@ -6,12 +6,26 @@
     </meta>
     <view>
         <hg_view id="easy_demoMainView" x="0" y="0" width="360" height="360" backgroundColor="#000000" entry="true" timers="[{&quot;id&quot;:&quot;timer_0&quot;,&quot;name&quot;:&quot;动画 1&quot;,&quot;enabled&quot;:false,&quot;interval&quot;:10,&quot;reload&quot;:true,&quot;mode&quot;:&quot;custom&quot;,&quot;callback&quot;:&quot;easy_demoMainView_timer_0_cb&quot;,&quot;duration&quot;:1000,&quot;stopOnComplete&quot;:true,&quot;delayStart&quot;:0,&quot;actions&quot;:[],&quot;segments&quot;:[]},{&quot;id&quot;:&quot;timer_1&quot;,&quot;name&quot;:&quot;动画 2&quot;,&quot;enabled&quot;:true,&quot;interval&quot;:1,&quot;reload&quot;:true,&quot;mode&quot;:&quot;custom&quot;,&quot;callback&quot;:&quot;easy_demoMainView_timer_init_cb&quot;,&quot;duration&quot;:1000,&quot;stopOnComplete&quot;:true,&quot;delayStart&quot;:0,&quot;actions&quot;:[],&quot;segments&quot;:[],&quot;runImmediately&quot;:true}]" animateStep="360" zIndex="0">
+            <events>
+                <event type="onKeyShortPress" keyName="Menu">
+                    <action type="switchView" target="bt_View" switchOutStyle="SWITCH_INIT_STATE" switchInStyle="SWITCH_IN_NONE_ANIMATION" />
+                </event>
+                <event type="onKeyLongPress" keyName="Power">
+                    <action type="switchView" target="menuMainView" switchOutStyle="SWITCH_INIT_STATE" switchInStyle="SWITCH_IN_NONE_ANIMATION" />
+                </event>
+            </events>
             <hg_window id="win_mainface" x="0" y="0" width="360" height="360" showBackground="false" backgroundColor="#808080" enableBlur="false" blurDegree="225" zIndex="0">
                 <hg_video id="vid_1" x="0" y="0" width="365" height="360" autoPlay="true" loop="true" src="assets/wallpaper_1.mp4" useMsv1="true" zIndex="0" />
             </hg_window>
             <hg_window id="win_menu" x="0" y="0" width="360" height="360" showBackground="false" backgroundColor="#808080" enableBlur="false" blurDegree="225" zIndex="1">
-                <hg_image id="bg_circle" x="0" y="0" width="360" height="360" transform="{&quot;opacity&quot;:100}" src="assets/image/A8/circle_360_bg.png" blendMode="IMG_2D_SW_FIX_A8_FG" fgColor="0xFF000000" zIndex="1" />
-                <hg_image id="icon_del" x="244" y="109" width="100" height="100" src="assets/image/A8/delete_iocn.png" blendMode="IMG_2D_SW_FIX_A8_FG" zIndex="2">
+                <hg_image id="bg_circle" x="0" y="0" width="360" height="360" transform="{&quot;opacity&quot;:100}" src="assets/image/A8/circle_360_bg.png" blendMode="IMG_2D_SW_FIX_A8_FG" fgColor="0xFF000000" zIndex="1">
+                    <events>
+                        <event type="onKeyShortPress" keyName="Menu">
+                            <action type="switchView" target="bt_View" switchOutStyle="SWITCH_INIT_STATE" switchInStyle="SWITCH_IN_NONE_ANIMATION" />
+                        </event>
+                    </events>
+                </hg_image>
+                <hg_image id="icon_del" x="244" y="109" width="100" height="100" src="assets/image/A8/delete_icon.png" blendMode="IMG_2D_SW_FIX_A8_FG" zIndex="2">
                     <events>
                         <event type="onClick">
                             <action type="callFunction" functionName="click_delete_icon" />
@@ -50,7 +64,16 @@
                     <action type="switchView" target="easy_demoMainView" switchOutStyle="SWITCH_INIT_STATE" switchInStyle="SWITCH_IN_NONE_ANIMATION" />
                 </event>
             </events>
-            <hg_image id="img_3" x="0" y="0" width="360" height="360" src="assets/image/A8/circle_360_bg.png" blendMode="IMG_2D_SW_FIX_A8_FG" zIndex="1" />
+            <hg_image id="img_3" x="0" y="0" width="360" height="360" src="assets/image/A8/circle_360_bg.png" blendMode="IMG_2D_SW_FIX_A8_FG" zIndex="1">
+                <events>
+                    <event type="onKeyShortPress" keyName="Menu">
+                        <action type="switchView" target="easy_demoMainView" switchOutStyle="SWITCH_INIT_STATE" switchInStyle="SWITCH_IN_NONE_ANIMATION" />
+                    </event>
+                    <event type="onKeyShortPress" keyName="Power">
+                        <action type="switchView" target="easy_demoMainView" switchOutStyle="SWITCH_INIT_STATE" switchInStyle="SWITCH_IN_NONE_ANIMATION" />
+                    </event>
+                </events>
+            </hg_image>
         </hg_view>
     </view>
 </hml>

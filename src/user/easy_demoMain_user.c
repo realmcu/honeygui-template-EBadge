@@ -65,7 +65,8 @@ void *mainface_list[MAINFACE_NUM] =
     "/image/wallpaper_5.bin",
 };
 bool is_auto_sleep_mode = false;
-bool is_delete_mode = false;
+bool is_bt_connect = false;
+MODE_TYPE mode = MODE_DEFAULT;
 
 uint8_t soc_val = 100;
 uint8_t screen_light_idx = 5; // 0~5
@@ -153,7 +154,7 @@ void click_delete_icon(void *obj, gui_event_t *e)
 {
     GUI_UNUSED(obj);
     GUI_UNUSED(e);
-    is_delete_mode = true;
+    mode = MODE_DELETE;
     y_rec = -SCREEN_H;
     win_menu->base.y = y_rec;
 
@@ -214,7 +215,7 @@ void click_back_icon(void *obj, gui_event_t *e)
 {
     GUI_UNUSED(obj);
     GUI_UNUSED(e);
-    is_delete_mode = false;
+    mode = MODE_DEFAULT;
     gui_obj_tree_free(GUI_BASE(obj)->parent);
     
 #ifdef _HONEYGUI_SIMULATOR_

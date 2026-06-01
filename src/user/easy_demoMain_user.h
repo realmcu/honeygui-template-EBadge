@@ -18,9 +18,15 @@ typedef enum
 {
     SRC_IMG = 0,
     SRC_VIDEO,
-
-    SRC_DEFAULT,
 } MAINFACE_SRC_TYPE;
+
+typedef enum
+{
+    MODE_DEFAULT = 0,
+    MODE_DELETE,
+    MODE_SHARE,
+    MODE_RECEIVE,
+} MODE_TYPE;
 
 uint8_t mainface_idx;
 uint8_t mainface_num;
@@ -30,7 +36,8 @@ void *mainface_list[MAINFACE_NUM];
 int16_t y_rec;
 
 bool is_auto_sleep_mode;
-bool is_delete_mode;
+bool is_bt_connect;
+MODE_TYPE mode;
 
 uint8_t soc_val;
 uint8_t screen_light_idx;

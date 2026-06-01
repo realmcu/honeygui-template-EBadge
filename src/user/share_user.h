@@ -10,5 +10,11 @@
  */
 
 // Add custom declarations here
+#include "easy_demoMain_user.h"
+
+
+
+void click_share_image_button(void *obj, gui_event_t *e);
+void click_receive_image_button(void *obj, gui_event_t *e);
 
 #endif // SHARE_USER_H

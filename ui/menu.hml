@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<hml>
+    <meta>
+        <project name="menu" appId="com.example.easy_demo" resolution="360X360" minSdk="API 2: HoneyGUI V1.1.0" pixelMode="RGB565" />
+        <author name="Anonymous" />
+    </meta>
+    <view>
+        <hg_view id="menuMainView" x="0" y="0" width="360" height="360" backgroundColor="#000000" entry="false" animateStep="360" zIndex="0">
+            <events>
+                <event type="onKeyShortPress" keyName="Power">
+                    <action type="switchView" target="easy_demoMainView" switchOutStyle="SWITCH_INIT_STATE" switchInStyle="SWITCH_IN_NONE_ANIMATION" />
+                </event>
+            </events>
+            <hg_list id="lst_1" x="0" y="77" width="360" height="250" itemWidth="360" itemHeight="50" space="28" direction="VERTICAL" style="LIST_CLASSIC" cardStackLocation="0" noteNum="3" offset="0" outScope="0" autoAlign="false" inertia="false" loop="false" createBar="false" enableAreaDisplay="false" keepNoteAlive="false" zIndex="1" showOverflow="true">
+                <hg_list_item id="lst_1_item_0" x="0" y="0" width="360" height="50" index="0" zIndex="0">
+                    <events>
+                        <event type="onClick">
+                            <action type="callFunction" functionName="click_menu_reset_button" />
+                        </event>
+                    </events>
+                    <hg_image id="img_10" x="50" y="0" width="50" height="50" src="assets/image/reset_icon.png" zIndex="1" />
+                    <hg_image id="img_11" x="284" y="15" width="11" height="21" src="assets/image/A8/arrow_r_icon.png" blendMode="IMG_2D_SW_FIX_A8_FG" zIndex="2" />
+                    <hg_label id="lbl_6" x="117" y="0" width="125" height="50" hAlign="LEFT" vAlign="MID" color="#ffffff" letterSpacing="0" lineSpacing="0" wordWrap="false" wordBreak="false" text="Reset" fontFile="/font/Inter_24pt_Regular.ttf" fontSize="20" zIndex="1" />
+                </hg_list_item>
+                <hg_list_item id="lst_1_item_1" x="0" y="78" width="360" height="50" index="1" zIndex="1">
+                    <events>
+                        <event type="onClick">
+                            <action type="callFunction" functionName="click_menu_fs_button" />
+                        </event>
+                    </events>
+                    <hg_image id="img_12" x="284" y="15" width="11" height="21" src="assets/image/A8/arrow_r_icon.png" blendMode="IMG_2D_SW_FIX_A8_FG" zIndex="2" />
+                    <hg_image id="img_14" x="50" y="0" width="50" height="50" src="assets/image/erase_icon.png" zIndex="3" />
+                    <hg_label id="lbl_7" x="117" y="0" width="160" height="50" hAlign="LEFT" vAlign="MID" color="#ffffff" letterSpacing="0" lineSpacing="0" wordWrap="false" wordBreak="false" text="Format Storage" fontFile="/font/Inter_24pt_Regular.ttf" fontSize="20" zIndex="1" />
+                </hg_list_item>
+                <hg_list_item id="lst_1_item_2" x="0" y="156" width="360" height="50" index="2" zIndex="2">
+                    <events>
+                        <event type="onClick">
+                            <action type="callFunction" functionName="click_menu_power_off_button" />
+                        </event>
+                    </events>
+                    <hg_image id="img_13" x="284" y="15" width="11" height="21" src="assets/image/A8/arrow_r_icon.png" blendMode="IMG_2D_SW_FIX_A8_FG" zIndex="2" />
+                    <hg_image id="img_15" x="50" y="0" width="50" height="50" src="assets/image/power_off_icon.png" zIndex="3" />
+                    <hg_label id="lbl_8" x="117" y="0" width="160" height="50" hAlign="LEFT" vAlign="MID" color="#ffffff" letterSpacing="0" lineSpacing="0" wordWrap="false" wordBreak="false" text="Power off" fontFile="/font/Inter_24pt_Regular.ttf" fontSize="20" zIndex="1" />
+                </hg_list_item>
+            </hg_list>
+        </hg_view>
+        <hg_view id="menuDetailView" x="480" y="0" width="360" height="360" backgroundColor="#000000" borderRadius="20" padding="12" overflow="auto" entry="false" animateStep="360" zIndex="1">
+            <events>
+                <event type="onKeyShortPress" keyName="Power">
+                    <action type="switchView" target="easy_demoMainView" switchOutStyle="SWITCH_INIT_STATE" switchInStyle="SWITCH_IN_NONE_ANIMATION" />
+                </event>
+            </events>
+            <hg_label id="lbl_option" x="0" y="150" width="360" height="52" hAlign="CENTER" vAlign="MID" color="#ffffff" letterSpacing="0" lineSpacing="0" wordWrap="false" wordBreak="false" text="Reset" fontFile="/font/Inter_24pt_Regular.ttf" fontSize="36" characterSets="[{&quot;type&quot;:&quot;range&quot;,&quot;value&quot;:&quot;0x20-0x7E&quot;}]" timers="[{&quot;id&quot;:&quot;timer_0&quot;,&quot;name&quot;:&quot;动画 1&quot;,&quot;enabled&quot;:true,&quot;interval&quot;:1000,&quot;reload&quot;:true,&quot;mode&quot;:&quot;custom&quot;,&quot;callback&quot;:&quot;lbl_option_timer_0_cb&quot;,&quot;duration&quot;:1000,&quot;stopOnComplete&quot;:true,&quot;delayStart&quot;:0,&quot;actions&quot;:[],&quot;segments&quot;:[],&quot;runImmediately&quot;:true}]" zIndex="0" />
+            <hg_image id="img_16" x="217" y="223" width="94" height="48" src="assets/image/A8/rect_bg.png" blendMode="IMG_2D_SW_FIX_A8_FG" fgColor="0xFFFF0000" zIndex="1">
+                <events>
+                    <event type="onClick">
+                        <action type="callFunction" functionName="click_menu_yes_button" />
+                    </event>
+                </events>
+            </hg_image>
+            <hg_image id="img_17" x="53" y="223" width="94" height="48" src="assets/image/A8/rect_bg.png" blendMode="IMG_2D_SW_FIX_A8_FG" fgColor="0xFF5B5B5B" zIndex="2">
+                <events>
+                    <event type="onClick">
+                        <action type="switchView" target="menuMainView" switchOutStyle="SWITCH_INIT_STATE" switchInStyle="SWITCH_IN_NONE_ANIMATION" />
+                    </event>
+                </events>
+            </hg_image>
+            <hg_label id="lbl_9" x="53" y="223" width="94" height="48" hAlign="CENTER" vAlign="MID" color="#ffffff" letterSpacing="0" lineSpacing="0" wordWrap="false" wordBreak="false" text="No" fontFile="/font/Inter_24pt_Regular.ttf" fontSize="20" zIndex="3" />
+            <hg_label id="lbl_10" x="217" y="223" width="94" height="48" hAlign="CENTER" vAlign="MID" color="#ffffff" letterSpacing="0" lineSpacing="0" wordWrap="false" wordBreak="false" text="Yes" fontFile="/font/Inter_24pt_Regular.ttf" fontSize="20" zIndex="3" />
+        </hg_view>
+    </view>
+</hml>

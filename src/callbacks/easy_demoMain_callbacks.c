@@ -12,6 +12,39 @@ uint16_t lbl_1_timer_cnt = 0;
 
 // Event callback function implementations
 
+void easy_demoMainView_key_0_cb(void *obj, gui_event_t *e)
+{
+    GUI_UNUSED(obj);
+    GUI_UNUSED(e);
+    // Check key name
+    if (strcmp(e->indev_name, "Menu") == 0)
+    {
+        gui_view_switch_direct(gui_view_get_current(), "bt_View", SWITCH_INIT_STATE, SWITCH_IN_NONE_ANIMATION);
+    }
+}
+
+void easy_demoMainView_key_1_cb(void *obj, gui_event_t *e)
+{
+    GUI_UNUSED(obj);
+    GUI_UNUSED(e);
+    // Check key name
+    if (strcmp(e->indev_name, "Power") == 0)
+    {
+        gui_view_switch_direct(gui_view_get_current(), "menuMainView", SWITCH_INIT_STATE, SWITCH_IN_NONE_ANIMATION);
+    }
+}
+
+void bg_circle_key_cb(void *obj, gui_event_t *e)
+{
+    GUI_UNUSED(obj);
+    GUI_UNUSED(e);
+    // Check key name
+    if (strcmp(e->indev_name, "Menu") == 0)
+    {
+        gui_view_switch_direct(gui_view_get_current(), "bt_View", SWITCH_INIT_STATE, SWITCH_IN_NONE_ANIMATION);
+    }
+}
+
 void icon_del_clicked_cb(void *obj, gui_event_t *e)
 {
     GUI_UNUSED(obj);
@@ -40,6 +73,21 @@ void icon_as_clicked_cb(void *obj, gui_event_t *e)
     click_auto_sleep_icon(obj, e);
 }
 
+void img_3_key_cb(void *obj, gui_event_t *e)
+{
+    GUI_UNUSED(obj);
+    GUI_UNUSED(e);
+    // Check key name
+    if (strcmp(e->indev_name, "Menu") == 0)
+    {
+        gui_view_switch_direct(gui_view_get_current(), "easy_demoMainView", SWITCH_INIT_STATE, SWITCH_IN_NONE_ANIMATION);
+    }
+    else if (strcmp(e->indev_name, "Power") == 0)
+    {
+        gui_view_switch_direct(gui_view_get_current(), "easy_demoMainView", SWITCH_INIT_STATE, SWITCH_IN_NONE_ANIMATION);
+    }
+}
+
 /* @protected start custom_functions */
 // Custom functions
 #include "tp_algo.h"
@@ -63,7 +111,7 @@ void easy_demoMainView_timer_0_cb(void *obj)
     
     if (tp->pressing && tp->type == TOUCH_HOLD_Y)
     {
-        if (is_delete_mode) return;
+        if (mode == MODE_DELETE) return;
         int16_t y = y_rec + tp->deltaY;
         gui_obj_hidden(GUI_BASE(win_menu), false);
         if (y < -SCREEN_H)
