@@ -221,6 +221,13 @@ void icon_fl_clicked_cb(void *obj, gui_event_t *e)
     gui_view_switch_direct(gui_view_get_current(), "view_fl", SWITCH_INIT_STATE, SWITCH_IN_NONE_ANIMATION);
 }
 
+void icon_connect_clicked_cb(void *obj, gui_event_t *e)
+{
+    GUI_UNUSED(obj);
+    GUI_UNUSED(e);
+    click_share_icon(obj, e);
+}
+
 void icon_sl_clicked_cb(void *obj, gui_event_t *e)
 {
     GUI_UNUSED(obj);

@@ -20,7 +20,7 @@
       "compression": "rle"
     },
     "image/A8": {
-      "format": "A8"
+      "format": "ARGB8565"
     },
     "wallpaper_1.mp4": {
       "videoFormat": "CINEPAK"
