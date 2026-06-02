@@ -140,7 +140,7 @@
             </hg_window>
         </hg_view>
         <hg_view id="view_1" x="-1012" y="550" width="360" height="360" backgroundColor="#000000" borderRadius="20" padding="12" overflow="auto" entry="false" zIndex="1">
-            <hg_video id="vid_test" x="0" y="0" width="365" height="360" src="assets/wallpaper_1.mp4" useMsv1="true" loop="true" zIndex="1" />
+            <hg_video id="vid_test" x="0" y="0" width="365" height="360" src="assets/wallpaper_1.mp4" useMsv1="true" loop="true" frameRate="35" zIndex="1" />
         </hg_view>
         <hg_view id="view_fl" x="-487" y="-416" width="360" height="360" backgroundColor="#000000" borderRadius="20" padding="12" overflow="auto" entry="false" animateStep="360" zIndex="2">
             <hg_image id="img_3" x="0" y="0" width="360" height="360" src="assets/image/A8/circle_360_bg_white.png" blendMode="IMG_BYPASS_MODE" zIndex="1">
