@@ -10,7 +10,7 @@
  */
 
 // Add custom declarations here
-uint8_t menu_idx; //0:Reset, 1:Format storage, 2:Power off
+extern uint8_t menu_idx; //0:Reset, 1:Format storage, 2:Power off
 
 void click_menu_reset_button(void *obj, gui_event_t *e);
 void click_menu_fs_button(void *obj, gui_event_t *e);
