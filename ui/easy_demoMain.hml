@@ -73,9 +73,6 @@
                 <event type="onKeyLongPress" keyName="Power">
                     <action type="switchView" target="menuMainView" switchOutStyle="SWITCH_INIT_STATE" switchInStyle="SWITCH_IN_NONE_ANIMATION" />
                 </event>
-                <event type="onSwipeDown">
-                    <action type="switchView" target="top_view" switchOutStyle="SWITCH_INIT_STATE" switchInStyle="SWITCH_IN_FROM_TOP_USE_TRANSLATION" />
-                </event>
             </events>
         </hg_view>
         <hg_view id="mainface_view_7" x="4000" y="0" width="360" height="360" backgroundColor="#000000" entry="false" animateStep="360" timers="[{&quot;id&quot;:&quot;timer_0&quot;,&quot;name&quot;:&quot;动画 1&quot;,&quot;enabled&quot;:true,&quot;interval&quot;:1000,&quot;reload&quot;:true,&quot;mode&quot;:&quot;custom&quot;,&quot;callback&quot;:&quot;mainface_view_7_timer_0_cb&quot;,&quot;duration&quot;:1000,&quot;stopOnComplete&quot;:true,&quot;delayStart&quot;:0,&quot;actions&quot;:[],&quot;segments&quot;:[],&quot;runImmediately&quot;:true}]" zIndex="0">
@@ -85,9 +82,6 @@
                 </event>
                 <event type="onKeyLongPress" keyName="Power">
                     <action type="switchView" target="menuMainView" switchOutStyle="SWITCH_INIT_STATE" switchInStyle="SWITCH_IN_NONE_ANIMATION" />
-                </event>
-                <event type="onSwipeDown">
-                    <action type="switchView" target="top_view" switchOutStyle="SWITCH_INIT_STATE" switchInStyle="SWITCH_IN_FROM_TOP_USE_TRANSLATION" />
                 </event>
             </events>
         </hg_view>
