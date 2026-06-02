@@ -66,7 +66,7 @@ void *mainface_list[MAINFACE_NUM] =
 };
 bool is_auto_sleep_mode = false;
 bool is_bt_connect = false;
-MODE_TYPE mode = MODE_DEFAULT;
+MODE_TYPE dev_mode = MODE_DEFAULT;
 
 uint8_t soc_val = 100;
 uint8_t screen_light_idx = 5; // 0~5
@@ -188,7 +188,7 @@ void switch_mainface(gui_obj_t *parent, uint8_t idx)
     gui_view_switch_on_event((void *)parent, view_right, SWITCH_OUT_TO_LEFT_USE_TRANSLATION, SWITCH_IN_FROM_RIGHT_USE_TRANSLATION, GUI_EVENT_TOUCH_MOVE_LEFT);
     gui_view_switch_on_event((void *)parent, view_left, SWITCH_OUT_TO_RIGHT_USE_TRANSLATION, SWITCH_IN_FROM_LEFT_USE_TRANSLATION, GUI_EVENT_TOUCH_MOVE_RIGHT);
 
-    if (mode == MODE_DELETE) create_win_del(parent);
+    if (dev_mode == MODE_DELETE) create_win_del(parent);
 }
 
 void click_auto_sleep_icon(void *obj, gui_event_t *e)
@@ -258,7 +258,7 @@ void click_delete_icon(void *obj, gui_event_t *e)
     GUI_UNUSED(e);
     if (mainface_num == 0) return;
 
-    mode = MODE_DELETE;
+    dev_mode = MODE_DELETE;
     void *view_mainface = "easy_demoMainView";
     switch (mainface_idx)
     {
@@ -366,7 +366,7 @@ void click_back_icon(void *obj, gui_event_t *e)
 {
     GUI_UNUSED(obj);
     GUI_UNUSED(e);
-    mode = MODE_DEFAULT;
+    dev_mode = MODE_DEFAULT;
     gui_obj_tree_free(GUI_BASE(obj)->parent);
     
 #ifdef _HONEYGUI_SIMULATOR_

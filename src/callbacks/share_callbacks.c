@@ -124,7 +124,7 @@ void img_8_timer_0_cb(void *obj)
 void lbl_share_timer_0_cb(void *obj)
 {
     GUI_UNUSED(obj);
-    if (mode == MODE_RECEIVE) gui_text_content_set(lbl_share, "Receive Image", strlen("Receive Image"));
+    if (dev_mode == MODE_RECEIVE) gui_text_content_set(lbl_share, "Receive Image", strlen("Receive Image"));
     gui_obj_stop_timer(obj);
 }
 
@@ -136,10 +136,10 @@ void win_share_3_timer_0_cb(void *obj)
     if (win_share_3_timer_cnt >= 500)
     {
         win_share_3_timer_cnt = 0;
-        mode = MODE_DEFAULT;
+        dev_mode = MODE_DEFAULT;
     }
 #endif
-    if (mode == MODE_DEFAULT)
+    if (dev_mode == MODE_DEFAULT)
     {
         gui_obj_hidden(obj, false);
         gui_text_content_set(lbl_share, "Time out", strlen("Time out"));

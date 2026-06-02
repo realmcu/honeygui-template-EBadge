@@ -28,17 +28,17 @@ typedef enum
     MODE_RECEIVE,
 } MODE_TYPE;
 
-uint8_t mainface_idx;
-uint8_t mainface_num;
-MAINFACE_SRC_TYPE mainface_src_type;
-void *mainface_list[MAINFACE_NUM];
+extern uint8_t mainface_idx;
+extern uint8_t mainface_num;
+extern MAINFACE_SRC_TYPE mainface_src_type;
+extern void *mainface_list[MAINFACE_NUM];
 
-bool is_auto_sleep_mode;
-bool is_bt_connect;
-MODE_TYPE mode;
+extern bool is_auto_sleep_mode;
+extern bool is_bt_connect;
+extern MODE_TYPE dev_mode;
 
-uint8_t soc_val;
-uint8_t screen_light_idx;
+extern uint8_t soc_val;
+extern uint8_t screen_light_idx;
 
 void switch_mainface(gui_obj_t *parent, uint8_t idx);
 void mainface_list_delete(void);

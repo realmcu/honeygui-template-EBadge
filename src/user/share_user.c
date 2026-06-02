@@ -49,7 +49,7 @@ void click_share_image_button(void *obj, gui_event_t *e)
 {
     GUI_UNUSED(obj);
     GUI_UNUSED(e);
-    mode = MODE_SHARE;
+    dev_mode = MODE_SHARE;
 #ifdef _HONEYGUI_SIMULATOR_
     // TODO
 #else
@@ -61,7 +61,7 @@ void click_receive_image_button(void *obj, gui_event_t *e)
 {
     GUI_UNUSED(obj);
     GUI_UNUSED(e);
-    mode = MODE_RECEIVE;
+    dev_mode = MODE_RECEIVE;
 #ifdef _HONEYGUI_SIMULATOR_
     // TODO
 #else
