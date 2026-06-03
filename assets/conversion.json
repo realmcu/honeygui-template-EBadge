@@ -33,6 +33,12 @@
     },
     "image/wallpaper_6.png": {
       "format": "RGB565"
+    },
+    "image/wallpaper_4.png": {
+      "format": "RGB565"
+    },
+    "image/wallpaper_5.png": {
+      "format": "RGB565"
     }
   }
 }

@@ -44,6 +44,7 @@ void win_timer_0_cb(void *obj)
     gui_obj_t *child = gui_list_entry(o->child_list.next, gui_obj_t, brother_list);
     if (child->type == IMAGE_FROM_MEM && child->w > SCREEN_SIZE)
     {
+        gui_obj_t *child_1 = gui_list_entry(o->child_list.prev, gui_obj_t, brother_list);
         int16_t img_x = -child->x;
         int16_t img_w = child->w;
         img_x += 5;
@@ -55,6 +56,7 @@ void win_timer_0_cb(void *obj)
         {
             child->x = -img_x;
         }
+        child_1->x = -img_x + img_w;
     }
 }
 
@@ -96,15 +98,33 @@ void switch_mainface(gui_obj_t *parent, uint8_t idx)
     else
     {
 #ifdef _HONEYGUI_SIMULATOR_
-        gui_img_create_from_fs((void *)win, 0, mainface_list[idx].data, 0, 0, SCREEN_SIZE, SCREEN_SIZE);
+        gui_img_t *img_0 = gui_img_create_from_fs((void *)win, 0, mainface_list[idx].data, 0, 0, SCREEN_SIZE, SCREEN_SIZE);
+        gui_img_set_mode(img_0, IMG_BYPASS_MODE);
+        if (img_0->base.w > SCREEN_SIZE)
+        {
+            gui_img_t *img = gui_img_create_from_fs((void *)win, 0, mainface_list[idx].data, img_0->base.w, 0, SCREEN_SIZE, SCREEN_SIZE);
+            gui_img_set_mode(img, IMG_BYPASS_MODE);
+        }
 #else
         if (((uint32_t)mainface_list[idx].data) > 0x0240f400)
         {
-            gui_img_create_from_mem((void *)win, 0, mainface_list[idx].data, 0, 0, SCREEN_SIZE, SCREEN_SIZE);
+            gui_img_t *img_0 = gui_img_create_from_mem((void *)win, 0, mainface_list[idx].data, 0, 0, SCREEN_SIZE, SCREEN_SIZE);
+            gui_img_set_mode(img_0, IMG_BYPASS_MODE);
+            if (img_0->base.w > SCREEN_SIZE)
+            {
+                gui_img_t *img = gui_img_create_from_mem((void *)win, 0, mainface_list[idx].data, img_0->base.w, 0, SCREEN_SIZE, SCREEN_SIZE);
+                gui_img_set_mode(img, IMG_BYPASS_MODE);
+            }
         }
         else
         {
-            gui_img_create_from_fs((void *)win, 0, mainface_list[idx].data, 0, 0, SCREEN_SIZE, SCREEN_SIZE);
+            gui_img_t *img_0 = gui_img_create_from_fs((void *)win, 0, mainface_list[idx].data, 0, 0, SCREEN_SIZE, SCREEN_SIZE);
+            gui_img_set_mode(img_0, IMG_BYPASS_MODE);
+            if (img_0->base.w > SCREEN_SIZE)
+            {
+                gui_img_t *img = gui_img_create_from_fs((void *)win, 0, mainface_list[idx].data, img_0->base.w, 0, SCREEN_SIZE, SCREEN_SIZE);
+                gui_img_set_mode(img, IMG_BYPASS_MODE);
+            }
         }
 #endif
     }
