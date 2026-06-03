@@ -88,8 +88,16 @@ void create_win_del(gui_obj_t *parent)
     gui_obj_add_event_cb(img, (gui_event_cb_t)click_back_icon, GUI_EVENT_TOUCH_CLICKED, NULL);
 }
 
+void win_timer_0_cb(void *obj)
+{
+    GUI_UNUSED(obj);
+    gui_obj_focus_set(GUI_BASE(obj)->parent);
+}
 void switch_mainface(gui_obj_t *parent, uint8_t idx)
 {
+    gui_win_t *win = gui_win_create(parent, 0, 0, 0, 360, 360);
+    gui_obj_create_timer((void *)win, 20, true, win_timer_0_cb);
+    
     if (mainface_num == 0) return;
     if (mainface_src_t[idx] == SRC_VIDEO)
     {
