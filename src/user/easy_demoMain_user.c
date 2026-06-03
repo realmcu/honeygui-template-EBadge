@@ -3,7 +3,7 @@
 
 /* ----------------------------------------------------*/
 uint8_t mainface_idx = 0;
-uint8_t mainface_num = 5;
+uint8_t mainface_num = 6;
 mainface_src_t mainface_list[MAINFACE_NUM_MAX] = 
 {
     {"/wallpaper_1.avi", SRC_VIDEO},
@@ -11,6 +11,7 @@ mainface_src_t mainface_list[MAINFACE_NUM_MAX] =
     {"/wallpaper_3.avi", SRC_VIDEO},
     {"/image/wallpaper_4.bin", SRC_IMG},
     {"/image/wallpaper_5.bin", SRC_IMG},
+    {"/image/wallpaper_6.bin", SRC_IMG},
 };
 bool is_auto_sleep_mode = false;
 bool is_bt_connect = false;
