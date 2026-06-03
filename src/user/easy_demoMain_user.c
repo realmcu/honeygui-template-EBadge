@@ -75,14 +75,37 @@ void switch_mainface(gui_obj_t *parent, uint8_t idx)
     }
     if (mainface_list[idx].type == SRC_VIDEO)
     {
-        gui_lite_video_t *vid_1 = gui_lite_video_create_from_fs((void *)win, 0, mainface_list[idx].data, 0, 0, SCREEN_SIZE, SCREEN_SIZE);
-        gui_lite_video_set_frame_rate((gui_lite_video_t *)vid_1, 30.f);
-        gui_lite_video_set_repeat_count((gui_lite_video_t *)vid_1, GUI_VIDEO_REPEAT_INFINITE);
-        gui_lite_video_set_state((gui_lite_video_t *)vid_1, GUI_VIDEO_STATE_PLAYING);
+        gui_lite_video_t *vid = NULL;
+#ifdef _HONEYGUI_SIMULATOR_
+        vid = gui_lite_video_create_from_fs((void *)win, 0, mainface_list[idx].data, 0, 0, SCREEN_SIZE, SCREEN_SIZE);
+#else
+        if (((uint32_t)mainface_list[idx].data) > 0x0240f400)
+        {
+            vid = gui_lite_video_create_from_mem((void *)win, 0, mainface_list[idx].data, 0, 0, SCREEN_SIZE, SCREEN_SIZE);
+        }
+        else
+        {
+            vid = gui_lite_video_create_from_fs((void *)win, 0, mainface_list[idx].data, 0, 0, SCREEN_SIZE, SCREEN_SIZE);
+        }
+#endif
+        gui_lite_video_set_frame_rate((gui_lite_video_t *)vid, 30.f);
+        gui_lite_video_set_repeat_count((gui_lite_video_t *)vid, GUI_VIDEO_REPEAT_INFINITE);
+        gui_lite_video_set_state((gui_lite_video_t *)vid, GUI_VIDEO_STATE_PLAYING);
     }
     else
     {
+#ifdef _HONEYGUI_SIMULATOR_
         gui_img_create_from_fs((void *)win, 0, mainface_list[idx].data, 0, 0, SCREEN_SIZE, SCREEN_SIZE);
+#else
+        if (((uint32_t)mainface_list[idx].data) > 0x0240f400)
+        {
+            gui_img_create_from_mem((void *)win, 0, mainface_list[idx].data, 0, 0, SCREEN_SIZE, SCREEN_SIZE);
+        }
+        else
+        {
+            gui_img_create_from_fs((void *)win, 0, mainface_list[idx].data, 0, 0, SCREEN_SIZE, SCREEN_SIZE);
+        }
+#endif
     }
 
     if (dev_mode == MODE_DELETE)
