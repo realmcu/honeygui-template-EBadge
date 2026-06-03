@@ -306,6 +306,8 @@ void click_delete_icon(void *obj, gui_event_t *e)
 void mainface_list_delete(void)
 {
     if (mainface_num == 0) return;
+
+    void *addr_del = mainface_list[mainface_idx].data;
     for (uint8_t i = mainface_idx; i < mainface_num - 1; i++)
     {
         memcpy(&mainface_list[i], &mainface_list[i + 1], sizeof(mainface_src_t));
@@ -353,8 +355,14 @@ void mainface_list_delete(void)
     {
         mainface_idx = 0;
     }
-    // to do, erase flash data
 
+    // to do, erase flash data
+#ifdef _HONEYGUI_SIMULATOR_
+    gui_log("Do file erase! 0x%x\n", addr_del);
+#else
+    extern int fdb_delete_by_addr(uintptr_t addr);
+    fdb_delete_by_addr((uintptr_t)addr_del);
+#endif
 
     void *view_rec = view_left? view_left : (void *)gui_view_get_current()->base.name;
     gui_log("view_rec = %s, view_left = %s, idx = %d, num = %d, dev_mode = %d\n", view_rec, view_left, mainface_idx, mainface_num, dev_mode);
@@ -365,8 +373,11 @@ void mainface_list_delete(void)
 void mainface_list_add(gui_msg_t *msg)
 {
     if (mainface_num == MAINFACE_NUM_MAX) return;
-    mainface_src_t *new = (mainface_src_t *)msg->payload;
-    memcpy(&mainface_list[mainface_num++], new, sizeof(mainface_src_t));
+    gui_log("Add resource 0x%x\n", msg->payload);
+
+    mainface_list[mainface_num].data = msg->payload;
+    mainface_list[mainface_num].type = (*(uint8_t *)(msg->payload) == 0x52)?SRC_VIDEO:SRC_IMG;
+    mainface_num++;
 
     void *view = NULL;
     mainface_idx = mainface_num - 1;
@@ -445,12 +456,12 @@ void click_back_icon(void *obj, gui_event_t *e)
 #endif
 }
 
-uint8_t mainface_list_init(void **data_list)
+uint8_t mainface_list_init(void **data_list, uint32_t n)
 {
     uint8_t idx = 0;
     if (data_list == NULL) return idx;
     
-    while (data_list[idx] != NULL && idx < MAINFACE_NUM_MAX)
+    while (data_list[idx] != NULL && ((idx < MAINFACE_NUM_MAX) || (idx < n)))
     {
         
         mainface_list[idx].data = data_list[idx];
