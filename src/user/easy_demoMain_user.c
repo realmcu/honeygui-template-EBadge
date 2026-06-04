@@ -104,6 +104,11 @@ void switch_mainface(gui_obj_t *parent, uint8_t idx)
         gui_img_set_mode(img_0, IMG_BYPASS_MODE);
         if (img_0->base.w > SCREEN_SIZE)
         {
+            gui_list_remove(&GUI_BASE(win)->brother_list);
+            gui_img_t *img_bg = gui_img_create_from_fs(parent, 0, "/image/A8/circle_360_bg_white.bin", 0, 0, SCREEN_SIZE, SCREEN_SIZE);
+            gui_img_set_mode(img_bg, IMG_BYPASS_MODE);
+            gui_list_insert(&GUI_BASE(img_bg)->brother_list, &GUI_BASE(win)->brother_list);
+            
             gui_img_t *img = gui_img_create_from_fs((void *)win, 0, mainface_list[idx].data, img_0->base.w, 0, SCREEN_SIZE, SCREEN_SIZE);
             gui_img_set_mode(img, IMG_BYPASS_MODE);
         }
@@ -114,6 +119,11 @@ void switch_mainface(gui_obj_t *parent, uint8_t idx)
             gui_img_set_mode(img_0, IMG_BYPASS_MODE);
             if (img_0->base.w > SCREEN_SIZE)
             {
+                gui_list_remove(&GUI_BASE(win)->brother_list);
+                gui_img_t *img_bg = gui_img_create_from_fs(parent, 0, "/image/A8/circle_360_bg_white.bin", 0, 0, SCREEN_SIZE, SCREEN_SIZE);
+                gui_img_set_mode(img_bg, IMG_BYPASS_MODE);
+                gui_list_insert(&GUI_BASE(img_bg)->brother_list, &GUI_BASE(win)->brother_list);
+                
                 gui_img_t *img = gui_img_create_from_mem((void *)win, 0, mainface_list[idx].data, img_0->base.w, 0, SCREEN_SIZE, SCREEN_SIZE);
                 gui_img_set_mode(img, IMG_BYPASS_MODE);
             }
@@ -124,6 +134,11 @@ void switch_mainface(gui_obj_t *parent, uint8_t idx)
             gui_img_set_mode(img_0, IMG_BYPASS_MODE);
             if (img_0->base.w > SCREEN_SIZE)
             {
+                gui_list_remove(&GUI_BASE(win)->brother_list);
+                gui_img_t *img_bg = gui_img_create_from_fs(parent, 0, "/image/A8/circle_360_bg_white.bin", 0, 0, SCREEN_SIZE, SCREEN_SIZE);
+                gui_img_set_mode(img_bg, IMG_BYPASS_MODE);
+                gui_list_insert(&GUI_BASE(img_bg)->brother_list, &GUI_BASE(win)->brother_list);
+
                 gui_img_t *img = gui_img_create_from_fs((void *)win, 0, mainface_list[idx].data, img_0->base.w, 0, SCREEN_SIZE, SCREEN_SIZE);
                 gui_img_set_mode(img, IMG_BYPASS_MODE);
             }
@@ -499,3 +514,8 @@ uint8_t mainface_list_init(void **data_list, uint32_t n)
     return idx;
 }
 
+static void switch_switch_transmit_view(void *arg)
+{
+    GUI_UNUSED(arg);
+    gui_view_switch_direct(gui_view_get_current(), "view_transmit", SWITCH_OUT_NONE_ANIMATION, SWITCH_IN_NONE_ANIMATION);
+}

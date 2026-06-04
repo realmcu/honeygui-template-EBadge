@@ -36,5 +36,8 @@
             </events>
             <hg_qbcode id="qbcode_1" x="70" y="70" width="220" height="220" codeType="qrcode" displayMode="image" encodeMode="text" codeContent="Hello, World!" borderSize="5" zIndex="1" />
         </hg_view>
+        <hg_view id="view_transmit" x="1790" y="15" width="360" height="360" backgroundColor="#000000" borderRadius="20" padding="12" overflow="auto" entry="false" zIndex="1">
+            <hg_label id="lbl_11" x="0" y="30" width="360" height="300" hAlign="CENTER" vAlign="MID" color="#ffffff" letterSpacing="0" lineSpacing="0" wordWrap="false" wordBreak="false" text="Transmitting..." fontFile="/font/Inter_24pt_SemiBold.ttf" fontSize="40" zIndex="1" />
+        </hg_view>
     </view>
 </hml>

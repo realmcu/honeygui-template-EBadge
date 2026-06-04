@@ -56,7 +56,9 @@ void click_delete_icon_detail(void *obj, gui_event_t *e);
 void click_back_icon(void *obj, gui_event_t *e);
 
 
+/* Interact api */ 
 void mainface_list_add(gui_msg_t *msg); //msg->payload should be mainface_src_t
 uint8_t mainface_list_init(void **data_list, uint32_t n); //ret: user's mainface num
+
 
 #endif // EASY_DEMOMAIN_USER_H

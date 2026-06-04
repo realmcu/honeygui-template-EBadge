@@ -13,6 +13,21 @@ uint16_t img_8_timer_cnt = 0;
 
 // Event callback function implementations
 
+void shareMainView_key_0_cb(void *obj, gui_event_t *e)
+{
+    GUI_UNUSED(obj);
+    GUI_UNUSED(e);
+    // Check key name
+    if (strcmp(e->indev_name, "Menu") == 0)
+    {
+        gui_view_switch_direct(gui_view_get_current(), "top_view", SWITCH_OUT_NONE_ANIMATION, SWITCH_IN_NONE_ANIMATION);
+    }
+    else if (strcmp(e->indev_name, "Home") == 0)
+    {
+        gui_view_switch_direct(gui_view_get_current(), "easy_demoMainView", SWITCH_OUT_NONE_ANIMATION, SWITCH_IN_NONE_ANIMATION);
+    }
+}
+
 void img_4_clicked_cb(void *obj, gui_event_t *e)
 {
     GUI_UNUSED(obj);
