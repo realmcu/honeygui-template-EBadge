@@ -31,6 +31,8 @@ MODE_TYPE dev_mode = MODE_DEFAULT;
 uint8_t soc_val = 100;
 uint8_t screen_light_idx = 5; // 0~5
 
+const char *view_rec = "easy_demoMainView";
+
 
 void create_win_del(gui_obj_t *parent)
 {
@@ -383,7 +385,7 @@ void click_delete_icon(void *obj, gui_event_t *e)
     default:
         break;
     }
-    gui_view_switch_direct(gui_view_get_current(), view_mainface, SWITCH_INIT_STATE, SWITCH_IN_NONE_ANIMATION);
+    gui_view_switch_direct(gui_view_get_current(), view_mainface, SWITCH_OUT_NONE_ANIMATION, SWITCH_IN_NONE_ANIMATION);
 #ifdef _HONEYGUI_SIMULATOR_
     // TODO
 #else
@@ -454,19 +456,19 @@ void mainface_list_delete(void)
     fdb_delete_by_addr((uintptr_t)addr_del);
 #endif
 
-    void *view_rec = view_left? view_left : (void *)gui_view_get_current()->base.name;
-    gui_log("view_rec = %s, view_left = %s, idx = %d, num = %d, dev_mode = %d\n", view_rec, view_left, mainface_idx, mainface_num, dev_mode);
+    void *view_target = view_left? view_left : (void *)gui_view_get_current()->base.name;
+    // gui_log("view_target = %s, view_left = %s, idx = %d, num = %d, dev_mode = %d\n", view_target, view_left, mainface_idx, mainface_num, dev_mode);
     gui_obj_child_free(gui_obj_get_root());
-    gui_view_create(gui_obj_get_root(), view_rec, 0, 0, 0, 0);
+    gui_view_create(gui_obj_get_root(), view_target, 0, 0, 0, 0);
 }
 
-void mainface_list_add(gui_msg_t *msg)
+static void mainface_list_add(void *data)
 {
     if (mainface_num == MAINFACE_NUM_MAX) return;
-    gui_log("Add resource 0x%x\n", msg->payload);
+    gui_log("Add resource 0x%x\n", data);
 
-    mainface_list[mainface_num].data = msg->payload;
-    mainface_list[mainface_num].type = (*(uint8_t *)(msg->payload) == 0x52)?SRC_VIDEO:SRC_IMG;
+    mainface_list[mainface_num].data = data;
+    mainface_list[mainface_num].type = (*(uint8_t *)(data) == 0x52)? SRC_VIDEO: SRC_IMG;
     mainface_num++;
 
     void *view = NULL;
@@ -523,7 +525,7 @@ void click_share_icon(void *obj, gui_event_t *e)
 {
     GUI_UNUSED(obj);
     GUI_UNUSED(e);
-    gui_view_switch_direct(gui_view_get_current(), "shareMainView", SWITCH_INIT_STATE, SWITCH_IN_NONE_ANIMATION);
+    gui_view_switch_direct(gui_view_get_current(), "shareMainView", SWITCH_OUT_NONE_ANIMATION, SWITCH_IN_NONE_ANIMATION);
     
 #ifdef _HONEYGUI_SIMULATOR_
     // TODO
@@ -538,7 +540,7 @@ void click_back_icon(void *obj, gui_event_t *e)
     GUI_UNUSED(e);
     dev_mode = MODE_DEFAULT;
     gui_obj_tree_free(GUI_BASE(obj)->parent);
-    gui_view_switch_on_event(gui_view_get_current(), "top_view", SWITCH_INIT_STATE, SWITCH_IN_FROM_TOP_USE_TRANSLATION, GUI_EVENT_TOUCH_MOVE_DOWN);
+    gui_view_switch_on_event(gui_view_get_current(), "top_view", SWITCH_OUT_NONE_ANIMATION, SWITCH_IN_FROM_TOP_USE_TRANSLATION, GUI_EVENT_TOUCH_MOVE_DOWN);
 #ifdef _HONEYGUI_SIMULATOR_
     // TODO
 #else
@@ -566,8 +568,52 @@ uint8_t mainface_list_init(void **data_list, uint32_t n)
     return idx;
 }
 
-static void switch_switch_transmit_view(void *arg)
+void ui_process_msg(void *arg)
 {
-    GUI_UNUSED(arg);
-    gui_view_switch_direct(gui_view_get_current(), "view_transmit", SWITCH_OUT_NONE_ANIMATION, SWITCH_IN_NONE_ANIMATION);
+    static bool get_transmit_start = false;
+    
+    gui_msg_t *msg = arg;
+    UI_SUBEVENT_TYPE subevent = (UI_SUBEVENT_TYPE)msg->sub_event;
+    switch (subevent)
+    {
+    case ADD_MAINFACE:
+    {
+        mainface_list_add(msg->payload);
+        get_transmit_start = false;
+        break;
+    } 
+    case BT_ON:
+        is_bt_connect = true;
+        break;
+    case BT_OFF:
+        is_bt_connect = false;
+        break;
+    case TRANSMIT_START:
+    {
+        if (get_transmit_start) // state abnormal
+        {
+            gui_obj_child_free(gui_obj_get_root());
+            gui_view_create(gui_obj_get_root(), view_rec, 0, 0, 0, 0);
+            get_transmit_start = false;
+            return;
+        }
+        
+        get_transmit_start = true;
+        
+        gui_view_t *view_cur = gui_view_get_current();
+        if (view_cur != NULL && strcmp(view_cur->base.name, "view_transmit") != 0)
+        {
+            view_rec = view_cur->base.name;
+        }
+        gui_obj_child_free(gui_obj_get_root());
+        gui_view_create(gui_obj_get_root(), "view_transmit", 0, 0, 0, 0);
+        break;
+    }
+    case TRANSMIT_ABORT:
+        gui_view_switch_direct(gui_view_get_current(), view_rec, SWITCH_OUT_NONE_ANIMATION, SWITCH_IN_NONE_ANIMATION);
+        break;
+    
+    default:
+        break;
+    }
 }
