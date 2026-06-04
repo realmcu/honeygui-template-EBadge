@@ -2,9 +2,19 @@
 
 
 /* ----------------------------------------------------*/
+#ifdef _HONEYGUI_SIMULATOR_
+
+#else
+
+#define USER_RESOURCE_ADDR     (0x0240f400u + 0x400000u)
+#define USER_RESOURCE_ADDR_END (USER_RESOURCE_ADDR + 0x300000u)
+
+#endif
+
+
 uint8_t mainface_idx = 0;
 uint8_t mainface_num = 6;
-mainface_src_t mainface_list[MAINFACE_NUM_MAX] = 
+mainface_src_t mainface_list[MAINFACE_NUM_MAX] =
 {
     {"/image/wallpaper_6.bin", SRC_IMG},
     {"/wallpaper_1.avi", SRC_VIDEO},
@@ -84,7 +94,7 @@ void switch_mainface(gui_obj_t *parent, uint8_t idx)
 #ifdef _HONEYGUI_SIMULATOR_
         vid = gui_lite_video_create_from_fs((void *)win, 0, mainface_list[idx].data, 0, 0, SCREEN_SIZE, SCREEN_SIZE);
 #else
-        if (((uint32_t)mainface_list[idx].data) > 0x0240f400)
+        if (((uint32_t)mainface_list[idx].data) > USER_RESOURCE_ADDR && ((uint32_t)mainface_list[idx].data) < (USER_RESOURCE_ADDR_END))
         {
             vid = gui_lite_video_create_from_mem((void *)win, 0, mainface_list[idx].data, 0, 0, SCREEN_SIZE, SCREEN_SIZE);
         }
@@ -113,7 +123,8 @@ void switch_mainface(gui_obj_t *parent, uint8_t idx)
             gui_img_set_mode(img, IMG_BYPASS_MODE);
         }
 #else
-        if (((uint32_t)mainface_list[idx].data) > 0x0240f400)
+        gui_log("%s %d 0x%x\n", __FUNCTION__, __LINE__, mainface_list[idx].data);
+        if (((uint32_t)mainface_list[idx].data) > USER_RESOURCE_ADDR && ((uint32_t)mainface_list[idx].data) < (USER_RESOURCE_ADDR_END))
         {
             gui_img_t *img_0 = gui_img_create_from_mem((void *)win, 0, mainface_list[idx].data, 0, 0, SCREEN_SIZE, SCREEN_SIZE);
             gui_img_set_mode(img_0, IMG_BYPASS_MODE);
@@ -395,8 +406,9 @@ void mainface_list_delete(void)
     }
 
     // to do, erase flash data
-#ifdef _HONEYGUI_SIMULATOR_
     gui_log("Do file erase! 0x%x\n", addr_del);
+#ifdef _HONEYGUI_SIMULATOR_
+    
 #else
     extern int fdb_delete_by_addr(uintptr_t addr);
     fdb_delete_by_addr((uintptr_t)addr_del);
@@ -499,7 +511,7 @@ uint8_t mainface_list_init(void **data_list, uint32_t n)
     uint8_t idx = 0;
     if (data_list == NULL) return idx;
     
-    while (data_list[idx] != NULL && ((idx < MAINFACE_NUM_MAX) || (idx < n)))
+    while (data_list[idx] != NULL && ((idx < MAINFACE_NUM_MAX) && (idx < n)))
     {
         
         mainface_list[idx].data = data_list[idx];

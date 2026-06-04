@@ -2,43 +2,19 @@
   "version": "1.0",
   "defaultSettings": {
     "format": "adaptive16",
-    "compression": "none",
+    "compression": "adaptive",
     "dither": false,
     "videoFormat": "MJPEG",
     "videoQuality": 5
   },
   "items": {
-    "wallpaper_2.mp4": {
-      "videoFormat": "CINEPAK",
-      "videoFrameRate": 25
-    },
-    "image": {
-      "videoCrop": {
-        "width": 100,
-        "height": 100
-      },
-      "format": "ARGB8565",
-      "compression": "rle"
-    },
-    "image/A8": {
-      "format": "ARGB8565"
-    },
-    "wallpaper_1.mp4": {
-      "videoFormat": "CINEPAK",
-      "videoFrameRate": 25
-    },
-    "wallpaper_3.mp4": {
-      "videoFormat": "CINEPAK",
-      "videoFrameRate": 25
+    "image/wallpaper_6_mid.png": {
+      "compression": "rle",
+      "format": "RGB565"
     },
     "image/wallpaper_6.png": {
-      "format": "RGB565"
-    },
-    "image/wallpaper_4.png": {
-      "format": "RGB565"
-    },
-    "image/wallpaper_5.png": {
-      "format": "RGB565"
+      "format": "RGB565",
+      "compression": "rle"
     }
   }
 }
