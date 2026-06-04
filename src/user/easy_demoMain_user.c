@@ -16,13 +16,13 @@ uint8_t mainface_idx = 0;
 uint8_t mainface_num = 6;
 mainface_src_t mainface_list[MAINFACE_NUM_MAX] =
 {
-    {"/image/wallpaper_6.bin", SRC_IMG},
+    {"/image/565/wallpaper_6.bin", SRC_IMG},
     {"/wallpaper_1.avi", SRC_VIDEO},
-    {"/image/wallpaper_4.bin", SRC_IMG},
+    {"/image/565/wallpaper_4.bin", SRC_IMG},
 
     {"/wallpaper_2.avi", SRC_VIDEO},
     {"/wallpaper_3.avi", SRC_VIDEO},
-    {"/image/wallpaper_5.bin", SRC_IMG},
+    {"/image/565/wallpaper_5.bin", SRC_IMG},
 };
 bool is_auto_sleep_mode = false;
 bool is_bt_connect = false;
@@ -55,19 +55,19 @@ void win_timer_0_cb(void *obj)
     gui_obj_t *child = gui_list_entry(o->child_list.next, gui_obj_t, brother_list);
     if (child->type == IMAGE_FROM_MEM && child->w > SCREEN_SIZE)
     {
-        gui_obj_t *child_1 = gui_list_entry(o->child_list.prev, gui_obj_t, brother_list);
-        int16_t img_x = -child->x;
+        // gui_obj_t *child_1 = gui_list_entry(o->child_list.prev, gui_obj_t, brother_list);
+        int16_t img_x = child->x;
         int16_t img_w = child->w;
-        img_x += 5;
-        if (img_x > img_w)
+        img_x -= 5;
+        if (img_x + img_w <= 0)
         {
-            child->x = 0;
+            child->x = SCREEN_SIZE;
         }
         else
         {
-            child->x = -img_x;
+            child->x = img_x;
         }
-        child_1->x = -img_x + img_w;
+        // child_1->x = -img_x + img_w;
     }
 }
 
@@ -110,48 +110,88 @@ void switch_mainface(gui_obj_t *parent, uint8_t idx)
     else
     {
 #ifdef _HONEYGUI_SIMULATOR_
-        gui_img_t *img_0 = gui_img_create_from_fs((void *)win, 0, mainface_list[idx].data, 0, 0, SCREEN_SIZE, SCREEN_SIZE);
+        gui_img_t *img_0 = gui_img_create_from_fs((void *)win, 0, mainface_list[idx].data, 0, 0, 0, 0);
         gui_img_set_mode(img_0, IMG_BYPASS_MODE);
         if (img_0->base.w > SCREEN_SIZE)
         {
+            int16_t img_y = (SCREEN_SIZE - img_0->base.h) / 2;
+            gui_obj_move((void *)img_0, SCREEN_SIZE, img_y);
             gui_list_remove(&GUI_BASE(win)->brother_list);
-            gui_img_t *img_bg = gui_img_create_from_fs(parent, 0, "/image/A8/circle_360_bg_white.bin", 0, 0, SCREEN_SIZE, SCREEN_SIZE);
-            gui_img_set_mode(img_bg, IMG_BYPASS_MODE);
-            gui_list_insert(&GUI_BASE(img_bg)->brother_list, &GUI_BASE(win)->brother_list);
+            uint16_t color = (uint16_t)(((uint16_t *)img_0->src_data)[4]);
+            void *img_bg_data = NULL;
+            switch (color)
+            {
+            case 0xFFFF:
+                img_bg_data = "/image/565/rect_360_white.bin";
+                break;
+
+            case 0x001F:
+                img_bg_data = "/image/565/rect_360_blue.bin";
+                break;
             
-            gui_img_t *img = gui_img_create_from_fs((void *)win, 0, mainface_list[idx].data, img_0->base.w, 0, SCREEN_SIZE, SCREEN_SIZE);
-            gui_img_set_mode(img, IMG_BYPASS_MODE);
+            case 0x03E0:
+                img_bg_data = "/image/565/rect_360_green.bin";
+                break;
+                
+            case 0xF800:
+                img_bg_data = "/image/565/rect_360_red.bin";
+                break;
+            default:
+                break;
+            }
+
+            if (img_bg_data != NULL)
+            {
+                gui_img_t *img_bg = gui_img_create_from_fs(parent, 0, img_bg_data, 0, 0, SCREEN_SIZE, SCREEN_SIZE);
+                gui_img_set_mode(img_bg, IMG_BYPASS_MODE);
+                gui_list_insert(&GUI_BASE(img_bg)->brother_list, &GUI_BASE(win)->brother_list);
+            }
         }
 #else
+        gui_img_t *img_0 = NULL;
         gui_log("%s %d 0x%x\n", __FUNCTION__, __LINE__, mainface_list[idx].data);
         if (((uint32_t)mainface_list[idx].data) > USER_RESOURCE_ADDR && ((uint32_t)mainface_list[idx].data) < (USER_RESOURCE_ADDR_END))
         {
-            gui_img_t *img_0 = gui_img_create_from_mem((void *)win, 0, mainface_list[idx].data, 0, 0, SCREEN_SIZE, SCREEN_SIZE);
-            gui_img_set_mode(img_0, IMG_BYPASS_MODE);
-            if (img_0->base.w > SCREEN_SIZE)
-            {
-                gui_list_remove(&GUI_BASE(win)->brother_list);
-                gui_img_t *img_bg = gui_img_create_from_fs(parent, 0, "/image/A8/circle_360_bg_white.bin", 0, 0, SCREEN_SIZE, SCREEN_SIZE);
-                gui_img_set_mode(img_bg, IMG_BYPASS_MODE);
-                gui_list_insert(&GUI_BASE(img_bg)->brother_list, &GUI_BASE(win)->brother_list);
-                
-                gui_img_t *img = gui_img_create_from_mem((void *)win, 0, mainface_list[idx].data, img_0->base.w, 0, SCREEN_SIZE, SCREEN_SIZE);
-                gui_img_set_mode(img, IMG_BYPASS_MODE);
-            }
+            img_0 = gui_img_create_from_mem((void *)win, 0, mainface_list[idx].data, 0, 0, SCREEN_SIZE, SCREEN_SIZE);
         }
         else
         {
-            gui_img_t *img_0 = gui_img_create_from_fs((void *)win, 0, mainface_list[idx].data, 0, 0, SCREEN_SIZE, SCREEN_SIZE);
-            gui_img_set_mode(img_0, IMG_BYPASS_MODE);
-            if (img_0->base.w > SCREEN_SIZE)
+            img_0 = gui_img_create_from_fs((void *)win, 0, mainface_list[idx].data, 0, 0, SCREEN_SIZE, SCREEN_SIZE);
+        }
+        gui_img_set_mode(img_0, IMG_BYPASS_MODE);
+        if (img_0->base.w > SCREEN_SIZE)
+        {
+            int16_t img_y = (SCREEN_SIZE - img_0->base.h) / 2;
+            gui_obj_move((void *)img_0, SCREEN_SIZE, img_y);
+            gui_list_remove(&GUI_BASE(win)->brother_list);
+            uint16_t color = (uint16_t)(((uint16_t *)img_0->src_data)[4]);
+            void *img_bg_data = NULL;
+            switch (color)
             {
-                gui_list_remove(&GUI_BASE(win)->brother_list);
-                gui_img_t *img_bg = gui_img_create_from_fs(parent, 0, "/image/A8/circle_360_bg_white.bin", 0, 0, SCREEN_SIZE, SCREEN_SIZE);
+            case 0xFFFF:
+                img_bg_data = "/image/565/rect_360_white.bin";
+                break;
+
+            case 0x001F:
+                img_bg_data = "/image/565/rect_360_blue.bin";
+                break;
+            
+            case 0x03E0:
+                img_bg_data = "/image/565/rect_360_green.bin";
+                break;
+                
+            case 0xF800:
+                img_bg_data = "/image/565/rect_360_red.bin";
+                break;
+            default:
+                break;
+            }
+
+            if (img_bg_data != NULL)
+            {
+                gui_img_t *img_bg = gui_img_create_from_fs(parent, 0, img_bg_data, 0, 0, SCREEN_SIZE, SCREEN_SIZE);
                 gui_img_set_mode(img_bg, IMG_BYPASS_MODE);
                 gui_list_insert(&GUI_BASE(img_bg)->brother_list, &GUI_BASE(win)->brother_list);
-
-                gui_img_t *img = gui_img_create_from_fs((void *)win, 0, mainface_list[idx].data, img_0->base.w, 0, SCREEN_SIZE, SCREEN_SIZE);
-                gui_img_set_mode(img, IMG_BYPASS_MODE);
             }
         }
 #endif
