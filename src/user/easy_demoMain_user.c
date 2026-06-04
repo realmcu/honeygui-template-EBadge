@@ -6,12 +6,13 @@ uint8_t mainface_idx = 0;
 uint8_t mainface_num = 6;
 mainface_src_t mainface_list[MAINFACE_NUM_MAX] = 
 {
+    {"/image/wallpaper_6.bin", SRC_IMG},
     {"/wallpaper_1.avi", SRC_VIDEO},
+    {"/image/wallpaper_4.bin", SRC_IMG},
+
     {"/wallpaper_2.avi", SRC_VIDEO},
     {"/wallpaper_3.avi", SRC_VIDEO},
-    {"/image/wallpaper_4.bin", SRC_IMG},
     {"/image/wallpaper_5.bin", SRC_IMG},
-    {"/image/wallpaper_6.bin", SRC_IMG},
 };
 bool is_auto_sleep_mode = false;
 bool is_bt_connect = false;
@@ -64,7 +65,8 @@ void switch_mainface(gui_obj_t *parent, uint8_t idx)
 {
     gui_win_t *win = gui_win_create(parent, 0, 0, 0, 360, 360);
     gui_obj_create_timer((void *)win, 20, true, win_timer_0_cb);
-    
+    mainface_idx = idx;
+
     if (mainface_num == 0)
     {
         gui_text_t *text = gui_text_create((gui_obj_t *)win, 0, 0, 0, 360, 360);
