@@ -315,6 +315,7 @@ void easy_demoMainView_update_idx_cb(void *obj)
     GUI_UNUSED(obj);
     mainface_idx = 0;
     gui_obj_focus_set(obj);
+    win_timer_0_cb(obj);
 }
 
 void mainface_view_1_update_idx_cb(void *obj)
@@ -322,6 +323,7 @@ void mainface_view_1_update_idx_cb(void *obj)
     GUI_UNUSED(obj);
     mainface_idx = 1;
     gui_obj_focus_set(obj);
+    win_timer_0_cb(obj);
 }
 
 void mainface_view_2_update_idx_cb(void *obj)
@@ -329,6 +331,7 @@ void mainface_view_2_update_idx_cb(void *obj)
     GUI_UNUSED(obj);
     mainface_idx = 2;
     gui_obj_focus_set(obj);
+    win_timer_0_cb(obj);
 }
 
 void mainface_view_3_update_idx_cb(void *obj)
@@ -336,6 +339,7 @@ void mainface_view_3_update_idx_cb(void *obj)
     GUI_UNUSED(obj);
     mainface_idx = 3;
     gui_obj_focus_set(obj);
+    win_timer_0_cb(obj);
 }
 
 void mainface_view_4_update_idx_cb(void *obj)
@@ -343,6 +347,7 @@ void mainface_view_4_update_idx_cb(void *obj)
     GUI_UNUSED(obj);
     mainface_idx = 4;
     gui_obj_focus_set(obj);
+    win_timer_0_cb(obj);
 }
 
 void mainface_view_5_update_idx_cb(void *obj)
@@ -350,6 +355,7 @@ void mainface_view_5_update_idx_cb(void *obj)
     GUI_UNUSED(obj);
     mainface_idx = 5;
     gui_obj_focus_set(obj);
+    win_timer_0_cb(obj);
 }
 
 void mainface_view_6_update_idx_cb(void *obj)
@@ -357,6 +363,7 @@ void mainface_view_6_update_idx_cb(void *obj)
     GUI_UNUSED(obj);
     mainface_idx = 6;
     gui_obj_focus_set(obj);
+    win_timer_0_cb(obj);
 }
 
 void mainface_view_7_update_idx_cb(void *obj)
@@ -364,69 +371,62 @@ void mainface_view_7_update_idx_cb(void *obj)
     GUI_UNUSED(obj);
     mainface_idx = 7;
     gui_obj_focus_set(obj);
+    win_timer_0_cb(obj);
 }
 void easy_demoMainView_timer_0_cb(void *obj)
 {
     GUI_UNUSED(obj);
     switch_mainface(obj, 0);
-    gui_obj_create_timer(obj, 20, true, easy_demoMainView_update_idx_cb);
-    gui_obj_start_timer(obj);
+    gui_obj_stop_timer(obj);
 }
 
 void mainface_view_1_timer_0_cb(void *obj)
 {
     GUI_UNUSED(obj);
     switch_mainface(obj, 1);
-    gui_obj_create_timer(obj, 20, true, mainface_view_1_update_idx_cb);
-    gui_obj_start_timer(obj);
+    gui_obj_stop_timer(obj);
 }
 
 void mainface_view_2_timer_0_cb(void *obj)
 {
     GUI_UNUSED(obj);
     switch_mainface(obj, 2);
-    gui_obj_create_timer(obj, 20, true, mainface_view_2_update_idx_cb);
-    gui_obj_start_timer(obj);
+    gui_obj_stop_timer(obj);
 }
 
 void mainface_view_3_timer_0_cb(void *obj)
 {
     GUI_UNUSED(obj);
     switch_mainface(obj, 3);
-    gui_obj_create_timer(obj, 20, true, mainface_view_3_update_idx_cb);
-    gui_obj_start_timer(obj);
+    gui_obj_stop_timer(obj);
 }
 
 void mainface_view_4_timer_0_cb(void *obj)
 {
     GUI_UNUSED(obj);
     switch_mainface(obj, 4);
-    gui_obj_create_timer(obj, 20, true, mainface_view_4_update_idx_cb);
-    gui_obj_start_timer(obj);
+    gui_obj_stop_timer(obj);
 }
 
 void mainface_view_5_timer_0_cb(void *obj)
 {
     GUI_UNUSED(obj);
     switch_mainface(obj, 5);
-    gui_obj_create_timer(obj, 20, true, mainface_view_5_update_idx_cb);
-    gui_obj_start_timer(obj);
+    gui_obj_stop_timer(obj);
 }
 
 void mainface_view_6_timer_0_cb(void *obj)
 {
     GUI_UNUSED(obj);
     switch_mainface(obj, 6);
-    gui_obj_create_timer(obj, 20, true, mainface_view_6_update_idx_cb);
-    gui_obj_start_timer(obj);
+    gui_obj_stop_timer(obj);
 }
 
 void mainface_view_7_timer_0_cb(void *obj)
 {
     GUI_UNUSED(obj);
     switch_mainface(obj, 7);
-    gui_obj_create_timer(obj, 20, true, mainface_view_7_update_idx_cb);
-    gui_obj_start_timer(obj);
+    gui_obj_stop_timer(obj);
 }
 
 void lbl_1_timer_0_cb(void *obj)

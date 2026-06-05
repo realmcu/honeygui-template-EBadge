@@ -1,5 +1,6 @@
 #include "easy_demoMain_user.h"
-
+#include "tp_algo.h"
+#include "gui_message.h"
 
 /* ----------------------------------------------------*/
 #ifdef _HONEYGUI_SIMULATOR_
@@ -26,6 +27,7 @@ mainface_src_t mainface_list[MAINFACE_NUM_MAX] =
 };
 bool is_auto_sleep_mode = false;
 bool is_bt_connect = false;
+bool enable_switch_mainface = true;
 MODE_TYPE dev_mode = MODE_DEFAULT;
 
 uint8_t soc_val = 100;
@@ -33,6 +35,40 @@ uint8_t screen_light_idx = 5; // 0~5
 
 const char *view_rec = "easy_demoMainView";
 
+static bool has_released = true;
+
+static void *prog_arc_array[20] = 
+{
+    "/image/prog_arc_0.bin",
+    "/image/prog_arc_1.bin",
+    "/image/prog_arc_2.bin",
+    "/image/prog_arc_3.bin",
+    "/image/prog_arc_4.bin",
+    "/image/prog_arc_5.bin",
+    "/image/prog_arc_6.bin",
+    "/image/prog_arc_7.bin",
+    "/image/prog_arc_8.bin",
+    "/image/prog_arc_9.bin",
+    "/image/prog_arc_10.bin",
+    "/image/prog_arc_11.bin",
+    "/image/prog_arc_12.bin",
+    "/image/prog_arc_13.bin",
+    "/image/prog_arc_14.bin",
+    "/image/prog_arc_15.bin",
+    "/image/prog_arc_16.bin",
+    "/image/prog_arc_17.bin",
+    "/image/prog_arc_18.bin",
+    "/image/prog_arc_19.bin",
+};
+
+/* FUNC */
+static void msg_2_regenerate_view(void *msg)
+{
+    GUI_UNUSED(msg);
+    void *view_rec = (void *)gui_view_get_current()->base.name;
+    gui_obj_child_free(gui_obj_get_root());
+    gui_view_create(gui_obj_get_root(), view_rec, 0, 0, 0, 0);
+}
 
 void create_win_del(gui_obj_t *parent)
 {
@@ -49,15 +85,63 @@ void create_win_del(gui_obj_t *parent)
     gui_obj_add_event_cb(img, (gui_event_cb_t)click_back_icon, GUI_EVENT_TOUCH_CLICKED, NULL);
 }
 
+void lcok_icon_timer_0_cb(void *obj)
+{
+    touch_info_t *tp = tp_get_info();
+    
+    gui_obj_t *lock = obj;
+    gui_obj_t *prag_arc = gui_list_entry(lock->brother_list.next, gui_obj_t, brother_list);
+    gui_obj_hidden(lock, false);
+    gui_obj_hidden(prag_arc, false);
+    
+    static uint8_t cnt = 0;
+    if (enable_switch_mainface)
+    {
+        gui_img_set_src((gui_img_t *)lock, "/image/lock_icon.bin", IMG_SRC_FILESYS);
+        gui_img_set_src((gui_img_t *)prag_arc, prog_arc_array[cnt], IMG_SRC_FILESYS);
+    }
+    else
+    {
+        gui_img_set_src((gui_img_t *)lock, "/image/unlock_icon.bin", IMG_SRC_FILESYS);
+        gui_img_set_src((gui_img_t *)prag_arc, prog_arc_array[19 - cnt], IMG_SRC_FILESYS);
+    }
+
+    cnt++;
+    if (cnt < 19)
+    {
+        if (!tp->pressing)
+        {
+            gui_obj_hidden(lock, true);
+            gui_obj_hidden(prag_arc, true);
+            cnt = 0;
+            gui_obj_delete_timer(lock);
+        }
+    }
+    else if (cnt >= 19)
+    {
+        enable_switch_mainface = !enable_switch_mainface;
+        gui_msg_t msg = 
+        {
+            .event = GUI_EVENT_USER_DEFINE,
+            .cb = msg_2_regenerate_view,
+        };
+        gui_send_msg_to_server(&msg);
+        cnt = 0;
+    }
+    // gui_log("cnt: %d\n", cnt);
+}
+
 void win_timer_0_cb(void *obj)
 {
     GUI_UNUSED(obj);
-    gui_obj_focus_set(GUI_BASE(obj)->parent);
+    if (mainface_num == 0) return;
+    touch_info_t *tp = tp_get_info();
     gui_obj_t *o = obj;
     gui_obj_t *child = gui_list_entry(o->child_list.next, gui_obj_t, brother_list);
+    gui_obj_t *lock = gui_list_entry(child->brother_list.next, gui_obj_t, brother_list);
+
     if (child->type == IMAGE_FROM_MEM && child->w > SCREEN_SIZE)
     {
-        // gui_obj_t *child_1 = gui_list_entry(o->child_list.prev, gui_obj_t, brother_list);
         int16_t img_x = child->x;
         int16_t img_w = child->w;
         img_x -= 5;
@@ -69,15 +153,74 @@ void win_timer_0_cb(void *obj)
         {
             child->x = img_x;
         }
-        // child_1->x = -img_x + img_w;
+    }
+
+    if (dev_mode != MODE_DELETE && tp->pressing)
+    {
+        if (tp->type == TOUCH_LONG && has_released)
+        {
+            has_released = false;
+            gui_obj_create_timer(lock, 50, true, lcok_icon_timer_0_cb);
+            gui_obj_start_timer(lock);
+            gui_log("TOUCH_LONG\n");
+        }
+        if (lock->timer == NULL)
+        {
+            if (!enable_switch_mainface)
+            {
+                gui_img_set_src((gui_img_t *)lock, "/image/lock_icon.bin", IMG_SRC_FILESYS);
+                gui_obj_hidden(lock, false);
+            }
+            else
+            {
+                gui_obj_hidden(lock, true);
+            }
+        }
+    }
+    if (!tp->pressing)
+    {
+        has_released = true;
+        gui_obj_hidden(lock, true);
+        // gui_log("touch released\n");
     }
 }
 
 void switch_mainface(gui_obj_t *parent, uint8_t idx)
 {
     gui_win_t *win = gui_win_create(parent, 0, 0, 0, 360, 360);
-    gui_obj_create_timer((void *)win, 20, true, win_timer_0_cb);
     mainface_idx = idx;
+    void (*timer_cb)(void *) = NULL;
+    switch (idx)
+    {
+    case 0:
+        timer_cb = easy_demoMainView_update_idx_cb;
+        break;
+    case 1:
+        timer_cb = mainface_view_1_update_idx_cb;
+        break;
+    case 2:
+        timer_cb = mainface_view_2_update_idx_cb;
+        break;
+    case 3:
+        timer_cb = mainface_view_3_update_idx_cb;
+        break;
+    case 4:
+        timer_cb = mainface_view_4_update_idx_cb;
+        break;
+    case 5:
+        timer_cb = mainface_view_5_update_idx_cb;
+        break;
+    case 6:
+        timer_cb = mainface_view_6_update_idx_cb;
+        break;
+    case 7:
+        timer_cb = mainface_view_7_update_idx_cb;
+        break;
+
+       default:
+        break;
+    }
+    gui_obj_create_timer((void *)win, 20, true, timer_cb);
 
     if (mainface_num == 0)
     {
@@ -90,6 +233,7 @@ void switch_mainface(gui_obj_t *parent, uint8_t idx)
         dev_mode = MODE_DEFAULT;
         return;
     }
+
     if (mainface_list[idx].type == SRC_VIDEO)
     {
         gui_lite_video_t *vid = NULL;
@@ -198,6 +342,12 @@ void switch_mainface(gui_obj_t *parent, uint8_t idx)
         }
 #endif
     }
+    gui_img_t *img = gui_img_create_from_fs(win, 0, "/image/lock_icon.bin", 90, 90, 0, 0);
+    gui_obj_hidden((gui_obj_t *)img, true);
+    img = gui_img_create_from_fs(win, 0, prog_arc_array[0], 90, 90, 0, 0);
+    gui_obj_hidden((gui_obj_t *)img, true);
+
+    if (dev_mode != MODE_DELETE && !enable_switch_mainface) return;
 
     if (dev_mode == MODE_DELETE)
     {
@@ -547,7 +697,6 @@ void click_back_icon(void *obj, gui_event_t *e)
     // TODO
 #endif
 }
-
 uint8_t mainface_list_init(void **data_list, uint32_t n)
 {
     uint8_t idx = 0;

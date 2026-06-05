@@ -59,6 +59,7 @@ extern uint8_t screen_light_idx;
 void switch_mainface(gui_obj_t *parent, uint8_t idx);
 void mainface_list_delete(void);
 
+void win_timer_0_cb(void *obj); // move long image
 void click_auto_sleep_icon(void *obj, gui_event_t *e);
 void click_screen_light_icon(void *obj, gui_event_t *e);
 void click_share_icon(void *obj, gui_event_t *e);

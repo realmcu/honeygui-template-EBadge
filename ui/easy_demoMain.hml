@@ -134,7 +134,7 @@
             <hg_label id="lbl_1" x="111" y="194" width="144" height="24" hAlign="LEFT" vAlign="TOP" color="#ffffff" letterSpacing="0" lineSpacing="0" wordWrap="false" wordBreak="false" text="Auto sleep mode" fontFile="/font/Inter_24pt_SemiBold.ttf" fontSize="18" timers="[{&quot;id&quot;:&quot;timer_0&quot;,&quot;name&quot;:&quot;动画 1&quot;,&quot;enabled&quot;:true,&quot;interval&quot;:10,&quot;reload&quot;:false,&quot;mode&quot;:&quot;custom&quot;,&quot;callback&quot;:&quot;lbl_1_timer_0_cb&quot;,&quot;duration&quot;:1000,&quot;stopOnComplete&quot;:true,&quot;delayStart&quot;:0,&quot;actions&quot;:[],&quot;segments&quot;:[],&quot;runImmediately&quot;:true}]" characterSets="[{&quot;type&quot;:&quot;range&quot;,&quot;value&quot;:&quot;0x20-0x7E&quot;}]" zIndex="7" />
         </hg_view>
         <hg_view id="view_1" x="-1012" y="550" width="360" height="360" backgroundColor="#000000" borderRadius="20" padding="12" overflow="auto" entry="false" zIndex="1">
-            <hg_video id="vid_test" x="0" y="0" width="365" height="360" src="assets/wallpaper_1.mp4" useMsv1="true" loop="true" frameRate="35" zIndex="1" />
+            <hg_video id="vid_test" x="0" y="0" width="365" height="360" src="assets/wallpaper_3.mp4" useMsv1="true" loop="true" frameRate="35" zIndex="1" />
         </hg_view>
         <hg_view id="view_fl" x="-487" y="-416" width="360" height="360" backgroundColor="#000000" borderRadius="20" padding="12" overflow="auto" entry="false" animateStep="360" zIndex="2">
             <events>
