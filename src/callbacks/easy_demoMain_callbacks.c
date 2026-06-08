@@ -277,7 +277,6 @@ void view_fl_timer_1_cb(void *obj)
 {
     GUI_UNUSED(obj);
     touch_info_t *tp = tp_get_info();
-    if (tp->released) gui_log("tp->type = %d\n", tp->type);
     switch (tp->type)
     {
     case TOUCH_UP_SLIDE:
@@ -305,7 +304,7 @@ void view_fl_timer_0_cb(void *obj)
 {
     GUI_UNUSED(obj);
     set_flashlight_color();
-    gui_obj_create_timer(obj, 20, true, view_fl_timer_1_cb);
+    gui_obj_create_timer(obj, 1, true, view_fl_timer_1_cb);
     gui_obj_start_timer(obj);
 }
 
@@ -313,7 +312,9 @@ void bg_circle_timer_0_cb(void *obj)
 {
     GUI_UNUSED(obj);
     gui_obj_focus_set(GUI_BASE(obj)->parent);
+    is_displaying_mainface = false;
 }
+
 void top_view_timer_0_cb(void *obj)
 {
     GUI_UNUSED(obj);
@@ -346,6 +347,7 @@ void top_view_timer_0_cb(void *obj)
         break;
     }
     gui_view_switch_on_event(obj, view_next, SWITCH_OUT_TO_TOP_USE_TRANSLATION, SWITCH_INIT_STATE, GUI_EVENT_TOUCH_MOVE_UP);
+    gui_obj_stop_timer(obj);
 }
 
 void easy_demoMainView_update_idx_cb(void *obj)

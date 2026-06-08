@@ -36,7 +36,7 @@
             </events>
             <hg_qbcode id="qbcode_1" x="70" y="70" width="220" height="220" codeType="qrcode" displayMode="image" encodeMode="text" codeContent="Hello, World!" borderSize="5" zIndex="1" />
         </hg_view>
-        <hg_view id="view_transmit" x="1790" y="15" width="360" height="360" backgroundColor="#000000" borderRadius="20" padding="12" overflow="auto" entry="false" animateStep="360" zIndex="1">
+        <hg_view id="view_transmit" x="1790" y="15" width="360" height="360" backgroundColor="#000000" borderRadius="20" padding="12" overflow="auto" entry="false" animateStep="360" timers="[{&quot;id&quot;:&quot;timer_0&quot;,&quot;name&quot;:&quot;动画 1&quot;,&quot;enabled&quot;:true,&quot;interval&quot;:20,&quot;reload&quot;:true,&quot;mode&quot;:&quot;custom&quot;,&quot;callback&quot;:&quot;view_transmit_timer_0_cb&quot;,&quot;duration&quot;:1000,&quot;stopOnComplete&quot;:true,&quot;delayStart&quot;:0,&quot;actions&quot;:[],&quot;segments&quot;:[]}]" zIndex="1">
             <hg_label id="lbl_11" x="0" y="30" width="360" height="300" hAlign="CENTER" vAlign="MID" color="#ffffff" letterSpacing="0" lineSpacing="0" wordWrap="false" wordBreak="false" text="Transmitting..." fontFile="/font/Inter_24pt_SemiBold.ttf" fontSize="40" zIndex="1" />
         </hg_view>
     </view>

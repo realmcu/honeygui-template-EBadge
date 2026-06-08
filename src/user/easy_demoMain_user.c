@@ -27,6 +27,7 @@ mainface_src_t mainface_list[MAINFACE_NUM_MAX] =
 };
 bool is_auto_sleep_mode = false;
 bool is_bt_connect = false;
+bool is_displaying_mainface = false;
 bool enable_switch_mainface = true;
 MODE_TYPE dev_mode = MODE_DEFAULT;
 
@@ -176,6 +177,8 @@ void lcok_icon_timer_0_cb(void *obj)
 void win_timer_0_cb(void *obj)
 {
     GUI_UNUSED(obj);
+    is_displaying_mainface = true;
+
     if (mainface_num == 0) return;
     touch_info_t *tp = tp_get_info();
     gui_obj_t *o = obj;
@@ -803,7 +806,21 @@ void ui_process_msg(void *arg)
     case TRANSMIT_ABORT:
         gui_view_switch_direct(gui_view_get_current(), view_rec, SWITCH_OUT_NONE_ANIMATION, SWITCH_IN_NONE_ANIMATION);
         break;
-    
+    case SWITCH_LEFT_MAINFACE:
+    {
+        if (is_displaying_mainface || mainface_num <= 1) return;
+        mainface_idx = (mainface_idx - 1 + mainface_num) % mainface_num;
+        msg_2_regenerate_view(NULL);
+        break;
+    }
+    case SWITCH_RIGHT_MAINFACE:
+    {
+        if (is_displaying_mainface || mainface_num <= 1) return;
+        mainface_idx = (mainface_idx + 1) % mainface_num;
+        msg_2_regenerate_view(NULL);
+        break;
+    }
+        
     default:
         break;
     }

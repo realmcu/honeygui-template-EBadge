@@ -8,6 +8,7 @@
 // Timer animation counters
 uint16_t circle_scale_timer_cnt = 0;
 uint16_t bt_icon_timer_cnt = 0;
+uint16_t view_transmit_timer_cnt = 0;
 
 // Event callback function implementations
 
@@ -100,10 +101,18 @@ void circle_scale_timer_0_cb(void *obj)
 
 /* @protected start custom_functions */
 // Custom functions
+void view_transmit_timer_0_cb(void *obj)
+{
+    GUI_UNUSED(obj);
+    is_displaying_mainface = false;
+}
+
 void bt_icon_timer_0_cb(void *obj)
 {
     GUI_UNUSED(obj);
     
+    is_displaying_mainface = false;
+
     void *src = NULL;
     if (is_bt_connect)
     {

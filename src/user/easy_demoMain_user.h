@@ -33,8 +33,10 @@ typedef enum
     BT_OFF,
     TRANSMIT_START,
     TRANSMIT_ABORT,
+    SWITCH_LEFT_MAINFACE,
+    SWITCH_RIGHT_MAINFACE,
 
-    
+
 } UI_SUBEVENT_TYPE;
 
 typedef enum
@@ -51,6 +53,7 @@ extern mainface_src_t mainface_list[MAINFACE_NUM_MAX];
 
 extern bool is_auto_sleep_mode;
 extern bool is_bt_connect;
+extern bool is_displaying_mainface;
 extern MODE_TYPE dev_mode;
 
 extern uint8_t soc_val;

@@ -6,6 +6,7 @@
 #include <time.h>
 
 // Timer animation counters
+uint16_t menuMainView_timer_cnt = 0;
 uint16_t lbl_option_timer_cnt = 0;
 
 // Event callback function implementations
@@ -48,6 +49,12 @@ void img_17_clicked_cb(void *obj, gui_event_t *e)
 
 /* @protected start custom_functions */
 // Custom functions
+void menuMainView_timer_0_cb(void *obj)
+{
+    GUI_UNUSED(obj);
+    is_displaying_mainface = false;
+}
+
 void lbl_option_timer_0_cb(void *obj)
 {
     GUI_UNUSED(obj);

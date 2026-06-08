@@ -6,6 +6,7 @@
 #include "gui_obj_focus.h"
 
 // Timer animation counters (defined in callbacks.c)
+extern uint16_t menuMainView_timer_cnt;
 extern uint16_t lbl_option_timer_cnt;
 
 // Event callback function declarations
@@ -18,9 +19,11 @@ void menuDetailView_key_0_cb(void *obj, gui_event_t *e);
 void menuMainView_key_0_cb(void *obj, gui_event_t *e);
 
 // User-configured timer callback function declarations
+void menuMainView_timer_0_cb(void *obj);
 void lbl_option_timer_0_cb(void *obj);
 
 // Custom function declarations (auto-extracted from callbacks.c protected area)
+void menuMainView_timer_0_cb(void *obj);
 void lbl_option_timer_0_cb(void *obj);
 
 #endif // MENU_CALLBACKS_H

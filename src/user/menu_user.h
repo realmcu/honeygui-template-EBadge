@@ -10,6 +10,8 @@
  */
 
 // Add custom declarations here
+#include "easy_demoMain_user.h"
+
 extern uint8_t menu_idx; //0:Reset, 1:Format storage, 2:Power off
 
 void click_menu_reset_button(void *obj, gui_event_t *e);
