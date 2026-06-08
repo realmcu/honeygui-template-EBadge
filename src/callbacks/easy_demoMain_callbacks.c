@@ -18,6 +18,7 @@ uint16_t top_view_timer_cnt = 0;
 uint16_t bg_circle_timer_cnt = 0;
 uint16_t icon_bat_timer_cnt = 0;
 uint16_t lbl_1_timer_cnt = 0;
+uint16_t view_fl_timer_cnt = 0;
 
 // Event callback function implementations
 
@@ -271,6 +272,43 @@ void view_fl_key_0_cb(void *obj, gui_event_t *e)
 
 /* @protected start custom_functions */
 // Custom functions
+#include "tp_algo.h"
+void view_fl_timer_1_cb(void *obj)
+{
+    GUI_UNUSED(obj);
+    touch_info_t *tp = tp_get_info();
+    if (tp->released) gui_log("tp->type = %d\n", tp->type);
+    switch (tp->type)
+    {
+    case TOUCH_UP_SLIDE:
+        fl_color_idx = (fl_color_idx + 1) % 8;
+        set_flashlight_color();
+        break;
+    case TOUCH_DOWN_SLIDE:
+        fl_color_idx = (fl_color_idx - 1 + 8) % 8;
+        set_flashlight_color();
+        break;
+    case TOUCH_UP_SLIDE_QUICK:
+        fl_color_idx = (fl_color_idx + 1) % 8;
+        set_flashlight_color();
+        break;
+    case TOUCH_DOWN_SLIDE_QUICK:
+        fl_color_idx = (fl_color_idx - 1 + 8) % 8;
+        set_flashlight_color();
+        break;
+    default:
+        break;
+    }
+}
+
+void view_fl_timer_0_cb(void *obj)
+{
+    GUI_UNUSED(obj);
+    set_flashlight_color();
+    gui_obj_create_timer(obj, 20, true, view_fl_timer_1_cb);
+    gui_obj_start_timer(obj);
+}
+
 void bg_circle_timer_0_cb(void *obj)
 {
     GUI_UNUSED(obj);

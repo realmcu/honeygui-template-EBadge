@@ -61,13 +61,55 @@ static void *prog_arc_array[20] =
     "/image/prog_arc_19.bin",
 };
 
-/* FUNC */
+int8_t fl_color_idx = 0; //white, red, orange, yellow, green, blue, indigo, violet
+
+/* ---------------FUNC---------------- */
 static void msg_2_regenerate_view(void *msg)
 {
     GUI_UNUSED(msg);
     void *view_rec = (void *)gui_view_get_current()->base.name;
     gui_obj_child_free(gui_obj_get_root());
     gui_view_create(gui_obj_get_root(), view_rec, 0, 0, 0, 0);
+}
+
+void set_flashlight_color(void)
+{
+    gui_color_t color = {0};
+    switch (fl_color_idx)
+    {
+    case 0:
+        color = gui_rgb(255, 255, 255);
+        break;
+    case 1:
+        color = gui_rgb(255, 0, 0);
+        break;
+    case 2:
+        color = gui_rgb(255, 165, 0);
+        break;
+    case 3:
+        color = gui_rgb(255, 255, 0);
+        break;
+    case 4:
+        color = gui_rgb(0, 255, 0);
+        break;
+    case 5:
+        color = gui_rgb(0, 127, 255);
+        break;
+    case 6:
+        color = gui_rgb(0, 0, 255);
+        break;
+    case 7:
+        color = gui_rgb(139, 0, 255);
+        break;
+
+    default:
+        break;
+    }
+    gui_set_bg_color(color);
+    gui_fb_change();
+
+    // TO DO: adjust screen light
+    
 }
 
 void create_win_del(gui_obj_t *parent)

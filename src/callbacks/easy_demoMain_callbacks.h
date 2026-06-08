@@ -18,6 +18,7 @@ extern uint16_t top_view_timer_cnt;
 extern uint16_t bg_circle_timer_cnt;
 extern uint16_t icon_bat_timer_cnt;
 extern uint16_t lbl_1_timer_cnt;
+extern uint16_t view_fl_timer_cnt;
 
 // Event callback function declarations
 void easy_demoMainView_key_0_cb(void *obj, gui_event_t *e);
@@ -58,8 +59,11 @@ void top_view_timer_0_cb(void *obj);
 void bg_circle_timer_0_cb(void *obj);
 void icon_bat_timer_0_cb(void *obj);
 void lbl_1_timer_0_cb(void *obj);
+void view_fl_timer_0_cb(void *obj);
 
 // Custom function declarations (auto-extracted from callbacks.c protected area)
+void view_fl_timer_1_cb(void *obj);
+void view_fl_timer_0_cb(void *obj);
 void bg_circle_timer_0_cb(void *obj);
 void top_view_timer_0_cb(void *obj);
 void easy_demoMainView_update_idx_cb(void *obj);
