@@ -815,8 +815,11 @@ void ui_process_msg(void *arg)
         break;
     }
     case TRANSMIT_ABORT:
+    {
+        get_transmit_start = false;
         gui_view_switch_direct(gui_view_get_current(), view_rec, SWITCH_OUT_NONE_ANIMATION, SWITCH_IN_NONE_ANIMATION);
         break;
+    }
     case SWITCH_LEFT_MAINFACE:
     {
         if (is_displaying_mainface || mainface_num <= 1) return;
@@ -829,6 +832,24 @@ void ui_process_msg(void *arg)
         if (is_displaying_mainface || mainface_num <= 1) return;
         mainface_idx = (mainface_idx + 1) % mainface_num;
         msg_2_regenerate_view(NULL);
+        break;
+    }
+    case CAST_START:
+    {
+        if (get_transmit_start) return;
+        gui_view_t *view_cur = gui_view_get_current();
+        if (view_cur != NULL && strcmp(view_cur->base.name, "view_cast") != 0)
+        {
+            view_rec = view_cur->base.name;
+        }
+        gui_obj_child_free(gui_obj_get_root());
+        gui_view_create(gui_obj_get_root(), "view_cast", 0, 0, 0, 0);
+        break;
+    }
+    case CAST_STOP:
+    {
+        gui_obj_child_free(gui_obj_get_root());
+        gui_view_create(gui_obj_get_root(), view_rec, 0, 0, 0, 0);
         break;
     }
         

@@ -164,6 +164,7 @@
             </hg_image>
             <hg_label id="lbl_12" x="0" y="130" width="360" height="100" hAlign="CENTER" vAlign="MID" color="#ffffff" letterSpacing="0" lineSpacing="0" wordWrap="false" wordBreak="false" text="Please connect phone" fontFile="/font/Inter_24pt_SemiBold.ttf" fontSize="28" zIndex="1" />
         </hg_view>
+        <hg_view id="view_" x="1139" y="-416" width="360" height="360" backgroundColor="#000000" borderRadius="20" padding="12" overflow="auto" entry="false" zIndex="1" />
         <hg_view id="view_fl" x="-487" y="-416" width="360" height="360" backgroundColor="#000000" borderRadius="20" padding="12" overflow="auto" entry="false" animateStep="360" timers="[{&quot;id&quot;:&quot;timer_0&quot;,&quot;name&quot;:&quot;动画 1&quot;,&quot;enabled&quot;:true,&quot;interval&quot;:10,&quot;reload&quot;:true,&quot;mode&quot;:&quot;custom&quot;,&quot;callback&quot;:&quot;view_fl_timer_0_cb&quot;,&quot;duration&quot;:1000,&quot;stopOnComplete&quot;:true,&quot;delayStart&quot;:0,&quot;actions&quot;:[],&quot;segments&quot;:[],&quot;runImmediately&quot;:true}]" zIndex="2">
             <events>
                 <event type="onKeyShortPress" keyName="Menu">
