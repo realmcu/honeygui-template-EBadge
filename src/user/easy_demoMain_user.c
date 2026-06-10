@@ -742,6 +742,17 @@ void click_back_icon(void *obj, gui_event_t *e)
     // TODO
 #endif
 }
+
+void click_camera_ctl_icon(void *obj, gui_event_t *e)
+{
+    GUI_UNUSED(obj);
+    GUI_UNUSED(e);
+    if (is_bt_connect)
+    {
+        //TO DO: send bt cmd
+    }
+}
+
 uint8_t mainface_list_init(void **data_list, uint32_t n)
 {
     uint8_t idx = 0;

@@ -18,6 +18,7 @@ uint16_t top_view_timer_cnt = 0;
 uint16_t bg_circle_timer_cnt = 0;
 uint16_t icon_bat_timer_cnt = 0;
 uint16_t lbl_1_timer_cnt = 0;
+uint16_t view_cam_ctl_timer_cnt = 0;
 uint16_t view_fl_timer_cnt = 0;
 
 // Event callback function implementations
@@ -255,6 +256,31 @@ void icon_as_clicked_cb(void *obj, gui_event_t *e)
     click_auto_sleep_icon(obj, e);
 }
 
+void icon_cam_clicked_cb(void *obj, gui_event_t *e)
+{
+    GUI_UNUSED(obj);
+    GUI_UNUSED(e);
+    gui_view_switch_direct(gui_view_get_current(), "view_cam_ctl", SWITCH_OUT_NONE_ANIMATION, SWITCH_IN_NONE_ANIMATION);
+}
+
+void view_cam_ctl_key_0_cb(void *obj, gui_event_t *e)
+{
+    GUI_UNUSED(obj);
+    GUI_UNUSED(e);
+    // Check key name
+    if (strcmp(e->indev_name, "Power") == 0)
+    {
+        gui_view_switch_direct(gui_view_get_current(), "top_view", SWITCH_OUT_NONE_ANIMATION, SWITCH_IN_NONE_ANIMATION);
+    }
+}
+
+void icon_cam_ctl_clicked_cb(void *obj, gui_event_t *e)
+{
+    GUI_UNUSED(obj);
+    GUI_UNUSED(e);
+    click_camera_ctl_icon(obj, e);
+}
+
 void view_fl_key_0_cb(void *obj, gui_event_t *e)
 {
     GUI_UNUSED(obj);
@@ -273,6 +299,23 @@ void view_fl_key_0_cb(void *obj, gui_event_t *e)
 /* @protected start custom_functions */
 // Custom functions
 #include "tp_algo.h"
+
+void view_cam_ctl_timer_0_cb(void *obj)
+{
+    GUI_UNUSED(obj);
+    // gui_obj_focus_set(GUI_BASE(obj));
+    if (is_bt_connect)
+    {
+        gui_img_set_opacity((gui_img_t *)icon_cam_ctl, 255);
+        gui_obj_hidden(GUI_BASE(lbl_12), true);
+    }
+    else
+    {
+        gui_img_set_opacity((gui_img_t *)icon_cam_ctl, 75);
+        gui_obj_hidden(GUI_BASE(lbl_12), false);
+    }
+}
+
 void view_fl_timer_1_cb(void *obj)
 {
     GUI_UNUSED(obj);
