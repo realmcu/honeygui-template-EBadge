@@ -6,9 +6,9 @@
 #ifdef _HONEYGUI_SIMULATOR_
 
 #else
-
-#define USER_RESOURCE_ADDR     (0x0240f400u + 0x400000u)
-#define USER_RESOURCE_ADDR_END (USER_RESOURCE_ADDR + 0x300000u)
+#include "flashdb.h"
+#define USER_RESOURCE_ADDR     (0x0240f400u +   0x700000u)
+#define USER_RESOURCE_ADDR_END (0x0240f400u + 0x00998000) // 0x00998000  //9824K Bytes
 
 #endif
 
@@ -343,6 +343,7 @@ void switch_mainface(gui_obj_t *parent, uint8_t idx)
         gui_log("%s %d 0x%x\n", __FUNCTION__, __LINE__, mainface_list[idx].data);
         if (((uint32_t)mainface_list[idx].data) > USER_RESOURCE_ADDR && ((uint32_t)mainface_list[idx].data) < (USER_RESOURCE_ADDR_END))
         {
+            gui_log("%s %d 0x%x\n", __FUNCTION__, __LINE__, mainface_list[idx].data);
             img_0 = gui_img_create_from_mem((void *)win, 0, mainface_list[idx].data, 0, 0, SCREEN_SIZE, SCREEN_SIZE);
         }
         else
@@ -647,8 +648,11 @@ void mainface_list_delete(void)
 #ifdef _HONEYGUI_SIMULATOR_
     
 #else
-    extern int fdb_delete_by_addr(uintptr_t addr);
-    fdb_delete_by_addr((uintptr_t)addr_del);
+    // extern int fdb_delete_by_addr(uintptr_t addr);
+    // fdb_delete_by_addr((uintptr_t)addr_del);
+    extern fdb_bf_t   app_get_bf(void);
+    extern fdb_err_t fdb_bf_delete_by_addr(fdb_bf_t db, uint32_t addr);
+    fdb_bf_delete_by_addr(app_get_bf(), (uint32_t)addr_del);
 #endif
 
     void *view_target = view_left? view_left : (void *)gui_view_get_current()->base.name;
@@ -661,6 +665,11 @@ static void mainface_list_add(void *data)
 {
     if (mainface_num == MAINFACE_NUM_MAX) return;
     gui_log("Add resource 0x%x\n", data);
+    if(!data)
+    {
+        gui_log("New passed resource  is NULL!!!!!!!!!!!!!!!!!\n");
+        return ;
+    }
 
     mainface_list[mainface_num].data = data;
     mainface_list[mainface_num].type = (*(uint8_t *)(data) == 0x52)? SRC_VIDEO: SRC_IMG;
@@ -756,7 +765,7 @@ void click_camera_ctl_icon(void *obj, gui_event_t *e)
 uint8_t mainface_list_init(void **data_list, uint32_t n)
 {
     uint8_t idx = 0;
-    if (data_list == NULL) return idx;
+    if (data_list == NULL || !n) return idx;
     
     while (data_list[idx] != NULL && ((idx < MAINFACE_NUM_MAX) && (idx < n)))
     {
@@ -767,6 +776,7 @@ uint8_t mainface_list_init(void **data_list, uint32_t n)
         {
             mainface_list[idx].type = SRC_VIDEO;
         }
+        gui_log("list init %d, 0x%x %d", idx, mainface_list[idx].data, mainface_list[idx].type);
         idx++;
     }
     mainface_num = idx;

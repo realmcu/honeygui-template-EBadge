@@ -28,13 +28,26 @@
       "compression": "none"
     },
     "wallpaper_1.mp4": {
-      "videoFormat": "CINEPAK"
+      "videoFormat": "CINEPAK",
+      "videoQuality": 10,
+      "videoFrameRate": 23
     },
     "wallpaper_2.mp4": {
-      "videoFormat": "CINEPAK"
+      "videoFormat": "CINEPAK",
+      "videoFrameRate": 23,
+      "videoScale": {
+        "mode": "pixels",
+        "width": 360
+      }
     },
     "wallpaper_3.mp4": {
-      "videoFormat": "CINEPAK"
+      "videoFormat": "CINEPAK",
+      "videoFrameRate": 23
+    },
+    "smoke.mp4": {
+      "videoFormat": "CINEPAK",
+      "videoQuality": 5,
+      "videoFrameRate": 25
     }
   }
 }

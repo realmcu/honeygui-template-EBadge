@@ -30,7 +30,7 @@ void easy_demoMainView_key_0_cb(void *obj, gui_event_t *e)
     // Check key name
     if (strcmp(e->indev_name, "Menu") == 0)
     {
-        gui_view_switch_direct(gui_view_get_current(), "bt_View", SWITCH_INIT_STATE, SWITCH_IN_NONE_ANIMATION);
+        gui_view_switch_direct(gui_view_get_current(), "bt_View", SWITCH_OUT_NONE_ANIMATION, SWITCH_IN_NONE_ANIMATION);
     }
 }
 
