@@ -140,12 +140,12 @@ void lcok_icon_timer_0_cb(void *obj)
     static uint8_t cnt = 0;
     if (enable_switch_mainface)
     {
-        gui_img_set_src((gui_img_t *)lock, "/image/lock_icon.bin", IMG_SRC_FILESYS);
+        gui_img_set_src((gui_img_t *)lock, (const uint8_t *)"/image/lock_icon.bin", IMG_SRC_FILESYS);
         gui_img_set_src((gui_img_t *)prag_arc, prog_arc_array[cnt], IMG_SRC_FILESYS);
     }
     else
     {
-        gui_img_set_src((gui_img_t *)lock, "/image/unlock_icon.bin", IMG_SRC_FILESYS);
+        gui_img_set_src((gui_img_t *)lock, (const uint8_t *)"/image/unlock_icon.bin", IMG_SRC_FILESYS);
         gui_img_set_src((gui_img_t *)prag_arc, prog_arc_array[19 - cnt], IMG_SRC_FILESYS);
     }
 
@@ -213,7 +213,7 @@ void win_timer_0_cb(void *obj)
         {
             if (!enable_switch_mainface)
             {
-                gui_img_set_src((gui_img_t *)lock, "/image/lock_icon.bin", IMG_SRC_FILESYS);
+                gui_img_set_src((gui_img_t *)lock, (const uint8_t *)"/image/lock_icon.bin", IMG_SRC_FILESYS);
                 gui_obj_hidden(lock, false);
             }
             else
@@ -492,12 +492,12 @@ void click_auto_sleep_icon(void *obj, gui_event_t *e)
     is_auto_sleep_mode = !is_auto_sleep_mode;
     if (is_auto_sleep_mode)
     {
-        gui_img_set_src(icon_as, "/image/auto_sleep_on_icon.bin", IMG_SRC_FILESYS);
+        gui_img_set_src(icon_as, (const uint8_t *)"/image/auto_sleep_on_icon.bin", IMG_SRC_FILESYS);
         gui_obj_hidden(GUI_BASE(lbl_1), false);
     }
     else
     {
-        gui_img_set_src(icon_as, "/image/auto_sleep_off_icon.bin", IMG_SRC_FILESYS);
+        gui_img_set_src(icon_as, (const uint8_t *)"/image/auto_sleep_off_icon.bin", IMG_SRC_FILESYS);
         gui_obj_hidden(GUI_BASE(lbl_1), true);
     }
 #ifdef _HONEYGUI_SIMULATOR_
