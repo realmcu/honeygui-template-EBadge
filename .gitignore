@@ -2,7 +2,7 @@
 build/
 
 # Codegen output (regenerated every build)
-src/ui/
+
 
 # Object files
 *.o
