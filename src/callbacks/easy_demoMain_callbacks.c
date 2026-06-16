@@ -338,6 +338,18 @@ void view_fl_timer_1_cb(void *obj)
         fl_color_idx = (fl_color_idx - 1 + 8) % 8;
         set_flashlight_color();
         break;
+    case TOUCH_LEFT_SLIDE_QUICK:
+        gui_view_switch_direct(gui_view_get_current(), "top_view", SWITCH_OUT_NONE_ANIMATION, SWITCH_IN_NONE_ANIMATION);
+        break;
+    case TOUCH_RIGHT_SLIDE_QUICK:
+        gui_view_switch_direct(gui_view_get_current(), "top_view", SWITCH_OUT_NONE_ANIMATION, SWITCH_IN_NONE_ANIMATION);
+        break;
+    case TOUCH_LEFT_SLIDE:
+        gui_view_switch_direct(gui_view_get_current(), "top_view", SWITCH_OUT_NONE_ANIMATION, SWITCH_IN_NONE_ANIMATION);
+        break;
+    case TOUCH_RIGHT_SLIDE:
+        gui_view_switch_direct(gui_view_get_current(), "top_view", SWITCH_OUT_NONE_ANIMATION, SWITCH_IN_NONE_ANIMATION);
+        break;
     default:
         break;
     }

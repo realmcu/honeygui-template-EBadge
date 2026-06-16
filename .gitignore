@@ -9,3 +9,6 @@ build/
 *.ko
 *.obj
 *.elf
+
+# Claude files
+.claude/
