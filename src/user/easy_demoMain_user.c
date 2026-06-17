@@ -12,6 +12,7 @@
 
 #endif
 
+gui_win_t *win_view = NULL;
 
 uint8_t mainface_idx = 0;
 uint8_t mainface_num = 6;
@@ -37,6 +38,7 @@ uint8_t screen_light_idx = 5; // 0~5
 const char *view_rec = "easy_demoMainView";
 
 static bool has_released = true;
+static bool has_created_win_del = false;
 
 static void *prog_arc_array[20] = 
 {
@@ -69,8 +71,8 @@ static void msg_2_regenerate_view(void *msg)
 {
     GUI_UNUSED(msg);
     void *view_rec = (void *)gui_view_get_current()->base.name;
-    gui_obj_child_free(gui_obj_get_root());
-    gui_view_create(gui_obj_get_root(), view_rec, 0, 0, 0, 0);
+    gui_obj_child_free(GUI_BASE(win_view));
+    gui_view_create(GUI_BASE(win_view), view_rec, 0, 0, 0, 0);
 }
 
 void set_flashlight_color(void)
@@ -113,9 +115,11 @@ void set_flashlight_color(void)
     
 }
 
-void create_win_del(gui_obj_t *parent)
+void create_win_del(void)
 {
-    gui_win_t *win_del = gui_win_create((gui_obj_t *)parent, "win_del", 0, 0, 360, 360);
+    if (has_created_win_del) return;
+    has_created_win_del = true;
+    gui_win_t *win_del = gui_win_create(gui_obj_get_root(), "win_del", 0, 0, 360, 360);
 
     gui_img_t *img = gui_img_create_from_fs(win_del, 0, "/image/A8/circle_360_bg.bin", 0, 180, 360, 360);
     gui_img_set_mode(img, IMG_SRC_OVER_MODE);
@@ -126,6 +130,8 @@ void create_win_del(gui_obj_t *parent)
 
     img = gui_img_create_from_fs(win_del, 0, "/image/A8/back_icon.bin", 198, 231, 100, 100);
     gui_obj_add_event_cb(img, (gui_event_cb_t)click_back_icon, GUI_EVENT_TOUCH_CLICKED, NULL);
+
+    gui_obj_focus_set(GUI_BASE(win_del));
 }
 
 void lcok_icon_timer_0_cb(void *obj)
@@ -178,6 +184,10 @@ void win_timer_0_cb(void *obj)
 {
     GUI_UNUSED(obj);
     is_displaying_mainface = true;
+    if (!has_created_win_del) // if win_del is not created, set focus to win_view
+    {
+        gui_obj_focus_set(GUI_BASE(gui_view_get_current()));
+    }
 
     if (mainface_num == 0) return;
     touch_info_t *tp = tp_get_info();
@@ -397,7 +407,7 @@ void switch_mainface(gui_obj_t *parent, uint8_t idx)
 
     if (dev_mode == MODE_DELETE)
     {
-        create_win_del(parent);
+        create_win_del();
     }
     else
     {
@@ -657,8 +667,8 @@ void mainface_list_delete(void)
 
     void *view_target = view_left? view_left : (void *)gui_view_get_current()->base.name;
     // gui_log("view_target = %s, view_left = %s, idx = %d, num = %d, dev_mode = %d\n", view_target, view_left, mainface_idx, mainface_num, dev_mode);
-    gui_obj_child_free(gui_obj_get_root());
-    gui_view_create(gui_obj_get_root(), view_target, 0, 0, 0, 0);
+    gui_obj_child_free(GUI_BASE(win_view));
+    gui_view_create(GUI_BASE(win_view), view_target, 0, 0, 0, 0);
 }
 
 static void mainface_list_add(void *data)
@@ -708,8 +718,8 @@ static void mainface_list_add(void *data)
         break;
     }
 
-    gui_obj_child_free(gui_obj_get_root());
-    gui_view_create(gui_obj_get_root(), view, 0, 0, 0, 0);
+    gui_obj_child_free(GUI_BASE(win_view));
+    gui_view_create(GUI_BASE(win_view), view, 0, 0, 0, 0);
 }
 
 void click_delete_icon_detail(void *obj, gui_event_t *e)
@@ -743,8 +753,10 @@ void click_back_icon(void *obj, gui_event_t *e)
     GUI_UNUSED(obj);
     GUI_UNUSED(e);
     dev_mode = MODE_DEFAULT;
+    has_created_win_del = false;
     gui_obj_tree_free(GUI_BASE(obj)->parent);
-    gui_view_switch_on_event(gui_view_get_current(), "top_view", SWITCH_OUT_NONE_ANIMATION, SWITCH_IN_FROM_TOP_USE_TRANSLATION, GUI_EVENT_TOUCH_MOVE_DOWN);
+    gui_obj_focus_set(GUI_BASE(gui_view_get_current()));
+    gui_view_switch_on_event(gui_view_get_current(), "top_view", SWITCH_INIT_STATE, SWITCH_IN_FROM_TOP_USE_TRANSLATION, GUI_EVENT_TOUCH_MOVE_DOWN);
 #ifdef _HONEYGUI_SIMULATOR_
     // TODO
 #else
@@ -807,8 +819,8 @@ void ui_process_msg(void *arg)
     {
         if (get_transmit_start) // state abnormal
         {
-            gui_obj_child_free(gui_obj_get_root());
-            gui_view_create(gui_obj_get_root(), view_rec, 0, 0, 0, 0);
+            gui_obj_child_free(GUI_BASE(win_view));
+            gui_view_create(GUI_BASE(win_view), view_rec, 0, 0, 0, 0);
             get_transmit_start = false;
             return;
         }
@@ -820,8 +832,8 @@ void ui_process_msg(void *arg)
         {
             view_rec = view_cur->base.name;
         }
-        gui_obj_child_free(gui_obj_get_root());
-        gui_view_create(gui_obj_get_root(), "view_transmit", 0, 0, 0, 0);
+        gui_obj_child_free(GUI_BASE(win_view));
+        gui_view_create(GUI_BASE(win_view), "view_transmit", 0, 0, 0, 0);
         break;
     }
     case TRANSMIT_ABORT:
@@ -852,14 +864,14 @@ void ui_process_msg(void *arg)
         {
             view_rec = view_cur->base.name;
         }
-        gui_obj_child_free(gui_obj_get_root());
-        gui_view_create(gui_obj_get_root(), "view_cast", 0, 0, 0, 0);
+        gui_obj_child_free(GUI_BASE(win_view));
+        gui_view_create(GUI_BASE(win_view), "view_cast", 0, 0, 0, 0);
         break;
     }
     case CAST_STOP:
     {
-        gui_obj_child_free(gui_obj_get_root());
-        gui_view_create(gui_obj_get_root(), view_rec, 0, 0, 0, 0);
+        gui_obj_child_free(GUI_BASE(win_view));
+        gui_view_create(GUI_BASE(win_view), view_rec, 0, 0, 0, 0);
         break;
     }
         

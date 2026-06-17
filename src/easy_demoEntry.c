@@ -19,14 +19,24 @@ static int app_init(void)
 
     /* @protected start app_init_pre */
     // Add user initialization code here (runs before the main view is created)
+#ifndef _HONEYGUI_SIMULATOR_
     extern int flashdb_prepare(void);
     flashdb_prepare();
+#endif
+#include "gui_win.h"
+    extern gui_win_t *win_view;
+    if (win_view == NULL)
+    {
+        win_view = gui_win_create(gui_obj_get_root(), "win_view", 0, 0, 360, 360);
+    }
     /* @protected end app_init_pre */
 
     gui_view_create(gui_obj_get_root(), "easy_demoMainView", 0, 0, 0, 0);
 
     /* @protected start app_init_post */
     // Add user initialization code here (runs after the main view is created)
+    gui_obj_tree_free(GUI_BASE(gui_view_get_current()));
+    gui_view_create(win_view, "easy_demoMainView", 0, 0, 0, 0);
     /* @protected end app_init_post */
 
     return 0;

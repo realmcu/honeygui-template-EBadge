@@ -1,6 +1,6 @@
 /**
  * easy_demoMain UI Definition (Auto-generated, do not modify manually)
- * Generated at: 2026-06-11T03:24:35.958Z
+ * Generated at: 2026-06-17T01:54:13.175Z
  */
 #ifndef EASY_DEMOMAIN_UI_H
 #define EASY_DEMOMAIN_UI_H

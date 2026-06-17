@@ -1,6 +1,6 @@
 /**
  * easy_demoMain UI Implementation (Auto-generated, do not modify manually)
- * Generated at: 2026-06-11T03:24:35.958Z
+ * Generated at: 2026-06-17T01:54:13.176Z
  */
 #include "easy_demoMain_ui.h"
 #include "../callbacks/easy_demoMain_callbacks.h"
@@ -354,7 +354,7 @@ static void view_1_switch_in(gui_view_t *view)
 
 
     // Create vid_test (hg_video)
-    vid_test = gui_lite_video_create_from_fs((gui_obj_t *)view, "vid_test", "/wallpaper_3.avi", 0, 0, 360, 360);
+    vid_test = gui_lite_video_create_from_fs((gui_obj_t *)view, "vid_test", "/wallpaper_1.avi", 0, 0, 365, 360);
     gui_lite_video_set_frame_rate((gui_lite_video_t *)vid_test, 35.f);
     gui_lite_video_set_repeat_count((gui_lite_video_t *)vid_test, GUI_VIDEO_REPEAT_INFINITE);
     gui_lite_video_set_state((gui_lite_video_t *)vid_test, GUI_VIDEO_STATE_PLAYING);
