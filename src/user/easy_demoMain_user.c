@@ -21,10 +21,9 @@ mainface_src_t mainface_list[MAINFACE_NUM_MAX] =
     {"/image/565/wallpaper_6.bin", SRC_IMG},
     {"/wallpaper_1.avi", SRC_VIDEO},
     {"/image/565/wallpaper_4.bin", SRC_IMG},
-
     {"/wallpaper_2.avi", SRC_VIDEO},
-    {"/wallpaper_3.avi", SRC_VIDEO},
     {"/image/565/wallpaper_5.bin", SRC_IMG},
+    {"/wallpaper_3.avi", SRC_VIDEO},
 };
 bool is_auto_sleep_mode = false;
 bool is_bt_connect = false;
