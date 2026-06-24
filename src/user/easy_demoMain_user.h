@@ -65,7 +65,6 @@ extern int8_t fl_color_idx; //white, red, orange, yellow, green, blue, indigo, v
 
 
 void switch_mainface(gui_obj_t *parent, uint8_t idx);
-void mainface_list_delete(void);
 void set_flashlight_color(void);
 
 void win_timer_0_cb(void *obj); // move long image

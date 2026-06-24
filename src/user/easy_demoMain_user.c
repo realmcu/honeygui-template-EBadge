@@ -599,7 +599,7 @@ void click_delete_icon(void *obj, gui_event_t *e)
     
 }
 
-void mainface_list_delete(void)
+void mainface_list_delete(void *obj)
 {
     if (mainface_num == 0) return;
 
@@ -650,6 +650,9 @@ void mainface_list_delete(void)
     else
     {
         mainface_idx = 0;
+        dev_mode = MODE_DEFAULT;
+        has_created_win_del = false;
+        gui_obj_tree_free(GUI_BASE(obj)->parent);
     }
 
     // to do, erase flash data
@@ -725,7 +728,7 @@ void click_delete_icon_detail(void *obj, gui_event_t *e)
 {
     GUI_UNUSED(obj);
     GUI_UNUSED(e);
-    mainface_list_delete();
+    mainface_list_delete(obj);
     
 #ifdef _HONEYGUI_SIMULATOR_
     // TODO
