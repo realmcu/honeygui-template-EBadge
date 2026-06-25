@@ -1,13 +1,19 @@
-# HoneyGUI 项目 — AI 协作指南
+<!-- BEGIN HoneyGUI AI 设计指南（自动维护，请勿编辑本区块） -->
 
-本项目使用 HoneyGUI HML（XML-based UI 标记）描述嵌入式 GUI。
-目标引擎（targetEngine）：**honeygui**（见 project.json，每个项目锁定一个引擎）。
+# HoneyGUI 项目 — AI 设计指南
 
-## 规范（唯一真相源）
+> 用任意 AI agent（Claude Code / Cursor / Codex / Copilot / Trae 等）生成或修改本项目的
+> HML 界面时，请先 `@` 引用本文件；Claude Code 还会自动加载 honeygui-designer skill。
 
-生成 / 修改 HML 前**必读**：[./HML-Spec.md](./HML-Spec.md)
+## 生成 HML 前必读完整规范
 
-- 仅使用规范中标注当前引擎 honeygui 为 ready(✓) 的组件；标注 planned / unsupported 的一律勿用。
+`.claude/skills/honeygui-designer/references/hml-spec.md`
+
+（该文件由扩展按当前项目引擎自动维护，顶部注明了 targetEngine 与各组件可用性。）
+
+## 不读规范也必须守的底线
+
+- 只用规范中标注当前 targetEngine 为 ready(✓) 的组件；planned / unsupported 一律勿用。
 - `hg_view` 不可嵌套；非容器组件不可有子组件。
 - 资源路径必须以 `/` 开头（从 assets 目录起算）；`hg_label` 必须有 `fontFile`，且字体须在 assets/ 中。
 - 事件用 `<events><event><action>` 结构，不用内联 `onXxx` 属性。
@@ -24,11 +30,13 @@ curl -X POST http://localhost:38912/api/validate-hml \
   -d '{"filePath":"ui/xxx.hml"}'
 ```
 
-修复所有 errors 后再继续。注意：验证器只查 8 条结构规则，**不校验组件白名单 / 属性名**，
-`valid:true` 仅必要不充分——仍须对照 HML-Spec.md 人工核对组件在当前引擎可用、属性名正确。
+修复所有 errors 后再继续。注意：验证器只查结构规则，**不校验组件白名单 / 属性名**，
+`valid:true` 仅必要不充分——仍须对照 hml-spec.md 人工核对组件在当前引擎可用、属性名正确。
 
 ## 看效果（仿真）
 
 在 VSCode 中打开本项目（已安装 HoneyGUI Visual Designer 扩展）：
 点击 HoneyGUI 侧边栏的 **Simulate（🚀）**，或命令面板执行 `HoneyGUI: Simulate`，
 扩展会自动完成 codegen → SCons 编译 → 仿真器运行。
+
+<!-- END HoneyGUI AI 设计指南 -->
