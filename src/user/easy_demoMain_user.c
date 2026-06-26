@@ -73,21 +73,21 @@ void *danmu_bg[MAINFACE_NUM_MAX] = {0};
 /* ---------------FUNC---------------- */
 typedef enum
 {
-    PURE_PF_RGB565    = 0,  /* 2B: bit[15:11]R bit[10:5]G bit[4:0]B，小端存储          */
-    PURE_PF_ARGB8565  = 1,  /* 3B: RGB565(2B,小端) + Alpha(1B)                          */
-    PURE_PF_RGB888    = 3,  /* 3B: 字节序 B,G,R                                         */
-    PURE_PF_ARGB8888  = 4,  /* 4B: 字节序 B,G,R,A                                       */
-    PURE_PF_XRGB8888  = 5,  /* 4B: 字节序 B,G,R,X(填0)                                  */
-    PURE_PF_A8        = 9,  /* 1B: 仅 Alpha（取颜色高 8 位）                            */
+    PURE_PF_RGB565    = 0,  /* 2B: bit[15:11]R bit[10:5]G bit[4:0]B, little-endian      */
+    PURE_PF_ARGB8565  = 1,  /* 3B: RGB565(2B, little-endian) + Alpha(1B)                */
+    PURE_PF_RGB888    = 3,  /* 3B: byte order B,G,R                                     */
+    PURE_PF_ARGB8888  = 4,  /* 4B: byte order B,G,R,A                                  */
+    PURE_PF_XRGB8888  = 5,  /* 4B: byte order B,G,R,X(fill 0)                          */
+    PURE_PF_A8        = 9,  /* 1B: Alpha only (upper 8 bits of color)                   */
 } pure_pixel_format_t;
 
-/* RLE 压缩算法常量（compress/rle.ts: COMPRESS_RLE = 0） */
+/* RLE compression algorithm constants (compress/rle.ts: COMPRESS_RLE = 0) */
 #define PURE_RLE_ALGORITHM   0
-#define PURE_RLE_FEATURE_1   1   /* RLECompression 默认 runLength1 = 1 */
-#define PURE_RLE_FEATURE_2   0   /* 默认 runLength2 = 0 */
-#define PURE_RLE_MAX_RUN     255 /* 单个 RLE 节点最大重复数 */
+#define PURE_RLE_FEATURE_1   1   /* RLECompression default runLength1 = 1 */
+#define PURE_RLE_FEATURE_2   0   /* default runLength2 = 0 */
+#define PURE_RLE_MAX_RUN     255 /* max repeat count per RLE node */
 
-/* gui_rgb_data_head_t flags 字节：仅置 compress 位(bit4) */
+/* gui_rgb_data_head_t flags byte: set compress bit only (bit4) */
 #define PURE_RLE_HEAD_FLAGS  0x10
 
 static void pure_wr_u16le(uint8_t *p, uint16_t v)
@@ -104,7 +104,7 @@ static void pure_wr_u32le(uint8_t *p, uint32_t v)
     p[3] = (uint8_t)((v >> 24) & 0xFF);
 }
 
-/* 每像素字节数（即一个 RLE 节点中 pixel 部分的长度）。不支持的格式返回 0 */
+/* Bytes per pixel (length of the pixel part in one RLE node). Returns 0 for unsupported formats. */
 static int pure_rle_bpp(uint8_t fmt)
 {
     switch (fmt)
@@ -117,7 +117,7 @@ static int pure_rle_bpp(uint8_t fmt)
     }
 }
 
-/* imdc_file_header_t 中 pixel_bytes 字段编码（PixelBytes 枚举）
+/* imdc_file_header_t pixel_bytes field encoding (PixelBytes enum):
  *   BYTES_2=0, BYTES_3=1, BYTES_4=2, BYTES_1=3 */
 static uint8_t pure_rle_pixel_bytes_code(uint8_t fmt)
 {
@@ -131,7 +131,7 @@ static uint8_t pure_rle_pixel_bytes_code(uint8_t fmt)
     }
 }
 
-/* 把 0xAARRGGBB 颜色按目标格式打包到 out，返回写入字节数(=bpp)，不支持返回 0 */
+/* Pack 0xAARRGGBB color into out using the target format; returns bytes written (=bpp), or 0 if unsupported. */
 static int pure_rle_pack_pixel(uint32_t argb, uint8_t fmt, uint8_t *out)
 {
     switch (fmt)
@@ -170,8 +170,8 @@ static int pure_rle_pack_pixel(uint32_t argb, uint8_t fmt, uint8_t *out)
 }
 
 /*
- * 计算生成的纯色 RLE 数据所需的总字节数（供调用者预分配缓冲）。
- * 参数非法（不支持的格式 / 宽高为 0）时返回 0。
+ * Calculate the total byte size needed for a solid-color RLE image (for caller pre-allocation).
+ * Returns 0 if parameters are invalid (unsupported format / zero width or height).
  */
 static size_t gui_pure_rle_size(uint8_t fmt, uint16_t width, uint16_t height)
 {
@@ -181,28 +181,28 @@ static size_t gui_pure_rle_size(uint8_t fmt, uint16_t width, uint16_t height)
         return 0;
     }
 
-    /* 一行 width 个相同像素 -> ceil(width/255) 个 RLE 节点 */
+    /* width identical pixels per row -> ceil(width/255) RLE nodes */
     size_t nodes_per_line = ((size_t)width + (PURE_RLE_MAX_RUN - 1)) / PURE_RLE_MAX_RUN;
     size_t bytes_per_line = nodes_per_line * (size_t)(1 + bpp);
 
     size_t header_bytes = 8                                   /* gui_rgb_data_head_t */
                           + 12                                /* imdc_file_header_t  */
-                          + (size_t)(height + 1) * 4;         /* 行偏移表            */
+                          + (size_t)(height + 1) * 4;         /* row offset table    */
 
     return header_bytes + bytes_per_line * (size_t)height;
 }
 
 /*
- * 生成「纯色 RLE 图片」二进制数据。
+ * Generate binary data for a solid-color RLE image.
  *
- *   argb      输入颜色，0xAARRGGBB（无 Alpha 的格式忽略 A；A8 仅取 A）
- *   fmt       图片类型，见 pure_pixel_format_t
- *   width     图片宽（像素）
- *   height    图片高（像素）
- *   out_buf   输出缓冲指针（“图片指针”）
- *   buf_size  输出缓冲容量（字节），用于越界保护
+ *   argb      Input color in 0xAARRGGBB format (A ignored for non-alpha formats; A8 uses A only)
+ *   fmt       Image pixel format, see pure_pixel_format_t
+ *   width     Image width in pixels
+ *   height    Image height in pixels
+ *   out_buf   Output buffer pointer (“image pointer”)
+ *   buf_size  Output buffer capacity in bytes, used for bounds protection
  *
- * 返回实际写入的字节数；参数非法或缓冲不足时返回 0。
+ * Returns the number of bytes actually written; returns 0 if parameters are invalid or buffer is too small.
  */
 static void *gui_pure_rle_create(uint32_t argb, uint8_t fmt,
                            uint16_t width, uint16_t height)
@@ -247,25 +247,25 @@ static void *gui_pure_rle_create(uint32_t argb, uint8_t fmt,
     pure_wr_u32le(p + 8, height);   /* raw_pic_height */
     p += 12;
 
-    /* ---- 3. 行偏移表 (height+1) * 4B ----
-     * 偏移基准 = imdc 头起点（文件偏移 8），imdcOffset = 12 + (height+1)*4 */
+    /* ---- 3. Row offset table (height+1) * 4B ----
+     * offset base = start of imdc header (file offset 8), imdcOffset = 12 + (height+1)*4 */
     size_t nodes_per_line = ((size_t)width + (PURE_RLE_MAX_RUN - 1)) / PURE_RLE_MAX_RUN;
     size_t bytes_per_line = nodes_per_line * (size_t)(1 + bpp);
     uint32_t imdc_offset = (uint32_t)(12 + (size_t)(height + 1) * 4);
 
     for (uint16_t line = 0; line < height; line++)
     {
-        /* 纯色每行字节数相同：lineOffset = line * bytes_per_line */
+        /* All rows have the same byte count: lineOffset = line * bytes_per_line */
         pure_wr_u32le(p, imdc_offset + (uint32_t)((size_t)line * bytes_per_line));
         p += 4;
     }
-    /* 末项 = imdc_offset + 压缩数据总长度（文件末尾） */
+    /* Last entry = imdc_offset + total compressed data length (end of file) */
     pure_wr_u32le(p, imdc_offset + (uint32_t)(bytes_per_line * (size_t)height));
     p += 4;
 
-    /* ---- 4. RLE 压缩数据 ---- */
+    /* ---- 4. RLE compressed data ---- */
     uint8_t pix[4];
-    pure_rle_pack_pixel(argb, fmt, pix);     /* 预先打包一个像素，整图复用 */
+    pure_rle_pack_pixel(argb, fmt, pix);     /* Pre-pack one pixel, reused for the entire image */
 
     for (uint16_t line = 0; line < height; line++)
     {
