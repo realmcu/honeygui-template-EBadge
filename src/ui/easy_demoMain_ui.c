@@ -1,6 +1,6 @@
 /**
  * easy_demoMain UI Implementation (Auto-generated, do not modify manually)
- * Generated at: 2026-06-17T01:54:13.176Z
+ * Generated at: 2026-06-26T08:36:24.059Z
  */
 #include "easy_demoMain_ui.h"
 #include "../callbacks/easy_demoMain_callbacks.h"
@@ -25,7 +25,7 @@ gui_text_t *lbl_12 = NULL;
 // Create easy_demoMainView (hg_view)
 static void easy_demoMainView_switch_out(gui_view_t *view)
 {
-    GUI_UNUSED(view);
+    switch_out_mainface_0(view);
 }
 
 static void easy_demoMainView_switch_in(gui_view_t *view)
@@ -53,7 +53,7 @@ GUI_VIEW_INSTANCE("easy_demoMainView", false, easy_demoMainView_switch_in, easy_
 // Create mainface_view_1 (hg_view)
 static void mainface_view_1_switch_out(gui_view_t *view)
 {
-    GUI_UNUSED(view);
+    switch_out_mainface_1(view);
 }
 
 static void mainface_view_1_switch_in(gui_view_t *view)
@@ -81,7 +81,7 @@ GUI_VIEW_INSTANCE("mainface_view_1", false, mainface_view_1_switch_in, mainface_
 // Create mainface_view_2 (hg_view)
 static void mainface_view_2_switch_out(gui_view_t *view)
 {
-    GUI_UNUSED(view);
+    switch_out_mainface_2(view);
 }
 
 static void mainface_view_2_switch_in(gui_view_t *view)
@@ -109,7 +109,7 @@ GUI_VIEW_INSTANCE("mainface_view_2", false, mainface_view_2_switch_in, mainface_
 // Create mainface_view_3 (hg_view)
 static void mainface_view_3_switch_out(gui_view_t *view)
 {
-    GUI_UNUSED(view);
+    switch_out_mainface_3(view);
 }
 
 static void mainface_view_3_switch_in(gui_view_t *view)
@@ -137,7 +137,7 @@ GUI_VIEW_INSTANCE("mainface_view_3", false, mainface_view_3_switch_in, mainface_
 // Create mainface_view_4 (hg_view)
 static void mainface_view_4_switch_out(gui_view_t *view)
 {
-    GUI_UNUSED(view);
+    switch_out_mainface_4(view);
 }
 
 static void mainface_view_4_switch_in(gui_view_t *view)
@@ -165,7 +165,7 @@ GUI_VIEW_INSTANCE("mainface_view_4", false, mainface_view_4_switch_in, mainface_
 // Create mainface_view_5 (hg_view)
 static void mainface_view_5_switch_out(gui_view_t *view)
 {
-    GUI_UNUSED(view);
+    switch_out_mainface_5(view);
 }
 
 static void mainface_view_5_switch_in(gui_view_t *view)
@@ -193,7 +193,7 @@ GUI_VIEW_INSTANCE("mainface_view_5", false, mainface_view_5_switch_in, mainface_
 // Create mainface_view_6 (hg_view)
 static void mainface_view_6_switch_out(gui_view_t *view)
 {
-    GUI_UNUSED(view);
+    switch_out_mainface_6(view);
 }
 
 static void mainface_view_6_switch_in(gui_view_t *view)
@@ -221,7 +221,7 @@ GUI_VIEW_INSTANCE("mainface_view_6", false, mainface_view_6_switch_in, mainface_
 // Create mainface_view_7 (hg_view)
 static void mainface_view_7_switch_out(gui_view_t *view)
 {
-    GUI_UNUSED(view);
+    switch_out_mainface_7(view);
 }
 
 static void mainface_view_7_switch_in(gui_view_t *view)

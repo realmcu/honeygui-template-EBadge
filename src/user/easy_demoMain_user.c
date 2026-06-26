@@ -1,6 +1,9 @@
 #include "easy_demoMain_user.h"
 #include "tp_algo.h"
 #include "gui_message.h"
+#include <stdint.h>
+#include <stddef.h>
+#include <string.h>
 
 /* ----------------------------------------------------*/
 #ifdef _HONEYGUI_SIMULATOR_
@@ -65,7 +68,223 @@ static void *prog_arc_array[20] =
 
 int8_t fl_color_idx = 0; //white, red, orange, yellow, green, blue, indigo, violet
 
+void *danmu_bg[MAINFACE_NUM_MAX] = {0};
+
 /* ---------------FUNC---------------- */
+typedef enum
+{
+    PURE_PF_RGB565    = 0,  /* 2B: bit[15:11]R bit[10:5]G bit[4:0]B，小端存储          */
+    PURE_PF_ARGB8565  = 1,  /* 3B: RGB565(2B,小端) + Alpha(1B)                          */
+    PURE_PF_RGB888    = 3,  /* 3B: 字节序 B,G,R                                         */
+    PURE_PF_ARGB8888  = 4,  /* 4B: 字节序 B,G,R,A                                       */
+    PURE_PF_XRGB8888  = 5,  /* 4B: 字节序 B,G,R,X(填0)                                  */
+    PURE_PF_A8        = 9,  /* 1B: 仅 Alpha（取颜色高 8 位）                            */
+} pure_pixel_format_t;
+
+/* RLE 压缩算法常量（compress/rle.ts: COMPRESS_RLE = 0） */
+#define PURE_RLE_ALGORITHM   0
+#define PURE_RLE_FEATURE_1   1   /* RLECompression 默认 runLength1 = 1 */
+#define PURE_RLE_FEATURE_2   0   /* 默认 runLength2 = 0 */
+#define PURE_RLE_MAX_RUN     255 /* 单个 RLE 节点最大重复数 */
+
+/* gui_rgb_data_head_t flags 字节：仅置 compress 位(bit4) */
+#define PURE_RLE_HEAD_FLAGS  0x10
+
+static void pure_wr_u16le(uint8_t *p, uint16_t v)
+{
+    p[0] = (uint8_t)(v & 0xFF);
+    p[1] = (uint8_t)((v >> 8) & 0xFF);
+}
+
+static void pure_wr_u32le(uint8_t *p, uint32_t v)
+{
+    p[0] = (uint8_t)(v & 0xFF);
+    p[1] = (uint8_t)((v >> 8) & 0xFF);
+    p[2] = (uint8_t)((v >> 16) & 0xFF);
+    p[3] = (uint8_t)((v >> 24) & 0xFF);
+}
+
+/* 每像素字节数（即一个 RLE 节点中 pixel 部分的长度）。不支持的格式返回 0 */
+static int pure_rle_bpp(uint8_t fmt)
+{
+    switch (fmt)
+    {
+    case PURE_PF_RGB565:   return 2;
+    case PURE_PF_ARGB8565: return 3;
+    case PURE_PF_RGB888:   return 3;
+    case PURE_PF_ARGB8888: return 4;
+    default:               return 0;
+    }
+}
+
+/* imdc_file_header_t 中 pixel_bytes 字段编码（PixelBytes 枚举）
+ *   BYTES_2=0, BYTES_3=1, BYTES_4=2, BYTES_1=3 */
+static uint8_t pure_rle_pixel_bytes_code(uint8_t fmt)
+{
+    switch (pure_rle_bpp(fmt))
+    {
+    case 2:  return 0; /* BYTES_2 */
+    case 3:  return 1; /* BYTES_3 */
+    case 4:  return 2; /* BYTES_4 */
+    case 1:  return 3; /* BYTES_1 */
+    default: return 0;
+    }
+}
+
+/* 把 0xAARRGGBB 颜色按目标格式打包到 out，返回写入字节数(=bpp)，不支持返回 0 */
+static int pure_rle_pack_pixel(uint32_t argb, uint8_t fmt, uint8_t *out)
+{
+    switch (fmt)
+    {
+    case PURE_PF_RGB565:
+        pure_wr_u16le(out, argb);
+        return 2;
+
+    case PURE_PF_ARGB8565:
+        pure_wr_u16le(out, argb);
+        out[2] = argb >> 16;
+        return 3;
+
+    case PURE_PF_RGB888:        /* BGR */
+    {
+        uint8_t r = (uint8_t)((argb >> 16) & 0xFF);
+        uint8_t g = (uint8_t)((argb >> 8) & 0xFF);
+        uint8_t b = (uint8_t)(argb & 0xFF);
+        out[0] = b; out[1] = g; out[2] = r;
+        return 3;
+    }
+        
+    case PURE_PF_ARGB8888:      /* BGRA */
+    {
+        uint8_t a = (uint8_t)((argb >> 24) & 0xFF);
+        uint8_t r = (uint8_t)((argb >> 16) & 0xFF);
+        uint8_t g = (uint8_t)((argb >> 8) & 0xFF);
+        uint8_t b = (uint8_t)(argb & 0xFF);
+        out[0] = b; out[1] = g; out[2] = r; out[3] = a;
+        return 4;
+    }
+
+    default:
+        return 0;
+    }
+}
+
+/*
+ * 计算生成的纯色 RLE 数据所需的总字节数（供调用者预分配缓冲）。
+ * 参数非法（不支持的格式 / 宽高为 0）时返回 0。
+ */
+static size_t gui_pure_rle_size(uint8_t fmt, uint16_t width, uint16_t height)
+{
+    int bpp = pure_rle_bpp(fmt);
+    if (bpp == 0 || width == 0 || height == 0)
+    {
+        return 0;
+    }
+
+    /* 一行 width 个相同像素 -> ceil(width/255) 个 RLE 节点 */
+    size_t nodes_per_line = ((size_t)width + (PURE_RLE_MAX_RUN - 1)) / PURE_RLE_MAX_RUN;
+    size_t bytes_per_line = nodes_per_line * (size_t)(1 + bpp);
+
+    size_t header_bytes = 8                                   /* gui_rgb_data_head_t */
+                          + 12                                /* imdc_file_header_t  */
+                          + (size_t)(height + 1) * 4;         /* 行偏移表            */
+
+    return header_bytes + bytes_per_line * (size_t)height;
+}
+
+/*
+ * 生成「纯色 RLE 图片」二进制数据。
+ *
+ *   argb      输入颜色，0xAARRGGBB（无 Alpha 的格式忽略 A；A8 仅取 A）
+ *   fmt       图片类型，见 pure_pixel_format_t
+ *   width     图片宽（像素）
+ *   height    图片高（像素）
+ *   out_buf   输出缓冲指针（“图片指针”）
+ *   buf_size  输出缓冲容量（字节），用于越界保护
+ *
+ * 返回实际写入的字节数；参数非法或缓冲不足时返回 0。
+ */
+static void *gui_pure_rle_create(uint32_t argb, uint8_t fmt,
+                           uint16_t width, uint16_t height)
+{
+    void *buffer = NULL;
+    int bpp = pure_rle_bpp(fmt);
+    if (bpp == 0 || width == 0 || height == 0)
+    {
+        return buffer;
+    }
+
+    size_t total = gui_pure_rle_size(fmt, width, height);
+    if (total == 0)
+    {
+        return buffer;
+    }
+    buffer = gui_malloc(total);
+    if (buffer == NULL)
+    {
+        return buffer;
+    }
+    uint8_t *p = buffer;
+
+    /* ---- 1. gui_rgb_data_head_t (8B) ---- */
+    p[0] = PURE_RLE_HEAD_FLAGS;     /* flags: compress=1 */
+    p[1] = fmt;                     /* type               */
+    pure_wr_u16le(p + 2, width);    /* width  (int16 LE)  */
+    pure_wr_u16le(p + 4, height);   /* height (int16 LE)  */
+    p[6] = 0;                       /* version            */
+    p[7] = 0;                       /* rsvd2              */
+    p += 8;
+
+    /* ---- 2. imdc_file_header_t (12B) ---- */
+    p[0] = (uint8_t)((PURE_RLE_ALGORITHM & 0x03)
+                     | ((PURE_RLE_FEATURE_1 & 0x03) << 2)
+                     | ((PURE_RLE_FEATURE_2 & 0x03) << 4)
+                     | ((pure_rle_pixel_bytes_code(fmt) & 0x03) << 6));
+    p[1] = 0;                       /* reserved[0] */
+    p[2] = 0;                       /* reserved[1] */
+    p[3] = 0;                       /* reserved[2] */
+    pure_wr_u32le(p + 4, width);    /* raw_pic_width  */
+    pure_wr_u32le(p + 8, height);   /* raw_pic_height */
+    p += 12;
+
+    /* ---- 3. 行偏移表 (height+1) * 4B ----
+     * 偏移基准 = imdc 头起点（文件偏移 8），imdcOffset = 12 + (height+1)*4 */
+    size_t nodes_per_line = ((size_t)width + (PURE_RLE_MAX_RUN - 1)) / PURE_RLE_MAX_RUN;
+    size_t bytes_per_line = nodes_per_line * (size_t)(1 + bpp);
+    uint32_t imdc_offset = (uint32_t)(12 + (size_t)(height + 1) * 4);
+
+    for (uint16_t line = 0; line < height; line++)
+    {
+        /* 纯色每行字节数相同：lineOffset = line * bytes_per_line */
+        pure_wr_u32le(p, imdc_offset + (uint32_t)((size_t)line * bytes_per_line));
+        p += 4;
+    }
+    /* 末项 = imdc_offset + 压缩数据总长度（文件末尾） */
+    pure_wr_u32le(p, imdc_offset + (uint32_t)(bytes_per_line * (size_t)height));
+    p += 4;
+
+    /* ---- 4. RLE 压缩数据 ---- */
+    uint8_t pix[4];
+    pure_rle_pack_pixel(argb, fmt, pix);     /* 预先打包一个像素，整图复用 */
+
+    for (uint16_t line = 0; line < height; line++)
+    {
+        uint16_t remain = width;
+        while (remain > 0)
+        {
+            uint8_t run = (remain > PURE_RLE_MAX_RUN)
+                          ? (uint8_t)PURE_RLE_MAX_RUN
+                          : (uint8_t)remain;
+            *p++ = run;                      /* [len] */
+            memcpy(p, pix, (size_t)bpp);     /* [pixel] */
+            p += bpp;
+            remain = (uint16_t)(remain - run);
+        }
+    }
+
+    return buffer;
+}
+
 static void msg_2_regenerate_view(void *msg)
 {
     GUI_UNUSED(msg);
@@ -317,34 +536,16 @@ void switch_mainface(gui_obj_t *parent, uint8_t idx)
             int16_t img_y = (SCREEN_SIZE - img_0->base.h) / 2;
             gui_obj_move((void *)img_0, SCREEN_SIZE, img_y);
             gui_list_remove(&GUI_BASE(win)->brother_list);
-            uint16_t color = (uint16_t)(((uint16_t *)img_0->src_data)[4]);
-            void *img_bg_data = NULL;
-            switch (color)
-            {
-            case 0xFFFF:
-                img_bg_data = "/image/565/rect_360_white.bin";
-                break;
-
-            case 0x001F:
-                img_bg_data = "/image/565/rect_360_blue.bin";
-                break;
-            
-            case 0x03E0:
-                img_bg_data = "/image/565/rect_360_green.bin";
-                break;
-                
-            case 0xF800:
-                img_bg_data = "/image/565/rect_360_red.bin";
-                break;
-            default:
-                break;
-            }
+            uint32_t color = (uint16_t)(((uint16_t *)img_0->src_data)[4]);
+            gui_log("bg color = 0x%x\n", color);
+            void *img_bg_data = gui_pure_rle_create(color, ((uint8_t *)img_0->src_data)[1], SCREEN_SIZE, SCREEN_SIZE);
 
             if (img_bg_data != NULL)
             {
-                gui_img_t *img_bg = gui_img_create_from_fs(parent, 0, img_bg_data, 0, 0, SCREEN_SIZE, SCREEN_SIZE);
+                gui_img_t *img_bg = gui_img_create_from_mem(parent, 0, img_bg_data, 0, 0, SCREEN_SIZE, SCREEN_SIZE);
                 gui_img_set_mode(img_bg, IMG_BYPASS_MODE);
                 gui_list_insert(&GUI_BASE(img_bg)->brother_list, &GUI_BASE(win)->brother_list);
+                danmu_bg[idx] = img_bg_data;
             }
         }
 #else
@@ -365,32 +566,13 @@ void switch_mainface(gui_obj_t *parent, uint8_t idx)
             int16_t img_y = (SCREEN_SIZE - img_0->base.h) / 2;
             gui_obj_move((void *)img_0, SCREEN_SIZE, img_y);
             gui_list_remove(&GUI_BASE(win)->brother_list);
-            uint16_t color = (uint16_t)(((uint16_t *)img_0->src_data)[4]);
-            void *img_bg_data = NULL;
-            switch (color)
-            {
-            case 0xFFFF:
-                img_bg_data = "/image/565/rect_360_white.bin";
-                break;
-
-            case 0x001F:
-                img_bg_data = "/image/565/rect_360_blue.bin";
-                break;
-            
-            case 0x03E0:
-                img_bg_data = "/image/565/rect_360_green.bin";
-                break;
-                
-            case 0xF800:
-                img_bg_data = "/image/565/rect_360_red.bin";
-                break;
-            default:
-                break;
-            }
+            uint32_t color = (uint16_t)(((uint16_t *)img_0->src_data)[4]);
+            gui_log("bg color = 0x%x\n", color);
+            void *img_bg_data = gui_pure_rle_create(color, ((uint8_t *)img_0->src_data)[1], SCREEN_SIZE, SCREEN_SIZE);
 
             if (img_bg_data != NULL)
             {
-                gui_img_t *img_bg = gui_img_create_from_fs(parent, 0, img_bg_data, 0, 0, SCREEN_SIZE, SCREEN_SIZE);
+                gui_img_t *img_bg = gui_img_create_from_mem(parent, 0, img_bg_data, 0, 0, SCREEN_SIZE, SCREEN_SIZE);
                 gui_img_set_mode(img_bg, IMG_BYPASS_MODE);
                 gui_list_insert(&GUI_BASE(img_bg)->brother_list, &GUI_BASE(win)->brother_list);
             }
@@ -879,5 +1061,85 @@ void ui_process_msg(void *arg)
         
     default:
         break;
+    }
+}
+
+void switch_out_mainface_0(gui_view_t *view)
+{
+    GUI_UNUSED(view);
+    if (danmu_bg[0] != NULL)
+    {
+        gui_free(danmu_bg[0]);
+        danmu_bg[0] = NULL;
+    }
+}
+
+void switch_out_mainface_1(gui_view_t *view)
+{
+    GUI_UNUSED(view);
+    if (danmu_bg[1] != NULL)
+    {
+        gui_free(danmu_bg[1]);
+        danmu_bg[1] = NULL;
+    }
+}
+
+void switch_out_mainface_2(gui_view_t *view)
+{
+    GUI_UNUSED(view);
+    if (danmu_bg[2] != NULL)
+    {
+        gui_free(danmu_bg[2]);
+        danmu_bg[2] = NULL;
+    }
+}
+
+void switch_out_mainface_3(gui_view_t *view)
+{
+    GUI_UNUSED(view);
+    if (danmu_bg[3] != NULL)
+    {
+        gui_free(danmu_bg[3]);
+        danmu_bg[3] = NULL;
+    }
+}
+
+void switch_out_mainface_4(gui_view_t *view)
+{
+    GUI_UNUSED(view);
+    if (danmu_bg[4] != NULL)
+    {
+        gui_free(danmu_bg[4]);
+        danmu_bg[4] = NULL;
+    }
+}
+
+void switch_out_mainface_5(gui_view_t *view)
+{
+    GUI_UNUSED(view);
+    if (danmu_bg[5] != NULL)
+    {
+        gui_free(danmu_bg[5]);
+        danmu_bg[5] = NULL;
+    }
+}
+
+void switch_out_mainface_6(gui_view_t *view)
+{
+    GUI_UNUSED(view);
+    if (danmu_bg[6] != NULL)
+    {
+        gui_free(danmu_bg[6]);
+        danmu_bg[6] = NULL;
+    }
+}
+
+void switch_out_mainface_7(gui_view_t *view)
+{
+    GUI_UNUSED(view);
+    if (danmu_bg[7] != NULL)
+    {
+        gui_free(danmu_bg[7]);
+        danmu_bg[7] = NULL;
     }
 }
