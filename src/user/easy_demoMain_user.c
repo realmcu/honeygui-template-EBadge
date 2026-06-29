@@ -577,6 +577,7 @@ void switch_mainface(gui_obj_t *parent, uint8_t idx)
                 gui_img_t *img_bg = gui_img_create_from_mem(parent, 0, img_bg_data, 0, 0, SCREEN_SIZE, SCREEN_SIZE);
                 gui_img_set_mode(img_bg, IMG_BYPASS_MODE);
                 gui_list_insert(&GUI_BASE(img_bg)->brother_list, &GUI_BASE(win)->brother_list);
+                danmu_bg[idx] = img_bg_data;
             }
         }
 #endif

@@ -1,6 +1,6 @@
 /**
  * share UI Implementation (Auto-generated, do not modify manually)
- * Generated at: 2026-06-26T09:13:25.997Z
+ * Generated at: 2026-06-29T09:57:00.772Z
  */
 #include "share_ui.h"
 #include "../callbacks/share_callbacks.h"

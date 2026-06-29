@@ -6,7 +6,9 @@
 /* @protected start entry_includes */
 // Add user includes here
 #include "gui_win.h"
+#ifndef _HONEYGUI_SIMULATOR_
 #include "os_sched.h"
+#endif
 /* @protected end entry_includes */
 
 static int app_init(void)
@@ -60,4 +62,4 @@ static int app_init(void)
     return 0;
 }
 
-// GUI_INIT_APP_EXPORT(app_init);
+GUI_INIT_APP_EXPORT(app_init);
