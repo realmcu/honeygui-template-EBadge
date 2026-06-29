@@ -48,6 +48,23 @@
       "videoFormat": "CINEPAK",
       "videoQuality": 5,
       "videoFrameRate": 25
+    },
+    "earth_7_30.avi": {
+      "videoFormat": "H264",
+      "videoQuality": 30,
+      "videoFrameRate": 30,
+      "videoCrop": {
+        "width": 400,
+        "height": 496
+      }
+    },
+    "background_clean_360.jpg": {
+      "format": "RGB565",
+      "compression": "rle"
+    },
+    "foreground_360.png": {
+      "format": "ARGB8565",
+      "compression": "rle"
     }
   }
 }

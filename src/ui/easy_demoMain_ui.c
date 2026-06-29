@@ -1,6 +1,6 @@
 /**
  * easy_demoMain UI Implementation (Auto-generated, do not modify manually)
- * Generated at: 2026-06-26T08:36:24.059Z
+ * Generated at: 2026-06-26T09:13:25.592Z
  */
 #include "easy_demoMain_ui.h"
 #include "../callbacks/easy_demoMain_callbacks.h"
@@ -18,8 +18,7 @@ gui_img_t *icon_as = NULL;
 gui_img_t *icon_cam = NULL;
 gui_text_t *lbl_1 = NULL;
 gui_lite_video_t *vid_test = NULL;
-gui_img_t *icon_cam_ctl = NULL;
-gui_text_t *lbl_12 = NULL;
+gui_stream_t *streaming_1 = NULL;
 
 
 // Create easy_demoMainView (hg_view)
@@ -387,20 +386,11 @@ static void view_cam_ctl_switch_in(gui_view_t *view)
     gui_view_switch_on_event(view, "top_view", SWITCH_OUT_NONE_ANIMATION, SWITCH_IN_NONE_ANIMATION, GUI_EVENT_TOUCH_RIGHT_SLIDE_QUICK);
 
 
-    // Create icon_cam_ctl (hg_image)
-    icon_cam_ctl = gui_img_create_from_fs((gui_obj_t *)view, "icon_cam_ctl", "/image/A8/cam_ctl_icon.bin", 80, 80, 200, 200);
-    gui_img_set_opacity((gui_img_t *)icon_cam_ctl, 75);
-    gui_obj_show((gui_obj_t *)icon_cam_ctl, true);
-    gui_obj_add_event_cb(icon_cam_ctl, (gui_event_cb_t)icon_cam_ctl_clicked_cb, GUI_EVENT_TOUCH_CLICKED, NULL);
-
-    // Create lbl_12 (hg_label)
-    lbl_12 = gui_text_create((gui_obj_t *)view, "lbl_12", 0, 130, 360, 100);
-    gui_text_set((gui_text_t *)lbl_12, "Please connect phone", GUI_FONT_SRC_BMP, gui_rgb(255, 255, 255), 20, 28);
-    gui_text_type_set((gui_text_t *)lbl_12, "/font/Inter_24pt_SemiBold_size28_bits4_bitmap.bin", FONT_SRC_FILESYS);
-    gui_text_mode_set((gui_text_t *)lbl_12, MID_CENTER);
-
-    gui_obj_add_event_cb((gui_obj_t *)view, (gui_event_cb_t)view_cam_ctl_key_0_cb, GUI_EVENT_KB_SHORT_PRESSED, NULL);
-    gui_obj_focus_set((gui_obj_t *)view);
+    // Create streaming_1 (hg_streaming)
+    streaming_1 = gui_stream_create((gui_obj_t *)view, "streaming_1", GUI_STREAM_CODEC_MSV1, gui_stream_transport_get(), 0, 0, 360, 360);
+    gui_stream_set_update_interval((gui_stream_t *)streaming_1, 10);
+    gui_stream_set_state((gui_stream_t *)streaming_1, GUI_VIDEO_STATE_PLAYING);
+    gui_obj_show((gui_obj_t *)streaming_1, true);
 }
 GUI_VIEW_INSTANCE("view_cam_ctl", false, view_cam_ctl_switch_in, view_cam_ctl_switch_out, false);
 

@@ -9,6 +9,7 @@
  * This file is generated once only, feel free to modify
  */
 
+
 // Add custom declarations here
 #define  SCREEN_SIZE  360
 #define  MAINFACE_NUM_MAX  8
@@ -89,6 +90,11 @@ void switch_out_mainface_7(gui_view_t *view);
 /* Interact api */ 
 uint8_t mainface_list_init(void **data_list, uint32_t n); //ret: user's mainface num
 void ui_process_msg(void *arg);
+
+/* Live-video stream transport accessor.  Implemented in
+ * app/example_gui_stream.c; the gui_stream widget (streaming_1) binds to the
+ * transport it returns, shared with the BLE producer (hmi_stream_ctrl.c). */
+stp_transport_t *gui_stream_transport_get(void);
 
 
 #endif // EASY_DEMOMAIN_USER_H

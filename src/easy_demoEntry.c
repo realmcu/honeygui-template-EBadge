@@ -5,6 +5,8 @@
 
 /* @protected start entry_includes */
 // Add user includes here
+#include "gui_win.h"
+#include "os_sched.h"
 /* @protected end entry_includes */
 
 static int app_init(void)
@@ -22,8 +24,24 @@ static int app_init(void)
 #ifndef _HONEYGUI_SIMULATOR_
     extern int flashdb_prepare(void);
     flashdb_prepare();
+
+    extern int app_stream_transport_init(void);
+    app_stream_transport_init();
+
+    // extern bool gsensor_sc7a20_read_xyz(int16_t *x, int16_t *y, int16_t *z);
+    // uint8_t i = 0;
+    // while(1)
+    // { 
+    //     int16_t ax = 0, ay = 0, az = 0;
+    //     if (gsensor_sc7a20_read_xyz(&ax, &ay, &az))
+    //     {
+    //         gui_log("[sc7a20] #%d xyz raw: x=%d y=%d z=%d", i, ax, ay, az);
+    //     }
+    //     os_delay(200);
+
+    // }
 #endif
-#include "gui_win.h"
+
     extern gui_win_t *win_view;
     if (win_view == NULL)
     {
@@ -42,4 +60,4 @@ static int app_init(void)
     return 0;
 }
 
-GUI_INIT_APP_EXPORT(app_init);
+// GUI_INIT_APP_EXPORT(app_init);

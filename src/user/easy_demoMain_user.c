@@ -5,6 +5,8 @@
 #include <stddef.h>
 #include <string.h>
 
+#include "stream_transport.h"   /* stp_config_t / stp_instance_create / ... */
+
 /* ----------------------------------------------------*/
 #ifdef _HONEYGUI_SIMULATOR_
 
@@ -1142,4 +1144,74 @@ void switch_out_mainface_7(gui_view_t *view)
         gui_free(danmu_bg[7]);
         danmu_bg[7] = NULL;
     }
+}
+/* ============================ Live-video stream ============================
+ *
+ * This board owns a single live-video STP transport, created once at GUI init
+ * (from easy_demoEntry.c app_init(), after flashdb_prepare() and before the
+ * main view is built) via stp_instance_create() -- the transport allocates its
+ * own frame pool internally through the porting allocator (stp_port_malloc).
+ * It is then shared, borrowed and never re-created, by both ends through
+ * gui_stream_transport_get():
+ *
+ *   producer : app/bluetooth/hmi_app/hmi_stream_ctrl.c (BLE RX -> stp_commit)
+ *   consumer : the designer-generated gui_stream widget (stp_consume -> render)
+ *
+ * Config for the eBadge BLE video stream (MSV1, 360x360):
+ *   - one 50 KB size class (>= the largest reassembled frame)
+ *   - 20 buffers in flight (ring depth absorbing producer/consumer jitter)
+ *   - 8-byte buffer alignment
+ *   - STP_DROP_NONE: MSV1 is continuously inter-coded, so frames must be
+ *     delivered strictly oldest-first and never dropped.
+ */
+#define APP_STREAM_MAX_FRAME   (50u * 1024u)   /* per-buffer cap: >= largest frame */
+#define APP_STREAM_BUF_COUNT   20u             /* ring depth: frames in flight     */
+
+static const stp_class_cfg_t s_stream_classes[] =
+{
+    { .buf_size = APP_STREAM_MAX_FRAME, .buf_count = APP_STREAM_BUF_COUNT },
+};
+
+/* The one transport this board owns.  NULL until app_stream_transport_init()
+ * has run; both ends fetch it through the getter below. */
+static stp_transport_t *s_stream_tp = NULL;
+
+/*
+ * Shared accessor for the live-video transport.  Used by:
+ *   - the designer gui_stream widget (consumer) to bind on creation, and
+ *   - hmi_stream_ctrl.c (BLE producer) to push reassembled frames.
+ * Returns NULL before the transport has been created.
+ */
+stp_transport_t *gui_stream_transport_get(void)
+{
+    return s_stream_tp;
+}
+
+/*
+ * Create the shared transport exactly once.  Called from easy_demoEntry.c
+ * app_init() (SOC only), after flashdb_prepare() and before the main view is
+ * created -- so the consumer's getter call already sees a valid handle, and the
+ * BLE producer (a separate task, with its own NULL guard) does too.
+ */
+int app_stream_transport_init(void)
+{
+    stp_config_t cfg;
+    stp_config_default(&cfg);
+    cfg.align              = 8;
+    cfg.classes            = s_stream_classes;
+    cfg.class_count        = 1;
+    cfg.drop_mode          = STP_DROP_NONE;   /* MSV1: oldest-first, never drop */
+    cfg.allow_oversize_fit = true;
+
+    s_stream_tp = stp_instance_create(&cfg);
+    if (s_stream_tp == NULL)
+    {
+        gui_log("app_stream: stp_instance_create failed\n");
+        return -1;
+    }
+
+    gui_log("app_stream: transport ready (%u buffers x %u KB)\n",
+            (unsigned)APP_STREAM_BUF_COUNT,
+            (unsigned)(APP_STREAM_MAX_FRAME / 1024u));
+    return 0;
 }

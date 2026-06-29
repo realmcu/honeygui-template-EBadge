@@ -1,6 +1,6 @@
 /**
  * bt UI Implementation (Auto-generated, do not modify manually)
- * Generated at: 2026-06-26T08:36:24.049Z
+ * Generated at: 2026-06-26T09:13:25.504Z
  */
 #include "bt_ui.h"
 #include "../callbacks/bt_callbacks.h"
