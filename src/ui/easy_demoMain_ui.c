@@ -1,6 +1,6 @@
 /**
  * easy_demoMain UI Implementation (Auto-generated, do not modify manually)
- * Generated at: 2026-06-29T09:57:00.759Z
+ * Generated at: 2026-07-03T09:22:55.063Z
  */
 #include "easy_demoMain_ui.h"
 #include "../callbacks/easy_demoMain_callbacks.h"
@@ -387,7 +387,7 @@ static void view_cam_ctl_switch_in(gui_view_t *view)
 
 
     // Create streaming_1 (hg_streaming)
-    streaming_1 = gui_stream_create((gui_obj_t *)view, "streaming_1", GUI_STREAM_CODEC_MSV1, gui_stream_transport_get(), 0, 0, 360, 360);
+    streaming_1 = gui_stream_create((gui_obj_t *)view, "streaming_1", GUI_STREAM_CODEC_H264, gui_stream_transport_get(), 0, 0, 360, 360);
     gui_stream_set_update_interval((gui_stream_t *)streaming_1, 10);
     gui_stream_set_state((gui_stream_t *)streaming_1, GUI_VIDEO_STATE_PLAYING);
     gui_obj_show((gui_obj_t *)streaming_1, true);
