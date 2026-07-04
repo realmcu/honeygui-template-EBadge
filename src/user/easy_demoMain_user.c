@@ -12,8 +12,8 @@
 
 #else
 #include "flashdb.h"
-#define USER_RESOURCE_ADDR     (0x0240f400u +   0x700000u)
-#define USER_RESOURCE_ADDR_END (0x0240f400u + 0x00998000) // 0x00998000  //9824K Bytes
+#define USER_RESOURCE_ADDR     (0x704D1400u +   0x700000u)
+#define USER_RESOURCE_ADDR_END (0x704D1400u + 0x00998000) // 0x00998000  //9824K Bytes
 
 #endif
 
@@ -23,9 +23,9 @@ uint8_t mainface_idx = 0;
 uint8_t mainface_num = 6;
 mainface_src_t mainface_list[MAINFACE_NUM_MAX] =
 {
-    {"/image/565/wallpaper_6.bin", SRC_IMG},
-    {"/wallpaper_1.avi", SRC_VIDEO},
     {"/image/565/wallpaper_4.bin", SRC_IMG},
+    {"/wallpaper_1.avi", SRC_VIDEO},
+    {"/image/565/wallpaper_6.bin", SRC_IMG},
     {"/wallpaper_2.avi", SRC_VIDEO},
     {"/image/565/wallpaper_5.bin", SRC_IMG},
     {"/wallpaper_3.avi", SRC_VIDEO},

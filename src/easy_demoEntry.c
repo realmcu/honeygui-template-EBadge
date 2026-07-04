@@ -15,7 +15,7 @@ static int app_init(void)
     gui_vfs_mount_posix("/", "./assets");
 #else
     // SOC: Mount romfs from flash address
-    gui_vfs_mount_romfs("/", (void *)0x0240f400, 0);
+    gui_vfs_mount_romfs("/", (void *)0x704D1400, 0);
 #endif
 
     /* @protected start app_init_pre */

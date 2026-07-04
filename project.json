@@ -10,6 +10,6 @@
   "minSdk": "API 2: HoneyGUI V1.1.0",
   "pixelMode": "RGB565",
   "mainHmlFile": "ui/easy_demoMain.hml",
-  "romfsBaseAddr": "0x0240f400",
+  "romfsBaseAddr": "0x704D1400",
   "created": "2026-05-27T02:45:20.392Z"
 }
