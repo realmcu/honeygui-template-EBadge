@@ -1,6 +1,6 @@
 /**
  * bt UI Implementation (Auto-generated, do not modify manually)
- * Generated at: 2026-06-29T09:57:00.753Z
+ * Generated at: 2026-07-07T02:36:56.308Z
  */
 #include "bt_ui.h"
 #include "../callbacks/bt_callbacks.h"
@@ -43,13 +43,11 @@ static void bt_View_switch_in(gui_view_t *view)
     gui_img_translate((gui_img_t *)circle_scale, 180.0f, 180.0f);
     gui_img_set_focus((gui_img_t *)circle_scale, 180.0f, 180.0f);
     gui_img_scale((gui_img_t *)circle_scale, 0.620000f, 0.620000f);
-    gui_obj_show((gui_obj_t *)circle_scale, true);
     // Bind timer: 动画 1
     gui_obj_create_timer((gui_obj_t *)circle_scale, 10, true, circle_scale_timer_0_cb);
 
     // Create bt_icon (hg_image)
     bt_icon = gui_img_create_from_fs((gui_obj_t *)view, "bt_icon", "/image/A8/bt_icon_discon.bin", 162, 115, 35, 57);
-    gui_obj_show((gui_obj_t *)bt_icon, true);
     // Bind timer: 动画 1
     gui_obj_create_timer((gui_obj_t *)bt_icon, 20, true, bt_icon_timer_0_cb);
 

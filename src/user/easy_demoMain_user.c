@@ -23,9 +23,9 @@ uint8_t mainface_idx = 0;
 uint8_t mainface_num = 6;
 mainface_src_t mainface_list[MAINFACE_NUM_MAX] =
 {
-    {"/image/565/wallpaper_4.bin", SRC_IMG},
-    {"/wallpaper_1.avi", SRC_VIDEO},
     {"/image/565/wallpaper_6.bin", SRC_IMG},
+    {"/wallpaper_1.avi", SRC_VIDEO},
+    {"/image/565/wallpaper_4.bin", SRC_IMG},
     {"/wallpaper_2.avi", SRC_VIDEO},
     {"/image/565/wallpaper_5.bin", SRC_IMG},
     {"/wallpaper_3.avi", SRC_VIDEO},
@@ -538,9 +538,10 @@ void switch_mainface(gui_obj_t *parent, uint8_t idx)
             int16_t img_y = (SCREEN_SIZE - img_0->base.h) / 2;
             gui_obj_move((void *)img_0, SCREEN_SIZE, img_y);
             gui_list_remove(&GUI_BASE(win)->brother_list);
-            uint32_t color = (uint16_t)(((uint16_t *)img_0->src_data)[4]);
+            const void *src_data = gui_img_get_image_data(img_0);
+            uint32_t color = (uint16_t)(((uint16_t *)src_data)[4]);
             gui_log("bg color = 0x%x\n", color);
-            void *img_bg_data = gui_pure_rle_create(color, ((uint8_t *)img_0->src_data)[1], SCREEN_SIZE, SCREEN_SIZE);
+            void *img_bg_data = gui_pure_rle_create(color, ((uint8_t *)src_data)[1], SCREEN_SIZE, SCREEN_SIZE);
 
             if (img_bg_data != NULL)
             {
@@ -568,9 +569,10 @@ void switch_mainface(gui_obj_t *parent, uint8_t idx)
             int16_t img_y = (SCREEN_SIZE - img_0->base.h) / 2;
             gui_obj_move((void *)img_0, SCREEN_SIZE, img_y);
             gui_list_remove(&GUI_BASE(win)->brother_list);
-            uint32_t color = (uint16_t)(((uint16_t *)img_0->src_data)[4]);
+            const void *src_data = gui_img_get_image_data(img_0);
+            uint32_t color = (uint16_t)(((uint16_t *)src_data)[4]);
             gui_log("bg color = 0x%x\n", color);
-            void *img_bg_data = gui_pure_rle_create(color, ((uint8_t *)img_0->src_data)[1], SCREEN_SIZE, SCREEN_SIZE);
+            void *img_bg_data = gui_pure_rle_create(color, ((uint8_t *)src_data)[1], SCREEN_SIZE, SCREEN_SIZE);
 
             if (img_bg_data != NULL)
             {

@@ -1,6 +1,6 @@
 /**
  * share UI Implementation (Auto-generated, do not modify manually)
- * Generated at: 2026-06-29T09:57:00.772Z
+ * Generated at: 2026-07-07T02:36:56.339Z
  */
 #include "share_ui.h"
 #include "../callbacks/share_callbacks.h"
@@ -44,13 +44,11 @@ static void shareMainView_switch_in(gui_view_t *view)
     // Create img_4 (hg_image)
     img_4 = gui_img_create_from_fs((gui_obj_t *)view, "img_4", "/image/A8/rect_268_70_bg.bin", 46, 108, 268, 70);
     gui_img_set_mode((gui_img_t *)img_4, IMG_BYPASS_MODE);
-    gui_obj_show((gui_obj_t *)img_4, true);
     gui_obj_add_event_cb(img_4, (gui_event_cb_t)img_4_clicked_cb, GUI_EVENT_TOUCH_CLICKED, NULL);
 
     // Create img_5 (hg_image)
     img_5 = gui_img_create_from_fs((gui_obj_t *)view, "img_5", "/image/A8/rect_268_70_bg.bin", 46, 208, 268, 70);
     gui_img_set_mode((gui_img_t *)img_5, IMG_BYPASS_MODE);
-    gui_obj_show((gui_obj_t *)img_5, true);
     gui_obj_add_event_cb(img_5, (gui_event_cb_t)img_5_clicked_cb, GUI_EVENT_TOUCH_CLICKED, NULL);
 
     // Create lbl_2 (hg_label)
@@ -94,7 +92,6 @@ static void shareSecondView_switch_in(gui_view_t *view)
     // Create img_6 (hg_image)
     img_6 = gui_img_create_from_fs((gui_obj_t *)view, "img_6", "/image/A8/share_icon.bin", 135, 115, 90, 90);
     gui_img_set_mode((gui_img_t *)img_6, IMG_BYPASS_MODE);
-    gui_obj_show((gui_obj_t *)img_6, true);
 
     // Create circle_anime (hg_image)
     circle_anime = gui_img_create_from_fs((gui_obj_t *)view, "circle_anime", "/image/circle_anime.bin", 44, 44, 272, 272);
@@ -102,7 +99,6 @@ static void shareSecondView_switch_in(gui_view_t *view)
     gui_img_translate((gui_img_t *)circle_anime, 136.0f, 136.0f);
     gui_img_set_focus((gui_img_t *)circle_anime, 136.0f, 136.0f);
     gui_img_rotation((gui_img_t *)circle_anime, -45.0f);
-    gui_obj_show((gui_obj_t *)circle_anime, true);
     // Bind timer: 动画 1
     gui_obj_create_timer((gui_obj_t *)circle_anime, 10, true, circle_anime_timer_0_cb);
 
@@ -116,7 +112,7 @@ static void shareSecondView_switch_in(gui_view_t *view)
 
     // Create win_share_3 (hg_window)
     win_share_3 = gui_win_create((gui_obj_t *)view, "win_share_3", 0, 0, 360, 360);
-    gui_obj_show((gui_obj_t *)win_share_3, false);
+    gui_obj_hidden((gui_obj_t *)win_share_3, true);
     // Bind timer: 动画 1
     gui_obj_create_timer((gui_obj_t *)win_share_3, 10, true, win_share_3_timer_0_cb);
     gui_obj_start_timer((gui_obj_t *)win_share_3);
@@ -129,13 +125,11 @@ static void shareSecondView_switch_in(gui_view_t *view)
     gui_img_set_focus((gui_img_t *)img_8, 180.0f, 180.0f);
     gui_img_scale((gui_img_t *)img_8, 0.620000f, 0.620000f);
     gui_img_set_opacity((gui_img_t *)img_8, 122);
-    gui_obj_show((gui_obj_t *)img_8, true);
     // Bind timer: 动画 1
     gui_obj_create_timer((gui_obj_t *)img_8, 1000, true, img_8_timer_0_cb);
 
     // Create img_9 (hg_image)
     img_9 = gui_img_create_from_fs(win_share_3, "img_9", "/image/A8/connect_state_icon.bin", 142, 132, 76, 76);
-    gui_obj_show((gui_obj_t *)img_9, true);
 
     gui_obj_add_event_cb((gui_obj_t *)view, (gui_event_cb_t)shareSecondView_key_0_cb, GUI_EVENT_KB_SHORT_PRESSED, NULL);
     gui_obj_focus_set((gui_obj_t *)view);

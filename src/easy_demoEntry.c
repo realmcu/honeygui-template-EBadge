@@ -40,6 +40,9 @@ static int app_init(void)
 
     /* @protected start app_init_post */
     // Add user initialization code here (runs after the main view is created)
+    extern void gui_set_keep_active_time(uint32_t active_time);
+    gui_set_keep_active_time(0xFFFFFFFF);
+
     gui_obj_tree_free(GUI_BASE(gui_view_get_current()));
     gui_view_create(win_view, "easy_demoMainView", 0, 0, 0, 0);
     /* @protected end app_init_post */
