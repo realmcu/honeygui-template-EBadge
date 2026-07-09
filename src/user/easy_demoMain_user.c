@@ -20,15 +20,13 @@
 gui_win_t *win_view = NULL;
 
 uint8_t mainface_idx = 0;
-uint8_t mainface_num = 6;
+uint8_t mainface_num = 3;
 mainface_src_t mainface_list[MAINFACE_NUM_MAX] =
 {
-    {"/image/565/wallpaper_6.bin", SRC_IMG},
-    {"/wallpaper_1.avi", SRC_VIDEO},
-    {"/image/565/wallpaper_4.bin", SRC_IMG},
-    {"/wallpaper_2.avi", SRC_VIDEO},
-    {"/image/565/wallpaper_5.bin", SRC_IMG},
-    {"/wallpaper_3.avi", SRC_VIDEO},
+    {"/image/565/wallpaper_danmu.bin", SRC_DANNU},
+    {"/image/565/wallpaper_static_img.bin", SRC_IMG},
+    {"/wallpaper_video.avi", SRC_VIDEO},
+
 };
 bool is_auto_sleep_mode = false;
 bool is_bt_connect = false;
@@ -414,8 +412,8 @@ void win_timer_0_cb(void *obj)
     gui_obj_t *o = obj;
     gui_obj_t *child = gui_list_entry(o->child_list.next, gui_obj_t, brother_list);
     gui_obj_t *lock = gui_list_entry(child->brother_list.next, gui_obj_t, brother_list);
-
-    if (child->type == IMAGE_FROM_MEM && child->w > SCREEN_SIZE)
+    mainface_src_t * mainface_src = (mainface_src_t *)o->user_data;
+    if (mainface_src->type == SRC_DANNU)
     {
         int16_t img_x = child->x;
         int16_t img_w = child->w;
@@ -463,6 +461,7 @@ void win_timer_0_cb(void *obj)
 void switch_mainface(gui_obj_t *parent, uint8_t idx)
 {
     gui_win_t *win = gui_win_create(parent, 0, 0, 0, 360, 360);
+    win->base.user_data = &mainface_list[idx];
     mainface_idx = idx;
     void (*timer_cb)(void *) = NULL;
     switch (idx)
@@ -491,6 +490,12 @@ void switch_mainface(gui_obj_t *parent, uint8_t idx)
     case 7:
         timer_cb = mainface_view_7_update_idx_cb;
         break;
+    case 8:
+        timer_cb = mainface_view_8_update_idx_cb;
+        break;
+    case 9:
+        timer_cb = mainface_view_9_update_idx_cb;
+        break;
 
        default:
         break;
@@ -509,7 +514,9 @@ void switch_mainface(gui_obj_t *parent, uint8_t idx)
         return;
     }
 
-    if (mainface_list[idx].type == SRC_VIDEO)
+    switch (mainface_list[idx].type)
+    {
+    case SRC_VIDEO:
     {
         gui_lite_video_t *vid = NULL;
 #ifdef _HONEYGUI_SIMULATOR_
@@ -527,13 +534,39 @@ void switch_mainface(gui_obj_t *parent, uint8_t idx)
         gui_lite_video_set_frame_rate((gui_lite_video_t *)vid, 30.f);
         gui_lite_video_set_repeat_count((gui_lite_video_t *)vid, GUI_VIDEO_REPEAT_INFINITE);
         gui_lite_video_set_state((gui_lite_video_t *)vid, GUI_VIDEO_STATE_PLAYING);
+        break;
     }
-    else
+    case SRC_IMG:
+    {
+        gui_img_t *img = NULL;
+#ifdef _HONEYGUI_SIMULATOR_
+        img = gui_img_create_from_fs((void *)win, 0, mainface_list[idx].data, 0, 0, 0, 0);
+#else
+        gui_log("%s %d 0x%x\n", __FUNCTION__, __LINE__, mainface_list[idx].data);
+        if (((uint32_t)mainface_list[idx].data) > USER_RESOURCE_ADDR && ((uint32_t)mainface_list[idx].data) < (USER_RESOURCE_ADDR_END))
+        {
+            gui_log("%s %d 0x%x\n", __FUNCTION__, __LINE__, mainface_list[idx].data);
+            img = gui_img_create_from_mem((void *)win, 0, mainface_list[idx].data, 0, 0, SCREEN_SIZE, SCREEN_SIZE);
+        }
+        else
+        {
+            img = gui_img_create_from_fs((void *)win, 0, mainface_list[idx].data, 0, 0, SCREEN_SIZE, SCREEN_SIZE);
+        }
+#endif        
+        gui_img_set_mode(img, IMG_BYPASS_MODE);
+        break;
+    }
+    case SRC_3D:
+        /* code */
+        break;
+    case SRC_IMG_SPATIAL:
+        /* code */
+        break;
+    case SRC_DANNU:
     {
 #ifdef _HONEYGUI_SIMULATOR_
         gui_img_t *img_0 = gui_img_create_from_fs((void *)win, 0, mainface_list[idx].data, 0, 0, 0, 0);
         gui_img_set_mode(img_0, IMG_BYPASS_MODE);
-        if (img_0->base.w > SCREEN_SIZE)
         {
             int16_t img_y = (SCREEN_SIZE - img_0->base.h) / 2;
             gui_obj_move((void *)img_0, SCREEN_SIZE, img_y);
@@ -564,7 +597,6 @@ void switch_mainface(gui_obj_t *parent, uint8_t idx)
             img_0 = gui_img_create_from_fs((void *)win, 0, mainface_list[idx].data, 0, 0, SCREEN_SIZE, SCREEN_SIZE);
         }
         gui_img_set_mode(img_0, IMG_BYPASS_MODE);
-        if (img_0->base.w > SCREEN_SIZE)
         {
             int16_t img_y = (SCREEN_SIZE - img_0->base.h) / 2;
             gui_obj_move((void *)img_0, SCREEN_SIZE, img_y);
@@ -583,7 +615,13 @@ void switch_mainface(gui_obj_t *parent, uint8_t idx)
             }
         }
 #endif
+        break;
     }
+        
+    default:
+        break;
+    }
+    
     gui_img_t *img = gui_img_create_from_fs(win, 0, "/image/lock_icon.bin", 90, 90, 0, 0);
     gui_obj_hidden((gui_obj_t *)img, true);
     img = gui_img_create_from_fs(win, 0, prog_arc_array[0], 90, 90, 0, 0);
@@ -628,6 +666,12 @@ void switch_mainface(gui_obj_t *parent, uint8_t idx)
     case 8:
         view_last = "mainface_view_7";
         break;
+    case 9:
+        view_last = "mainface_view_8";
+        break;
+    case 10:
+        view_last = "mainface_view_9";
+        break;
 
     default:
         break;
@@ -667,6 +711,14 @@ void switch_mainface(gui_obj_t *parent, uint8_t idx)
         break;
     case 7:
         view_left = "mainface_view_6";
+        view_right = "mainface_view_8";
+        break;
+    case 8:
+        view_left = "mainface_view_7";
+        view_right = "mainface_view_9";
+        break;
+    case 9:
+        view_left = "mainface_view_8";
         view_right = view_first;
         break;
         
@@ -1072,10 +1124,10 @@ void ui_process_msg(void *arg)
 
 void ui_add_resource(uint32_t payload)
 {
-    gui_msg_t msg = {.event = GUI_EVENT_USER_DEFINE, .sub_event = ADD_MAINFACE, .payload = (void*)payload,.cb = (gui_msg_cb)ui_process_msg};    
+    gui_msg_t msg = {.event = GUI_EVENT_USER_DEFINE, .sub_event = ADD_MAINFACE, .payload = (void *)payload,.cb = (gui_msg_cb)ui_process_msg};    
     gui_send_msg_to_server(&msg);
 }
-void ui_jump_streaming()
+void ui_jump_streaming(void)
 {
     gui_msg_t msg = {.event = GUI_EVENT_USER_DEFINE, .sub_event = CAST_START, .cb = (gui_msg_cb)ui_process_msg};    
     gui_send_msg_to_server(&msg);
@@ -1159,6 +1211,26 @@ void switch_out_mainface_7(gui_view_t *view)
     {
         gui_free(danmu_bg[7]);
         danmu_bg[7] = NULL;
+    }
+}
+
+void switch_out_mainface_8(gui_view_t *view)
+{
+    GUI_UNUSED(view);
+    if (danmu_bg[8] != NULL)
+    {
+        gui_free(danmu_bg[8]);
+        danmu_bg[8] = NULL;
+    }
+}
+
+void switch_out_mainface_9(gui_view_t *view)
+{
+    GUI_UNUSED(view);
+    if (danmu_bg[9] != NULL)
+    {
+        gui_free(danmu_bg[9]);
+        danmu_bg[9] = NULL;
     }
 }
 

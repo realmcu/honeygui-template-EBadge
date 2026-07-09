@@ -12,13 +12,16 @@
 
 // Add custom declarations here
 #define  SCREEN_SIZE  360
-#define  MAINFACE_NUM_MAX  8
+#define  MAINFACE_NUM_MAX  10
 
 
 typedef enum
 {
     SRC_IMG = 0,
     SRC_VIDEO,
+    SRC_3D,
+    SRC_IMG_SPATIAL,
+    SRC_DANNU,
 } MAINFACE_SRC_TYPE;
 
 typedef struct mainface_src
@@ -85,6 +88,9 @@ void switch_out_mainface_4(gui_view_t *view);
 void switch_out_mainface_5(gui_view_t *view);
 void switch_out_mainface_6(gui_view_t *view);
 void switch_out_mainface_7(gui_view_t *view);
+void switch_out_mainface_8(gui_view_t *view);
+void switch_out_mainface_9(gui_view_t *view);
+
 
 
 /* Interact api */ 

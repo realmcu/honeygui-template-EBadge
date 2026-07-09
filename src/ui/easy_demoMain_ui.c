@@ -1,6 +1,6 @@
 /**
  * easy_demoMain UI Implementation (Auto-generated, do not modify manually)
- * Generated at: 2026-07-09T05:54:53.792Z
+ * Generated at: 2026-07-09T08:29:49.295Z
  */
 #include "easy_demoMain_ui.h"
 #include "../callbacks/easy_demoMain_callbacks.h"
@@ -244,6 +244,62 @@ static void mainface_view_7_switch_in(gui_view_t *view)
     gui_obj_focus_set((gui_obj_t *)view);
 }
 GUI_VIEW_INSTANCE("mainface_view_7", false, mainface_view_7_switch_in, mainface_view_7_switch_out, false);
+
+// Create mainface_view_8 (hg_view)
+static void mainface_view_8_switch_out(gui_view_t *view)
+{
+    switch_out_mainface_8(view);
+}
+
+static void mainface_view_8_switch_in(gui_view_t *view)
+{
+    // Set animation step
+    gui_view_set_animate_step(view, 360);
+
+    // Set opacity
+    gui_view_set_opacity(view, 255);
+
+    // Set background color
+    gui_set_bg_color(gui_rgb(0, 0, 0));
+
+    // Bind timer: 动画 1
+    gui_obj_create_timer((gui_obj_t *)view, 1000, true, mainface_view_7_timer_0_cb);
+
+    GUI_UNUSED(view);
+
+    gui_obj_add_event_cb((gui_obj_t *)view, (gui_event_cb_t)mainface_view_8_key_0_cb, GUI_EVENT_KB_SHORT_PRESSED, NULL);
+    gui_obj_add_event_cb((gui_obj_t *)view, (gui_event_cb_t)mainface_view_8_key_1_cb, GUI_EVENT_KB_LONG_PRESSED, NULL);
+    gui_obj_focus_set((gui_obj_t *)view);
+}
+GUI_VIEW_INSTANCE("mainface_view_8", false, mainface_view_8_switch_in, mainface_view_8_switch_out, false);
+
+// Create mainface_view_9 (hg_view)
+static void mainface_view_9_switch_out(gui_view_t *view)
+{
+    switch_out_mainface_9(view);
+}
+
+static void mainface_view_9_switch_in(gui_view_t *view)
+{
+    // Set animation step
+    gui_view_set_animate_step(view, 360);
+
+    // Set opacity
+    gui_view_set_opacity(view, 255);
+
+    // Set background color
+    gui_set_bg_color(gui_rgb(0, 0, 0));
+
+    // Bind timer: 动画 1
+    gui_obj_create_timer((gui_obj_t *)view, 1000, true, mainface_view_7_timer_0_cb);
+
+    GUI_UNUSED(view);
+
+    gui_obj_add_event_cb((gui_obj_t *)view, (gui_event_cb_t)mainface_view_9_key_0_cb, GUI_EVENT_KB_SHORT_PRESSED, NULL);
+    gui_obj_add_event_cb((gui_obj_t *)view, (gui_event_cb_t)mainface_view_9_key_1_cb, GUI_EVENT_KB_LONG_PRESSED, NULL);
+    gui_obj_focus_set((gui_obj_t *)view);
+}
+GUI_VIEW_INSTANCE("mainface_view_9", false, mainface_view_9_switch_in, mainface_view_9_switch_out, false);
 
 // Create top_view (hg_view)
 static void top_view_switch_out(gui_view_t *view)

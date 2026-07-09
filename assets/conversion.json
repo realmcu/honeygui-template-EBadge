@@ -22,7 +22,8 @@
       "format": "RGB565"
     },
     "image/565": {
-      "format": "RGB565"
+      "format": "RGB565",
+      "compression": "none"
     },
     "image/565/wallpaper_6.png": {
       "compression": "none"
@@ -57,6 +58,9 @@
         "width": 400,
         "height": 496
       }
+    },
+    "wallpaper_video.mp4": {
+      "videoFormat": "CINEPAK"
     }
   }
 }
