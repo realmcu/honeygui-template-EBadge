@@ -1,6 +1,6 @@
 /**
  * menu UI Implementation (Auto-generated, do not modify manually)
- * Generated at: 2026-07-08T08:51:00.910Z
+ * Generated at: 2026-07-09T05:54:53.835Z
  */
 #include "menu_ui.h"
 #include "../callbacks/menu_callbacks.h"

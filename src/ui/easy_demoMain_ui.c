@@ -1,6 +1,6 @@
 /**
  * easy_demoMain UI Implementation (Auto-generated, do not modify manually)
- * Generated at: 2026-07-08T08:51:00.874Z
+ * Generated at: 2026-07-09T05:54:53.792Z
  */
 #include "easy_demoMain_ui.h"
 #include "../callbacks/easy_demoMain_callbacks.h"
@@ -369,10 +369,6 @@ static void view_cam_ctl_switch_in(gui_view_t *view)
     // Set background color
     gui_set_bg_color(gui_rgb(0, 0, 0));
 
-    // Bind timer: 动画 1
-    gui_obj_create_timer((gui_obj_t *)view, 20, true, view_cam_ctl_timer_0_cb);
-    gui_obj_start_timer((gui_obj_t *)view);
-
     gui_view_switch_on_event(view, "easy_demoMainView", SWITCH_OUT_NONE_ANIMATION, SWITCH_IN_NONE_ANIMATION, GUI_EVENT_TOUCH_LEFT_SLIDE_QUICK);
     gui_view_switch_on_event(view, "easy_demoMainView", SWITCH_OUT_NONE_ANIMATION, SWITCH_IN_NONE_ANIMATION, GUI_EVENT_TOUCH_RIGHT_SLIDE_QUICK);
 
@@ -383,27 +379,6 @@ static void view_cam_ctl_switch_in(gui_view_t *view)
     gui_stream_set_state((gui_stream_t *)streaming_1, GUI_VIDEO_STATE_PLAYING);
 }
 GUI_VIEW_INSTANCE("view_cam_ctl", false, view_cam_ctl_switch_in, view_cam_ctl_switch_out, false);
-
-// Create view_ (hg_view)
-static void view__switch_out(gui_view_t *view)
-{
-    GUI_UNUSED(view);
-}
-
-static void view__switch_in(gui_view_t *view)
-{
-    // Set animation step
-    gui_view_set_animate_step(view, 36);
-
-    // Set opacity
-    gui_view_set_opacity(view, 255);
-
-    // Set background color
-    gui_set_bg_color(gui_rgb(0, 0, 0));
-
-    GUI_UNUSED(view);
-}
-GUI_VIEW_INSTANCE("view_", false, view__switch_in, view__switch_out, false);
 
 // Create view_fl (hg_view)
 static void view_fl_switch_out(gui_view_t *view)

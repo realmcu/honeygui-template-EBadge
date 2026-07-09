@@ -1049,12 +1049,12 @@ void ui_process_msg(void *arg)
     {
         if (get_transmit_start) return;
         gui_view_t *view_cur = gui_view_get_current();
-        if (view_cur != NULL && strcmp(view_cur->base.name, "view_cast") != 0)
+        if (view_cur != NULL && strcmp(view_cur->base.name, "view_cam_ctl") != 0)
         {
             view_rec = view_cur->base.name;
+            gui_view_switch_direct(gui_view_get_current(), "view_cam_ctl", SWITCH_OUT_NONE_ANIMATION, SWITCH_IN_NONE_ANIMATION);
         }
-        gui_obj_child_free(GUI_BASE(win_view));
-        gui_view_create(GUI_BASE(win_view), "view_cast", 0, 0, 0, 0);
+
         break;
     }
     case CAST_STOP:
@@ -1068,6 +1068,19 @@ void ui_process_msg(void *arg)
         break;
     }
 }
+
+
+void ui_add_resource(uint32_t payload)
+{
+    gui_msg_t msg = {.event = GUI_EVENT_USER_DEFINE, .sub_event = ADD_MAINFACE, .payload = (void*)payload,.cb = (gui_msg_cb)ui_process_msg};    
+    gui_send_msg_to_server(&msg);
+}
+void ui_jump_streaming()
+{
+    gui_msg_t msg = {.event = GUI_EVENT_USER_DEFINE, .sub_event = CAST_START, .cb = (gui_msg_cb)ui_process_msg};    
+    gui_send_msg_to_server(&msg);
+}
+
 
 void switch_out_mainface_0(gui_view_t *view)
 {
@@ -1148,6 +1161,10 @@ void switch_out_mainface_7(gui_view_t *view)
         danmu_bg[7] = NULL;
     }
 }
+
+
+
+
 /* ============================ Live-video stream ============================
  *
  * This board owns a single live-video STP transport, created once at GUI init

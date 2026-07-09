@@ -18,7 +18,6 @@ uint16_t top_view_timer_cnt = 0;
 uint16_t bg_circle_timer_cnt = 0;
 uint16_t icon_bat_timer_cnt = 0;
 uint16_t lbl_1_timer_cnt = 0;
-uint16_t view_cam_ctl_timer_cnt = 0;
 uint16_t view_fl_timer_cnt = 0;
 
 // Event callback function implementations
