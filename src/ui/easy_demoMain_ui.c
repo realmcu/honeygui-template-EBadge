@@ -1,6 +1,6 @@
 /**
  * easy_demoMain UI Implementation (Auto-generated, do not modify manually)
- * Generated at: 2026-07-07T02:36:56.320Z
+ * Generated at: 2026-07-08T08:51:00.874Z
  */
 #include "easy_demoMain_ui.h"
 #include "../callbacks/easy_demoMain_callbacks.h"
@@ -373,12 +373,12 @@ static void view_cam_ctl_switch_in(gui_view_t *view)
     gui_obj_create_timer((gui_obj_t *)view, 20, true, view_cam_ctl_timer_0_cb);
     gui_obj_start_timer((gui_obj_t *)view);
 
-    gui_view_switch_on_event(view, "top_view", SWITCH_OUT_NONE_ANIMATION, SWITCH_IN_NONE_ANIMATION, GUI_EVENT_TOUCH_LEFT_SLIDE_QUICK);
-    gui_view_switch_on_event(view, "top_view", SWITCH_OUT_NONE_ANIMATION, SWITCH_IN_NONE_ANIMATION, GUI_EVENT_TOUCH_RIGHT_SLIDE_QUICK);
+    gui_view_switch_on_event(view, "easy_demoMainView", SWITCH_OUT_NONE_ANIMATION, SWITCH_IN_NONE_ANIMATION, GUI_EVENT_TOUCH_LEFT_SLIDE_QUICK);
+    gui_view_switch_on_event(view, "easy_demoMainView", SWITCH_OUT_NONE_ANIMATION, SWITCH_IN_NONE_ANIMATION, GUI_EVENT_TOUCH_RIGHT_SLIDE_QUICK);
 
 
     // Create streaming_1 (hg_streaming)
-    streaming_1 = gui_stream_create((gui_obj_t *)view, "streaming_1", GUI_STREAM_CODEC_H264, gui_stream_transport_get(), 0, 0, 360, 360);
+    streaming_1 = gui_stream_create((gui_obj_t *)view, "streaming_1", GUI_STREAM_CODEC_H264, gui_stream_transport_get(), 0, 0, 368, 368);
     gui_stream_set_update_interval((gui_stream_t *)streaming_1, 10);
     gui_stream_set_state((gui_stream_t *)streaming_1, GUI_VIDEO_STATE_PLAYING);
 }

@@ -57,14 +57,6 @@
         "width": 400,
         "height": 496
       }
-    },
-    "background_clean_360.jpg": {
-      "format": "RGB565",
-      "compression": "rle"
-    },
-    "foreground_360.png": {
-      "format": "ARGB8565",
-      "compression": "rle"
     }
   }
 }

@@ -1167,8 +1167,8 @@ void switch_out_mainface_7(gui_view_t *view)
  *   - STP_DROP_NONE: MSV1 is continuously inter-coded, so frames must be
  *     delivered strictly oldest-first and never dropped.
  */
-#define APP_STREAM_MAX_FRAME   (50u * 1024u)   /* per-buffer cap: >= largest frame */
-#define APP_STREAM_BUF_COUNT   20u             /* ring depth: frames in flight     */
+#define APP_STREAM_MAX_FRAME   (35u * 1024u)   /* per-buffer cap: >= largest frame */
+#define APP_STREAM_BUF_COUNT   32u             /* ring depth: frames in flight     */
 
 static const stp_class_cfg_t s_stream_classes[] =
 {

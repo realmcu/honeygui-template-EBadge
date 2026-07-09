@@ -1,6 +1,6 @@
 /**
  * bt UI Definition (Auto-generated, do not modify manually)
- * Generated at: 2026-07-07T02:36:56.308Z
+ * Generated at: 2026-07-08T08:51:00.845Z
  */
 #ifndef BT_UI_H
 #define BT_UI_H
