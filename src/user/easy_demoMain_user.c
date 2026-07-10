@@ -23,7 +23,7 @@ uint8_t mainface_idx = 0;
 uint8_t mainface_num = 3;
 mainface_src_t mainface_list[MAINFACE_NUM_MAX] =
 {
-    {"/image/565/wallpaper_danmu.bin", SRC_DANNU},
+    {"/image/565/wallpaper_danmu.bin", SRC_DANMU},
     {"/image/565/wallpaper_static_img.bin", SRC_IMG},
     {"/wallpaper_video.avi", SRC_VIDEO},
 
@@ -438,7 +438,7 @@ void win_timer_0_cb(void *obj)
     gui_obj_t *child = gui_list_entry(o->child_list.next, gui_obj_t, brother_list);
     gui_obj_t *lock = gui_list_entry(child->brother_list.next, gui_obj_t, brother_list);
     mainface_src_t * mainface_src = (mainface_src_t *)o->user_data;
-    if (mainface_src->type == SRC_DANNU)
+    if (mainface_src->type == SRC_DANMU)
     {
         int16_t img_x = child->x;
         int16_t img_w = child->w;
@@ -558,7 +558,7 @@ void switch_mainface(gui_obj_t *parent, uint8_t idx)
             vid = gui_lite_video_create_from_fs((void *)win, 0, mainface_list[idx].data, 0, 0, SCREEN_SIZE, SCREEN_SIZE);
         }
 #endif
-        gui_lite_video_set_frame_rate((gui_lite_video_t *)vid, 30.f);
+        // gui_lite_video_set_frame_rate((gui_lite_video_t *)vid, 30.f);
         gui_lite_video_set_repeat_count((gui_lite_video_t *)vid, GUI_VIDEO_REPEAT_INFINITE);
         gui_lite_video_set_state((gui_lite_video_t *)vid, GUI_VIDEO_STATE_PLAYING);
         break;
@@ -591,7 +591,7 @@ void switch_mainface(gui_obj_t *parent, uint8_t idx)
     case SRC_IMG_SPATIAL:
         /* code */
         break;
-    case SRC_DANNU:
+    case SRC_DANMU:
     {
 #ifdef _HONEYGUI_SIMULATOR_
         gui_img_t *img_0 = gui_img_create_from_fs((void *)win, 0, mainface_list[idx].data, 0, 0, 0, 0);
@@ -944,16 +944,29 @@ void mainface_list_delete(void *obj)
 static void mainface_list_add(void *data)
 {
     if (mainface_num == MAINFACE_NUM_MAX) return;
-    gui_log("Add resource 0x%x\n", data);
-    if(!data)
+
+    uint32_t info[2];
+    memcpy(info, data, 8);
+    gui_log("Add resource 0x%x sz %d\n", info[0], info[1]);
+    if(!info[0] || !info[1])
     {
         gui_log("New passed resource  is NULL!!!!!!!!!!!!!!!!!\n");
         return ;
     }
 
-    mainface_list[mainface_num].data = data;
-    mainface_list[mainface_num].type = (*(uint8_t *)(data) == 0x52)? SRC_VIDEO: SRC_IMG;
+    
+    mainface_list[mainface_num].data = info[0];
+    mainface_list[mainface_num].type = (*(uint8_t *)(info[0]) == 0x52)? SRC_VIDEO: SRC_IMG;
     mainface_num++;
+
+    if(mainface_list[mainface_num].type == SRC_IMG)
+    {
+        uint8_t *pdata = info[0] + info[1] - 1;
+        if(*pdata)      
+        {
+            mainface_list[mainface_num].type = SRC_DANMU;
+        }  
+    }
 
     void *view = NULL;
     mainface_idx = mainface_num - 1;
@@ -1051,12 +1064,18 @@ uint8_t mainface_list_init(void **data_list, uint32_t n)
     
     while (data_list[idx] != NULL && ((idx < MAINFACE_NUM_MAX) && (idx < n)))
     {
-        
-        mainface_list[idx].data = data_list[idx];
+        void *addr = data_list[2*idx];
+        uint32_t size = data_list[2*idx + 1];
+
+        mainface_list[idx].data = addr;
         mainface_list[idx].type = SRC_IMG;
-        if (*(uint8_t *)data_list[idx] == 0x52)
+        if (*(uint8_t *)addr == 0x52)
         {
             mainface_list[idx].type = SRC_VIDEO;
+        }
+        if (mainface_list[idx].type == SRC_IMG && (addr >= USER_RESOURCE_ADDR ) && (*((uint8_t *)addr + size - 1) == 0x01))
+        {
+            mainface_list[idx].type = SRC_DANMU;
         }
         gui_log("list init %d, 0x%x %d", idx, mainface_list[idx].data, mainface_list[idx].type);
         idx++;

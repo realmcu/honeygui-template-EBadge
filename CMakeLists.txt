@@ -32,10 +32,33 @@ if(CONFIG_REALTEK_BUILD_EXAMPLE_EBADGE) #set to 1 to enable or variable to for d
         target_include_directories(${APP_TARGET_NAME} PUBLIC ${ZEPHYR_BASE}/../modules/display/device/key_button/8773G)
     endif()
 
+    # HoneyGUI designer generated UI code lives under src/ (mirrors app/designer/SConscript).
+    # The root-level GLOB above only covers this directory; src/ has no CMakeLists of its
+    # own, so add its sources and include paths explicitly here at this level.
+    file(GLOB DESIGNER_UI_SOURCES
+         "src/easy_demoEntry.c"
+         "src/callbacks/*.c"
+         "src/user/*.c"
+         "src/ui/*.c")
+
+    if(DESIGNER_UI_SOURCES)
+        target_sources(${APP_TARGET_NAME} PRIVATE ${DESIGNER_UI_SOURCES})
+        target_include_directories(${APP_TARGET_NAME} PUBLIC
+            ${CMAKE_CURRENT_SOURCE_DIR}/src/callbacks
+            ${CMAKE_CURRENT_SOURCE_DIR}/src/ui
+            ${CMAKE_CURRENT_SOURCE_DIR}/src/user)
+    endif()
+
     # Process subdirectories regardless
     file(GLOB SUBDIRS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/*)
 
     foreach(subdir ${SUBDIRS})
+        # Skip build/: it is the SDL PC-simulator project (hard-codes gcc/g++, links
+        # mingw/SDL2/opengl32) and must not be pulled into the Zephyr firmware build.
+        # SConscript likewise collects only src/, never build/.
+        if(subdir STREQUAL "build")
+            continue()
+        endif()
         if(IS_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/${subdir})
             if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/${subdir}/CMakeLists.txt)
                 add_subdirectory(${subdir})

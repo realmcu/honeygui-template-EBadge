@@ -21,7 +21,7 @@ typedef enum
     SRC_VIDEO,
     SRC_3D,
     SRC_IMG_SPATIAL,
-    SRC_DANNU,
+    SRC_DANMU,
 } MAINFACE_SRC_TYPE;
 
 typedef struct mainface_src

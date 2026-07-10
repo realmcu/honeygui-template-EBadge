@@ -402,7 +402,7 @@ static void view_1_switch_in(gui_view_t *view)
 
     // Create vid_test (hg_video)
     vid_test = gui_lite_video_create_from_fs((gui_obj_t *)view, "vid_test", "/wallpaper_video.avi", 0, 0, 360, 360);
-    gui_lite_video_set_frame_rate((gui_lite_video_t *)vid_test, 35.f);
+    gui_lite_video_set_frame_rate((gui_lite_video_t *)vid_test, 30.f);
     gui_lite_video_set_repeat_count((gui_lite_video_t *)vid_test, GUI_VIDEO_REPEAT_INFINITE);
     gui_lite_video_set_state((gui_lite_video_t *)vid_test, GUI_VIDEO_STATE_PLAYING);
 }
