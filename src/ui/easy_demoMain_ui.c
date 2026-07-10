@@ -1,5 +1,6 @@
 /**
  * easy_demoMain UI Implementation (Auto-generated, do not modify manually)
+ * Generated at: 2026-07-10T07:52:37.886Z
  */
 #include "easy_demoMain_ui.h"
 #include "../callbacks/easy_demoMain_callbacks.h"
@@ -29,7 +30,7 @@ static void easy_demoMainView_switch_out(gui_view_t *view)
 static void easy_demoMainView_switch_in(gui_view_t *view)
 {
     // Set animation step
-    gui_view_set_animate_step(view, 360);
+    gui_view_set_animate_step(view, 36);
 
     // Set opacity
     gui_view_set_opacity(view, 255);
@@ -57,7 +58,7 @@ static void mainface_view_1_switch_out(gui_view_t *view)
 static void mainface_view_1_switch_in(gui_view_t *view)
 {
     // Set animation step
-    gui_view_set_animate_step(view, 360);
+    gui_view_set_animate_step(view, 36);
 
     // Set opacity
     gui_view_set_opacity(view, 255);
@@ -85,7 +86,7 @@ static void mainface_view_2_switch_out(gui_view_t *view)
 static void mainface_view_2_switch_in(gui_view_t *view)
 {
     // Set animation step
-    gui_view_set_animate_step(view, 360);
+    gui_view_set_animate_step(view, 36);
 
     // Set opacity
     gui_view_set_opacity(view, 255);
@@ -113,7 +114,7 @@ static void mainface_view_3_switch_out(gui_view_t *view)
 static void mainface_view_3_switch_in(gui_view_t *view)
 {
     // Set animation step
-    gui_view_set_animate_step(view, 360);
+    gui_view_set_animate_step(view, 36);
 
     // Set opacity
     gui_view_set_opacity(view, 255);
@@ -141,7 +142,7 @@ static void mainface_view_4_switch_out(gui_view_t *view)
 static void mainface_view_4_switch_in(gui_view_t *view)
 {
     // Set animation step
-    gui_view_set_animate_step(view, 360);
+    gui_view_set_animate_step(view, 36);
 
     // Set opacity
     gui_view_set_opacity(view, 255);
@@ -169,7 +170,7 @@ static void mainface_view_5_switch_out(gui_view_t *view)
 static void mainface_view_5_switch_in(gui_view_t *view)
 {
     // Set animation step
-    gui_view_set_animate_step(view, 360);
+    gui_view_set_animate_step(view, 36);
 
     // Set opacity
     gui_view_set_opacity(view, 255);
@@ -197,7 +198,7 @@ static void mainface_view_6_switch_out(gui_view_t *view)
 static void mainface_view_6_switch_in(gui_view_t *view)
 {
     // Set animation step
-    gui_view_set_animate_step(view, 360);
+    gui_view_set_animate_step(view, 36);
 
     // Set opacity
     gui_view_set_opacity(view, 255);
@@ -225,7 +226,7 @@ static void mainface_view_7_switch_out(gui_view_t *view)
 static void mainface_view_7_switch_in(gui_view_t *view)
 {
     // Set animation step
-    gui_view_set_animate_step(view, 360);
+    gui_view_set_animate_step(view, 36);
 
     // Set opacity
     gui_view_set_opacity(view, 255);
@@ -253,7 +254,7 @@ static void mainface_view_8_switch_out(gui_view_t *view)
 static void mainface_view_8_switch_in(gui_view_t *view)
 {
     // Set animation step
-    gui_view_set_animate_step(view, 360);
+    gui_view_set_animate_step(view, 36);
 
     // Set opacity
     gui_view_set_opacity(view, 255);
@@ -281,7 +282,7 @@ static void mainface_view_9_switch_out(gui_view_t *view)
 static void mainface_view_9_switch_in(gui_view_t *view)
 {
     // Set animation step
-    gui_view_set_animate_step(view, 360);
+    gui_view_set_animate_step(view, 36);
 
     // Set opacity
     gui_view_set_opacity(view, 255);
@@ -400,7 +401,7 @@ static void view_1_switch_in(gui_view_t *view)
 
 
     // Create vid_test (hg_video)
-    vid_test = gui_lite_video_create_from_fs((gui_obj_t *)view, "vid_test", "/wallpaper_video.avi", 0, 0, 365, 360);
+    vid_test = gui_lite_video_create_from_fs((gui_obj_t *)view, "vid_test", "/wallpaper_video.avi", 0, 0, 360, 360);
     gui_lite_video_set_frame_rate((gui_lite_video_t *)vid_test, 35.f);
     gui_lite_video_set_repeat_count((gui_lite_video_t *)vid_test, GUI_VIDEO_REPEAT_INFINITE);
     gui_lite_video_set_state((gui_lite_video_t *)vid_test, GUI_VIDEO_STATE_PLAYING);

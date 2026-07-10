@@ -285,6 +285,31 @@ static void *gui_pure_rle_create(uint32_t argb, uint8_t fmt,
     return buffer;
 }
 
+uint32_t get_img_color(uint8_t *img_data)
+{
+    uint32_t color = 0;
+    if (img_data[0] & 0x10) // Compressed (RLE)
+    {
+        /* Layout: gui_rgb_data_head_t(8B) + imdc_file_header_t(12B)
+         *         + row offset table((height+1)*4B) + RLE data.
+         * Row offsets are relative to the imdc header start (file offset 8).
+         * Each RLE node = [run length (1B)] [pixel (bpp)].
+         * Use byte reads: the first pixel sits at an odd (unaligned) offset. */
+        const uint8_t *row_table = img_data + 8 + 12;      /* row offset table  */
+        uint32_t row0_off = (uint32_t)row_table[0]
+                          | ((uint32_t)row_table[1] << 8)
+                          | ((uint32_t)row_table[2] << 16)
+                          | ((uint32_t)row_table[3] << 24);
+        const uint8_t *pixel = img_data + 8 + row0_off + 1; /* skip run length   */
+        color = (uint16_t)(pixel[0] | (pixel[1] << 8));     /* RGB565, little-end */
+    }
+    else
+    {
+        color = ((uint16_t *)img_data)[4]; //RGB565
+    }
+    return color;
+}
+
 static void msg_2_regenerate_view(void *msg)
 {
     GUI_UNUSED(msg);
@@ -514,6 +539,8 @@ void switch_mainface(gui_obj_t *parent, uint8_t idx)
         return;
     }
 
+    gui_event_code_t event_code_l = GUI_EVENT_TOUCH_MOVE_LEFT;
+    gui_event_code_t event_code_r = GUI_EVENT_TOUCH_MOVE_RIGHT;
     switch (mainface_list[idx].type)
     {
     case SRC_VIDEO:
@@ -558,6 +585,8 @@ void switch_mainface(gui_obj_t *parent, uint8_t idx)
     }
     case SRC_3D:
         /* code */
+        event_code_l = GUI_EVENT_TOUCH_LEFT_SLIDE_QUICK;
+        event_code_r = GUI_EVENT_TOUCH_RIGHT_SLIDE_QUICK;
         break;
     case SRC_IMG_SPATIAL:
         /* code */
@@ -572,7 +601,7 @@ void switch_mainface(gui_obj_t *parent, uint8_t idx)
             gui_obj_move((void *)img_0, SCREEN_SIZE, img_y);
             gui_list_remove(&GUI_BASE(win)->brother_list);
             const void *src_data = gui_img_get_image_data(img_0);
-            uint32_t color = (uint16_t)(((uint16_t *)src_data)[4]);
+            uint32_t color = get_img_color((uint8_t *)src_data);
             gui_log("bg color = 0x%x\n", color);
             void *img_bg_data = gui_pure_rle_create(color, ((uint8_t *)src_data)[1], SCREEN_SIZE, SCREEN_SIZE);
 
@@ -602,7 +631,7 @@ void switch_mainface(gui_obj_t *parent, uint8_t idx)
             gui_obj_move((void *)img_0, SCREEN_SIZE, img_y);
             gui_list_remove(&GUI_BASE(win)->brother_list);
             const void *src_data = gui_img_get_image_data(img_0);
-            uint32_t color = (uint16_t)(((uint16_t *)src_data)[4]);
+            uint32_t color = get_img_color((uint8_t *)src_data);
             gui_log("bg color = 0x%x\n", color);
             void *img_bg_data = gui_pure_rle_create(color, ((uint8_t *)src_data)[1], SCREEN_SIZE, SCREEN_SIZE);
 
@@ -729,8 +758,8 @@ void switch_mainface(gui_obj_t *parent, uint8_t idx)
     {
         view_right = view_first;
     }
-    gui_view_switch_on_event((void *)parent, view_right, SWITCH_OUT_TO_LEFT_USE_TRANSLATION, SWITCH_IN_FROM_RIGHT_USE_TRANSLATION, GUI_EVENT_TOUCH_MOVE_LEFT);
-    gui_view_switch_on_event((void *)parent, view_left, SWITCH_OUT_TO_RIGHT_USE_TRANSLATION, SWITCH_IN_FROM_LEFT_USE_TRANSLATION, GUI_EVENT_TOUCH_MOVE_RIGHT);
+    gui_view_switch_on_event((void *)parent, view_right, SWITCH_OUT_TO_LEFT_USE_TRANSLATION, SWITCH_IN_FROM_RIGHT_USE_TRANSLATION, event_code_l);
+    gui_view_switch_on_event((void *)parent, view_left, SWITCH_OUT_TO_RIGHT_USE_TRANSLATION, SWITCH_IN_FROM_LEFT_USE_TRANSLATION, event_code_r);
 }
 
 void click_auto_sleep_icon(void *obj, gui_event_t *e)
