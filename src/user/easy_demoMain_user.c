@@ -20,12 +20,13 @@
 gui_win_t *win_view = NULL;
 
 uint8_t mainface_idx = 0;
-uint8_t mainface_num = 3;
+uint8_t mainface_num = 4;
 mainface_src_t mainface_list[MAINFACE_NUM_MAX] =
 {
     {"/image/565/wallpaper_danmu.bin", SRC_DANMU},
-    {"/image/565/wallpaper_static_img.bin", SRC_IMG},
     {"/wallpaper_video.avi", SRC_VIDEO},
+    {"/image/565/wallpaper_static_img.bin", SRC_IMG},
+    {"/foreground_360.bin", SRC_IMG_SPATIAL},
 
 };
 bool is_auto_sleep_mode = false;
@@ -589,8 +590,19 @@ void switch_mainface(gui_obj_t *parent, uint8_t idx)
         event_code_r = GUI_EVENT_TOUCH_RIGHT_SLIDE_QUICK;
         break;
     case SRC_IMG_SPATIAL:
+    {
         /* code */
+        extern int spatial_wallpaper(gui_obj_t *parent);
+        // spatial_wallpaper(gui_obj_get_root());
+        /* 用独立容器 sw_root 承载壁纸的两层(+ctrl)，不要直接挂 win：
+         * win_timer_0_cb 把 win 的第 2 个 child 硬编码当成 lock_icon，未触摸时
+         * 每 20ms gui_obj_hidden(它, true)。直接挂 win 会让 sw_stage_fg(恰为 win
+         * 第 2 个 child)被周期性隐藏 → 前景消失。套一层后 win 的 child[0]=sw_root、
+         * child[1]=真正的 lock_icon，win_timer_0_cb 恢复正常，且不动壁纸内部逻辑。 */
+        gui_obj_t *sw_root = gui_obj_create(win, "sw_root", 0, 0, 0, 0);
+        spatial_wallpaper(sw_root);
         break;
+    }
     case SRC_DANMU:
     {
 #ifdef _HONEYGUI_SIMULATOR_
@@ -955,18 +967,18 @@ static void mainface_list_add(void *data)
     }
 
     
-    mainface_list[mainface_num].data = info[0];
+    mainface_list[mainface_num].data = (void *)info[0];
     mainface_list[mainface_num].type = (*(uint8_t *)(info[0]) == 0x52)? SRC_VIDEO: SRC_IMG;
-    mainface_num++;
-
     if(mainface_list[mainface_num].type == SRC_IMG)
     {
-        uint8_t *pdata = info[0] + info[1] - 1;
+        uint8_t *pdata = (uint8_t *)(info[0] + info[1] - 1);
         if(*pdata)      
         {
             mainface_list[mainface_num].type = SRC_DANMU;
+            gui_log("Add danmu\n");
         }  
     }
+    mainface_num++;
 
     void *view = NULL;
     mainface_idx = mainface_num - 1;
@@ -1065,7 +1077,7 @@ uint8_t mainface_list_init(void **data_list, uint32_t n)
     while (data_list[idx] != NULL && ((idx < MAINFACE_NUM_MAX) && (idx < n)))
     {
         void *addr = data_list[2*idx];
-        uint32_t size = data_list[2*idx + 1];
+        
 
         mainface_list[idx].data = addr;
         mainface_list[idx].type = SRC_IMG;
@@ -1073,10 +1085,14 @@ uint8_t mainface_list_init(void **data_list, uint32_t n)
         {
             mainface_list[idx].type = SRC_VIDEO;
         }
+#ifdef _HONEYGUI_SIMULATOR_
+#else
+        uint32_t size = (uint32_t)data_list[2*idx + 1];
         if (mainface_list[idx].type == SRC_IMG && (addr >= USER_RESOURCE_ADDR ) && (*((uint8_t *)addr + size - 1) == 0x01))
         {
             mainface_list[idx].type = SRC_DANMU;
         }
+#endif
         gui_log("list init %d, 0x%x %d", idx, mainface_list[idx].data, mainface_list[idx].type);
         idx++;
     }
@@ -1172,7 +1188,7 @@ void ui_process_msg(void *arg)
 
 void ui_add_resource(uint32_t payload)
 {
-    gui_msg_t msg = {.event = GUI_EVENT_USER_DEFINE, .sub_event = ADD_MAINFACE, .payload = (void *)payload,.cb = (gui_msg_cb)ui_process_msg};    
+    gui_msg_t msg = {.event = GUI_EVENT_USER_DEFINE, .sub_event = ADD_MAINFACE, .cb = (gui_msg_cb)ui_process_msg, .payload = (void *)payload};    
     gui_send_msg_to_server(&msg);
 }
 void ui_jump_streaming(void)

@@ -21,12 +21,19 @@ static int app_init(void)
     /* @protected start app_init_pre */
     // Add user initialization code here (runs before the main view is created)
 #ifndef _HONEYGUI_SIMULATOR_
+
+    extern int posix_port_init_all(void);
+    posix_port_init_all();
+
     extern int flashdb_prepare(void);
     flashdb_prepare();
 
     extern int app_stream_transport_init(void);
     app_stream_transport_init();
 
+    // extern int spatial_wallpaper(gui_obj_t *parent);
+    // spatial_wallpaper(gui_obj_get_root());
+    // return 0;
 #endif
 
     extern gui_win_t *win_view;

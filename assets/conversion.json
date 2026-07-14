@@ -61,6 +61,14 @@
     },
     "wallpaper_video.mp4": {
       "videoFormat": "CINEPAK"
+    },
+    "background_clean_360.jpg": {
+      "format": "RGB565",
+      "compression": "adaptive"
+    },
+    "foreground_360.png": {
+      "format": "ARGB8565",
+      "compression": "adaptive"
     }
   }
 }

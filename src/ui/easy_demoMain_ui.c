@@ -1,6 +1,5 @@
 /**
  * easy_demoMain UI Implementation (Auto-generated, do not modify manually)
- * Generated at: 2026-07-10T07:52:37.886Z
  */
 #include "easy_demoMain_ui.h"
 #include "../callbacks/easy_demoMain_callbacks.h"
