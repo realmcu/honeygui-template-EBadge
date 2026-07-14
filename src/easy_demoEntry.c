@@ -31,9 +31,6 @@ static int app_init(void)
     extern int app_stream_transport_init(void);
     app_stream_transport_init();
 
-    // extern int spatial_wallpaper(gui_obj_t *parent);
-    // spatial_wallpaper(gui_obj_get_root());
-    // return 0;
 #endif
 
     extern gui_win_t *win_view;

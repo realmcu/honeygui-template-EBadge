@@ -12,8 +12,8 @@
 
 #else
 #include "flashdb.h"
-#define USER_RESOURCE_ADDR     (0x704D1400u +   0x700000u)
-#define USER_RESOURCE_ADDR_END (0x704D1400u + 0x00998000) // 0x00998000  //9824K Bytes
+#define USER_RESOURCE_ADDR     (FDB_BF_DATA_PART_OFFSET)
+#define USER_RESOURCE_ADDR_END (FDB_BF_DATA_PART_OFFSET + FDB_BF_DATA_SIZE) // 0x00998000  //9824K Bytes
 
 #endif
 
@@ -593,12 +593,6 @@ void switch_mainface(gui_obj_t *parent, uint8_t idx)
     {
         /* code */
         extern int spatial_wallpaper(gui_obj_t *parent);
-        // spatial_wallpaper(gui_obj_get_root());
-        /* 用独立容器 sw_root 承载壁纸的两层(+ctrl)，不要直接挂 win：
-         * win_timer_0_cb 把 win 的第 2 个 child 硬编码当成 lock_icon，未触摸时
-         * 每 20ms gui_obj_hidden(它, true)。直接挂 win 会让 sw_stage_fg(恰为 win
-         * 第 2 个 child)被周期性隐藏 → 前景消失。套一层后 win 的 child[0]=sw_root、
-         * child[1]=真正的 lock_icon，win_timer_0_cb 恢复正常，且不动壁纸内部逻辑。 */
         gui_obj_t *sw_root = gui_obj_create(win, "sw_root", 0, 0, 0, 0);
         spatial_wallpaper(sw_root);
         break;
@@ -1088,7 +1082,7 @@ uint8_t mainface_list_init(void **data_list, uint32_t n)
 #ifdef _HONEYGUI_SIMULATOR_
 #else
         uint32_t size = (uint32_t)data_list[2*idx + 1];
-        if (mainface_list[idx].type == SRC_IMG && (addr >= USER_RESOURCE_ADDR ) && (*((uint8_t *)addr + size - 1) == 0x01))
+        if (mainface_list[idx].type == SRC_IMG && ((uint32_t)addr >= USER_RESOURCE_ADDR ) && (*((uint8_t *)addr + size - 1) == 0x01))
         {
             mainface_list[idx].type = SRC_DANMU;
         }
