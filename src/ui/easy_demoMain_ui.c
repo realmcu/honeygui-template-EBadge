@@ -16,14 +16,13 @@ gui_img_t *icon_sl = NULL;
 gui_img_t *icon_as = NULL;
 gui_img_t *icon_cam = NULL;
 gui_text_t *lbl_1 = NULL;
-gui_lite_video_t *vid_test = NULL;
 gui_stream_t *streaming_1 = NULL;
 
 
 // Create easy_demoMainView (hg_view)
 static void easy_demoMainView_switch_out(gui_view_t *view)
 {
-    GUI_UNUSED(view);
+    free_3d_temp_data(view);
 }
 
 static void easy_demoMainView_switch_in(gui_view_t *view)
@@ -51,7 +50,7 @@ GUI_VIEW_INSTANCE("easy_demoMainView", false, easy_demoMainView_switch_in, easy_
 // Create mainface_view_1 (hg_view)
 static void mainface_view_1_switch_out(gui_view_t *view)
 {
-    switch_out_mainface_1(view);
+    free_3d_temp_data(view);
 }
 
 static void mainface_view_1_switch_in(gui_view_t *view)
@@ -79,7 +78,7 @@ GUI_VIEW_INSTANCE("mainface_view_1", false, mainface_view_1_switch_in, mainface_
 // Create mainface_view_2 (hg_view)
 static void mainface_view_2_switch_out(gui_view_t *view)
 {
-    switch_out_mainface_2(view);
+    free_3d_temp_data(view);
 }
 
 static void mainface_view_2_switch_in(gui_view_t *view)
@@ -107,7 +106,7 @@ GUI_VIEW_INSTANCE("mainface_view_2", false, mainface_view_2_switch_in, mainface_
 // Create mainface_view_3 (hg_view)
 static void mainface_view_3_switch_out(gui_view_t *view)
 {
-    switch_out_mainface_3(view);
+    free_3d_temp_data(view);
 }
 
 static void mainface_view_3_switch_in(gui_view_t *view)
@@ -135,7 +134,7 @@ GUI_VIEW_INSTANCE("mainface_view_3", false, mainface_view_3_switch_in, mainface_
 // Create mainface_view_4 (hg_view)
 static void mainface_view_4_switch_out(gui_view_t *view)
 {
-    switch_out_mainface_4(view);
+    free_3d_temp_data(view);
 }
 
 static void mainface_view_4_switch_in(gui_view_t *view)
@@ -163,7 +162,7 @@ GUI_VIEW_INSTANCE("mainface_view_4", false, mainface_view_4_switch_in, mainface_
 // Create mainface_view_5 (hg_view)
 static void mainface_view_5_switch_out(gui_view_t *view)
 {
-    switch_out_mainface_5(view);
+    free_3d_temp_data(view);
 }
 
 static void mainface_view_5_switch_in(gui_view_t *view)
@@ -191,7 +190,7 @@ GUI_VIEW_INSTANCE("mainface_view_5", false, mainface_view_5_switch_in, mainface_
 // Create mainface_view_6 (hg_view)
 static void mainface_view_6_switch_out(gui_view_t *view)
 {
-    switch_out_mainface_6(view);
+    free_3d_temp_data(view);
 }
 
 static void mainface_view_6_switch_in(gui_view_t *view)
@@ -219,7 +218,7 @@ GUI_VIEW_INSTANCE("mainface_view_6", false, mainface_view_6_switch_in, mainface_
 // Create mainface_view_7 (hg_view)
 static void mainface_view_7_switch_out(gui_view_t *view)
 {
-    switch_out_mainface_7(view);
+    free_3d_temp_data(view);
 }
 
 static void mainface_view_7_switch_in(gui_view_t *view)
@@ -247,7 +246,7 @@ GUI_VIEW_INSTANCE("mainface_view_7", false, mainface_view_7_switch_in, mainface_
 // Create mainface_view_8 (hg_view)
 static void mainface_view_8_switch_out(gui_view_t *view)
 {
-    switch_out_mainface_8(view);
+    free_3d_temp_data(view);
 }
 
 static void mainface_view_8_switch_in(gui_view_t *view)
@@ -275,7 +274,7 @@ GUI_VIEW_INSTANCE("mainface_view_8", false, mainface_view_8_switch_in, mainface_
 // Create mainface_view_9 (hg_view)
 static void mainface_view_9_switch_out(gui_view_t *view)
 {
-    switch_out_mainface_9(view);
+    free_3d_temp_data(view);
 }
 
 static void mainface_view_9_switch_in(gui_view_t *view)
@@ -378,34 +377,6 @@ static void top_view_switch_in(gui_view_t *view)
     gui_obj_focus_set((gui_obj_t *)view);
 }
 GUI_VIEW_INSTANCE("top_view", false, top_view_switch_in, top_view_switch_out, false);
-
-// Create view_1 (hg_view)
-static void view_1_switch_out(gui_view_t *view)
-{
-    GUI_UNUSED(view);
-}
-
-static void view_1_switch_in(gui_view_t *view)
-{
-    // Set animation step
-    gui_view_set_animate_step(view, 36);
-
-    // Set opacity
-    gui_view_set_opacity(view, 255);
-
-    // Set background color
-    gui_view_set_bg_color(view, gui_rgb(0, 0, 0));
-
-    GUI_UNUSED(view);
-
-
-    // Create vid_test (hg_video)
-    vid_test = gui_lite_video_create_from_fs((gui_obj_t *)view, "vid_test", "/wallpaper_video.avi", 0, 0, 360, 360);
-    gui_lite_video_set_frame_rate((gui_lite_video_t *)vid_test, 30.f);
-    gui_lite_video_set_repeat_count((gui_lite_video_t *)vid_test, GUI_VIDEO_REPEAT_INFINITE);
-    gui_lite_video_set_state((gui_lite_video_t *)vid_test, GUI_VIDEO_STATE_PLAYING);
-}
-GUI_VIEW_INSTANCE("view_1", false, view_1_switch_in, view_1_switch_out, false);
 
 // Create view_cam_ctl (hg_view)
 static void view_cam_ctl_switch_out(gui_view_t *view)
