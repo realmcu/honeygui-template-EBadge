@@ -105,7 +105,7 @@ static void menuMainView_switch_in(gui_view_t *view)
     gui_view_set_opacity(view, 255);
 
     // Set background color
-    gui_set_bg_color(gui_rgb(0, 0, 0));
+    gui_view_set_bg_color(view, gui_rgb(0, 0, 0));
 
     // Bind timer: 动画 1
     gui_obj_create_timer((gui_obj_t *)view, 20, true, menuMainView_timer_0_cb);
@@ -140,7 +140,7 @@ static void menuDetailView_switch_in(gui_view_t *view)
     gui_view_set_opacity(view, 255);
 
     // Set background color
-    gui_set_bg_color(gui_rgb(0, 0, 0));
+    gui_view_set_bg_color(view, gui_rgb(0, 0, 0));
 
     GUI_UNUSED(view);
 

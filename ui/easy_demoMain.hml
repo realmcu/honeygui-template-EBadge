@@ -5,7 +5,7 @@
         <author name="Anonymous" />
     </meta>
     <view>
-        <hg_view id="easy_demoMainView" x="11" y="0" width="360" height="360" backgroundColor="#000000" entry="true" animateStep="36" timers="[{&quot;id&quot;:&quot;timer_0&quot;,&quot;name&quot;:&quot;动画 1&quot;,&quot;enabled&quot;:true,&quot;interval&quot;:1000,&quot;reload&quot;:true,&quot;mode&quot;:&quot;custom&quot;,&quot;callback&quot;:&quot;easy_demoMainView_timer_0_cb&quot;,&quot;duration&quot;:1000,&quot;stopOnComplete&quot;:true,&quot;delayStart&quot;:0,&quot;actions&quot;:[],&quot;segments&quot;:[],&quot;runImmediately&quot;:true}]" switchOutFunctionName="switch_out_mainface_0" zIndex="0">
+        <hg_view id="easy_demoMainView" x="11" y="0" width="360" height="360" backgroundColor="#000000" entry="true" animateStep="36" timers="[{&quot;id&quot;:&quot;timer_0&quot;,&quot;name&quot;:&quot;动画 1&quot;,&quot;enabled&quot;:true,&quot;interval&quot;:1000,&quot;reload&quot;:true,&quot;mode&quot;:&quot;custom&quot;,&quot;callback&quot;:&quot;easy_demoMainView_timer_0_cb&quot;,&quot;duration&quot;:1000,&quot;stopOnComplete&quot;:true,&quot;delayStart&quot;:0,&quot;actions&quot;:[],&quot;segments&quot;:[],&quot;runImmediately&quot;:true}]" switchOutFunctionName="free_3d_temp_data" zIndex="0">
             <events>
                 <event type="onKeyShortPress" keyName="Menu">
                     <action type="switchView" target="bt_View" switchOutStyle="SWITCH_OUT_NONE_ANIMATION" switchInStyle="SWITCH_IN_NONE_ANIMATION" />
@@ -15,7 +15,7 @@
                 </event>
             </events>
         </hg_view>
-        <hg_view id="mainface_view_1" x="584" y="0" width="360" height="360" backgroundColor="#000000" entry="false" animateStep="36" timers="[{&quot;id&quot;:&quot;timer_0&quot;,&quot;name&quot;:&quot;动画 1&quot;,&quot;enabled&quot;:true,&quot;interval&quot;:1000,&quot;reload&quot;:true,&quot;mode&quot;:&quot;custom&quot;,&quot;callback&quot;:&quot;mainface_view_1_timer_0_cb&quot;,&quot;duration&quot;:1000,&quot;stopOnComplete&quot;:true,&quot;delayStart&quot;:0,&quot;actions&quot;:[],&quot;segments&quot;:[],&quot;runImmediately&quot;:true}]" switchOutFunctionName="switch_out_mainface_1" zIndex="0">
+        <hg_view id="mainface_view_1" x="584" y="0" width="360" height="360" backgroundColor="#000000" entry="false" animateStep="36" timers="[{&quot;id&quot;:&quot;timer_0&quot;,&quot;name&quot;:&quot;动画 1&quot;,&quot;enabled&quot;:true,&quot;interval&quot;:1000,&quot;reload&quot;:true,&quot;mode&quot;:&quot;custom&quot;,&quot;callback&quot;:&quot;mainface_view_1_timer_0_cb&quot;,&quot;duration&quot;:1000,&quot;stopOnComplete&quot;:true,&quot;delayStart&quot;:0,&quot;actions&quot;:[],&quot;segments&quot;:[],&quot;runImmediately&quot;:true}]" switchOutFunctionName="free_3d_temp_data" zIndex="0">
             <events>
                 <event type="onKeyShortPress" keyName="Menu">
                     <action type="switchView" target="bt_View" switchOutStyle="SWITCH_INIT_STATE" switchInStyle="SWITCH_IN_NONE_ANIMATION" />
@@ -25,7 +25,7 @@
                 </event>
             </events>
         </hg_view>
-        <hg_view id="mainface_view_2" x="1183" y="8" width="360" height="360" backgroundColor="#000000" entry="false" animateStep="36" timers="[{&quot;id&quot;:&quot;timer_0&quot;,&quot;name&quot;:&quot;动画 1&quot;,&quot;enabled&quot;:true,&quot;interval&quot;:1000,&quot;reload&quot;:true,&quot;mode&quot;:&quot;custom&quot;,&quot;callback&quot;:&quot;mainface_view_2_timer_0_cb&quot;,&quot;duration&quot;:1000,&quot;stopOnComplete&quot;:true,&quot;delayStart&quot;:0,&quot;actions&quot;:[],&quot;segments&quot;:[],&quot;runImmediately&quot;:true}]" switchOutFunctionName="switch_out_mainface_2" zIndex="0">
+        <hg_view id="mainface_view_2" x="1183" y="8" width="360" height="360" backgroundColor="#000000" entry="false" animateStep="36" timers="[{&quot;id&quot;:&quot;timer_0&quot;,&quot;name&quot;:&quot;动画 1&quot;,&quot;enabled&quot;:true,&quot;interval&quot;:1000,&quot;reload&quot;:true,&quot;mode&quot;:&quot;custom&quot;,&quot;callback&quot;:&quot;mainface_view_2_timer_0_cb&quot;,&quot;duration&quot;:1000,&quot;stopOnComplete&quot;:true,&quot;delayStart&quot;:0,&quot;actions&quot;:[],&quot;segments&quot;:[],&quot;runImmediately&quot;:true}]" switchOutFunctionName="free_3d_temp_data" zIndex="0">
             <events>
                 <event type="onKeyShortPress" keyName="Menu">
                     <action type="switchView" target="bt_View" switchOutStyle="SWITCH_INIT_STATE" switchInStyle="SWITCH_IN_NONE_ANIMATION" />
@@ -35,7 +35,7 @@
                 </event>
             </events>
         </hg_view>
-        <hg_view id="mainface_view_3" x="1803" y="8" width="360" height="360" backgroundColor="#000000" entry="false" animateStep="36" timers="[{&quot;id&quot;:&quot;timer_0&quot;,&quot;name&quot;:&quot;动画 1&quot;,&quot;enabled&quot;:true,&quot;interval&quot;:1000,&quot;reload&quot;:true,&quot;mode&quot;:&quot;custom&quot;,&quot;callback&quot;:&quot;mainface_view_3_timer_0_cb&quot;,&quot;duration&quot;:1000,&quot;stopOnComplete&quot;:true,&quot;delayStart&quot;:0,&quot;actions&quot;:[],&quot;segments&quot;:[],&quot;runImmediately&quot;:true}]" switchOutFunctionName="switch_out_mainface_3" zIndex="0">
+        <hg_view id="mainface_view_3" x="1803" y="8" width="360" height="360" backgroundColor="#000000" entry="false" animateStep="36" timers="[{&quot;id&quot;:&quot;timer_0&quot;,&quot;name&quot;:&quot;动画 1&quot;,&quot;enabled&quot;:true,&quot;interval&quot;:1000,&quot;reload&quot;:true,&quot;mode&quot;:&quot;custom&quot;,&quot;callback&quot;:&quot;mainface_view_3_timer_0_cb&quot;,&quot;duration&quot;:1000,&quot;stopOnComplete&quot;:true,&quot;delayStart&quot;:0,&quot;actions&quot;:[],&quot;segments&quot;:[],&quot;runImmediately&quot;:true}]" switchOutFunctionName="free_3d_temp_data" zIndex="0">
             <events>
                 <event type="onKeyShortPress" keyName="Menu">
                     <action type="switchView" target="bt_View" switchOutStyle="SWITCH_INIT_STATE" switchInStyle="SWITCH_IN_NONE_ANIMATION" />
@@ -45,7 +45,7 @@
                 </event>
             </events>
         </hg_view>
-        <hg_view id="mainface_view_4" x="2343" y="8" width="360" height="360" backgroundColor="#000000" entry="false" animateStep="36" timers="[{&quot;id&quot;:&quot;timer_0&quot;,&quot;name&quot;:&quot;动画 1&quot;,&quot;enabled&quot;:true,&quot;interval&quot;:1000,&quot;reload&quot;:true,&quot;mode&quot;:&quot;custom&quot;,&quot;callback&quot;:&quot;mainface_view_4_timer_0_cb&quot;,&quot;duration&quot;:1000,&quot;stopOnComplete&quot;:true,&quot;delayStart&quot;:0,&quot;actions&quot;:[],&quot;segments&quot;:[],&quot;runImmediately&quot;:true}]" switchOutFunctionName="switch_out_mainface_4" zIndex="0">
+        <hg_view id="mainface_view_4" x="2343" y="8" width="360" height="360" backgroundColor="#000000" entry="false" animateStep="36" timers="[{&quot;id&quot;:&quot;timer_0&quot;,&quot;name&quot;:&quot;动画 1&quot;,&quot;enabled&quot;:true,&quot;interval&quot;:1000,&quot;reload&quot;:true,&quot;mode&quot;:&quot;custom&quot;,&quot;callback&quot;:&quot;mainface_view_4_timer_0_cb&quot;,&quot;duration&quot;:1000,&quot;stopOnComplete&quot;:true,&quot;delayStart&quot;:0,&quot;actions&quot;:[],&quot;segments&quot;:[],&quot;runImmediately&quot;:true}]" switchOutFunctionName="free_3d_temp_data" zIndex="0">
             <events>
                 <event type="onKeyShortPress" keyName="Menu">
                     <action type="switchView" target="bt_View" switchOutStyle="SWITCH_INIT_STATE" switchInStyle="SWITCH_IN_NONE_ANIMATION" />
@@ -55,7 +55,7 @@
                 </event>
             </events>
         </hg_view>
-        <hg_view id="mainface_view_5" x="2890" y="0" width="360" height="360" backgroundColor="#000000" entry="false" animateStep="36" timers="[{&quot;id&quot;:&quot;timer_0&quot;,&quot;name&quot;:&quot;动画 1&quot;,&quot;enabled&quot;:true,&quot;interval&quot;:1000,&quot;reload&quot;:true,&quot;mode&quot;:&quot;custom&quot;,&quot;callback&quot;:&quot;mainface_view_5_timer_0_cb&quot;,&quot;duration&quot;:1000,&quot;stopOnComplete&quot;:true,&quot;delayStart&quot;:0,&quot;actions&quot;:[],&quot;segments&quot;:[],&quot;runImmediately&quot;:true}]" switchOutFunctionName="switch_out_mainface_5" zIndex="0">
+        <hg_view id="mainface_view_5" x="2890" y="0" width="360" height="360" backgroundColor="#000000" entry="false" animateStep="36" timers="[{&quot;id&quot;:&quot;timer_0&quot;,&quot;name&quot;:&quot;动画 1&quot;,&quot;enabled&quot;:true,&quot;interval&quot;:1000,&quot;reload&quot;:true,&quot;mode&quot;:&quot;custom&quot;,&quot;callback&quot;:&quot;mainface_view_5_timer_0_cb&quot;,&quot;duration&quot;:1000,&quot;stopOnComplete&quot;:true,&quot;delayStart&quot;:0,&quot;actions&quot;:[],&quot;segments&quot;:[],&quot;runImmediately&quot;:true}]" switchOutFunctionName="free_3d_temp_data" zIndex="0">
             <events>
                 <event type="onKeyShortPress" keyName="Menu">
                     <action type="switchView" target="bt_View" switchOutStyle="SWITCH_INIT_STATE" switchInStyle="SWITCH_IN_NONE_ANIMATION" />
@@ -65,7 +65,7 @@
                 </event>
             </events>
         </hg_view>
-        <hg_view id="mainface_view_6" x="3457" y="0" width="360" height="360" backgroundColor="#000000" entry="false" animateStep="36" timers="[{&quot;id&quot;:&quot;timer_0&quot;,&quot;name&quot;:&quot;动画 1&quot;,&quot;enabled&quot;:true,&quot;interval&quot;:1000,&quot;reload&quot;:true,&quot;mode&quot;:&quot;custom&quot;,&quot;callback&quot;:&quot;mainface_view_6_timer_0_cb&quot;,&quot;duration&quot;:1000,&quot;stopOnComplete&quot;:true,&quot;delayStart&quot;:0,&quot;actions&quot;:[],&quot;segments&quot;:[],&quot;runImmediately&quot;:true}]" switchOutFunctionName="switch_out_mainface_6" zIndex="0">
+        <hg_view id="mainface_view_6" x="3457" y="0" width="360" height="360" backgroundColor="#000000" entry="false" animateStep="36" timers="[{&quot;id&quot;:&quot;timer_0&quot;,&quot;name&quot;:&quot;动画 1&quot;,&quot;enabled&quot;:true,&quot;interval&quot;:1000,&quot;reload&quot;:true,&quot;mode&quot;:&quot;custom&quot;,&quot;callback&quot;:&quot;mainface_view_6_timer_0_cb&quot;,&quot;duration&quot;:1000,&quot;stopOnComplete&quot;:true,&quot;delayStart&quot;:0,&quot;actions&quot;:[],&quot;segments&quot;:[],&quot;runImmediately&quot;:true}]" switchOutFunctionName="free_3d_temp_data" zIndex="0">
             <events>
                 <event type="onKeyShortPress" keyName="Menu">
                     <action type="switchView" target="bt_View" switchOutStyle="SWITCH_INIT_STATE" switchInStyle="SWITCH_IN_NONE_ANIMATION" />
@@ -75,7 +75,7 @@
                 </event>
             </events>
         </hg_view>
-        <hg_view id="mainface_view_7" x="4000" y="0" width="360" height="360" backgroundColor="#000000" entry="false" animateStep="36" timers="[{&quot;id&quot;:&quot;timer_0&quot;,&quot;name&quot;:&quot;动画 1&quot;,&quot;enabled&quot;:true,&quot;interval&quot;:1000,&quot;reload&quot;:true,&quot;mode&quot;:&quot;custom&quot;,&quot;callback&quot;:&quot;mainface_view_7_timer_0_cb&quot;,&quot;duration&quot;:1000,&quot;stopOnComplete&quot;:true,&quot;delayStart&quot;:0,&quot;actions&quot;:[],&quot;segments&quot;:[],&quot;runImmediately&quot;:true}]" switchOutFunctionName="switch_out_mainface_7" zIndex="0">
+        <hg_view id="mainface_view_7" x="4000" y="0" width="360" height="360" backgroundColor="#000000" entry="false" animateStep="36" timers="[{&quot;id&quot;:&quot;timer_0&quot;,&quot;name&quot;:&quot;动画 1&quot;,&quot;enabled&quot;:true,&quot;interval&quot;:1000,&quot;reload&quot;:true,&quot;mode&quot;:&quot;custom&quot;,&quot;callback&quot;:&quot;mainface_view_7_timer_0_cb&quot;,&quot;duration&quot;:1000,&quot;stopOnComplete&quot;:true,&quot;delayStart&quot;:0,&quot;actions&quot;:[],&quot;segments&quot;:[],&quot;runImmediately&quot;:true}]" switchOutFunctionName="free_3d_temp_data" zIndex="0">
             <events>
                 <event type="onKeyShortPress" keyName="Menu">
                     <action type="switchView" target="bt_View" switchOutStyle="SWITCH_INIT_STATE" switchInStyle="SWITCH_IN_NONE_ANIMATION" />
@@ -85,7 +85,7 @@
                 </event>
             </events>
         </hg_view>
-        <hg_view id="mainface_view_8" x="4587" y="8" width="360" height="360" backgroundColor="#000000" entry="false" animateStep="36" timers="[{&quot;id&quot;:&quot;timer_0&quot;,&quot;name&quot;:&quot;动画 1&quot;,&quot;enabled&quot;:true,&quot;interval&quot;:1000,&quot;reload&quot;:true,&quot;mode&quot;:&quot;custom&quot;,&quot;callback&quot;:&quot;mainface_view_7_timer_0_cb&quot;,&quot;duration&quot;:1000,&quot;stopOnComplete&quot;:true,&quot;delayStart&quot;:0,&quot;actions&quot;:[],&quot;segments&quot;:[],&quot;runImmediately&quot;:true}]" switchOutFunctionName="switch_out_mainface_8" zIndex="0">
+        <hg_view id="mainface_view_8" x="4587" y="8" width="360" height="360" backgroundColor="#000000" entry="false" animateStep="36" timers="[{&quot;id&quot;:&quot;timer_0&quot;,&quot;name&quot;:&quot;动画 1&quot;,&quot;enabled&quot;:true,&quot;interval&quot;:1000,&quot;reload&quot;:true,&quot;mode&quot;:&quot;custom&quot;,&quot;callback&quot;:&quot;mainface_view_7_timer_0_cb&quot;,&quot;duration&quot;:1000,&quot;stopOnComplete&quot;:true,&quot;delayStart&quot;:0,&quot;actions&quot;:[],&quot;segments&quot;:[],&quot;runImmediately&quot;:true}]" switchOutFunctionName="free_3d_temp_data" zIndex="0">
             <events>
                 <event type="onKeyShortPress" keyName="Menu">
                     <action type="switchView" target="bt_View" switchOutStyle="SWITCH_INIT_STATE" switchInStyle="SWITCH_IN_NONE_ANIMATION" />
@@ -95,7 +95,7 @@
                 </event>
             </events>
         </hg_view>
-        <hg_view id="mainface_view_9" x="5122" y="8" width="360" height="360" backgroundColor="#000000" entry="false" animateStep="36" timers="[{&quot;id&quot;:&quot;timer_0&quot;,&quot;name&quot;:&quot;动画 1&quot;,&quot;enabled&quot;:true,&quot;interval&quot;:1000,&quot;reload&quot;:true,&quot;mode&quot;:&quot;custom&quot;,&quot;callback&quot;:&quot;mainface_view_7_timer_0_cb&quot;,&quot;duration&quot;:1000,&quot;stopOnComplete&quot;:true,&quot;delayStart&quot;:0,&quot;actions&quot;:[],&quot;segments&quot;:[],&quot;runImmediately&quot;:true}]" switchOutFunctionName="switch_out_mainface_9" zIndex="0">
+        <hg_view id="mainface_view_9" x="5122" y="8" width="360" height="360" backgroundColor="#000000" entry="false" animateStep="36" timers="[{&quot;id&quot;:&quot;timer_0&quot;,&quot;name&quot;:&quot;动画 1&quot;,&quot;enabled&quot;:true,&quot;interval&quot;:1000,&quot;reload&quot;:true,&quot;mode&quot;:&quot;custom&quot;,&quot;callback&quot;:&quot;mainface_view_7_timer_0_cb&quot;,&quot;duration&quot;:1000,&quot;stopOnComplete&quot;:true,&quot;delayStart&quot;:0,&quot;actions&quot;:[],&quot;segments&quot;:[],&quot;runImmediately&quot;:true}]" switchOutFunctionName="free_3d_temp_data" zIndex="0">
             <events>
                 <event type="onKeyShortPress" keyName="Menu">
                     <action type="switchView" target="bt_View" switchOutStyle="SWITCH_INIT_STATE" switchInStyle="SWITCH_IN_NONE_ANIMATION" />
@@ -159,9 +159,6 @@
                 </events>
             </hg_image>
             <hg_label id="lbl_1" x="0" y="180" width="360" height="24" hAlign="CENTER" vAlign="MID" color="#ffffff" letterSpacing="0" lineSpacing="0" wordWrap="false" wordBreak="false" text="Auto sleep mode" fontFile="/font/Inter_24pt_SemiBold.ttf" fontSize="16" timers="[{&quot;id&quot;:&quot;timer_0&quot;,&quot;name&quot;:&quot;动画 1&quot;,&quot;enabled&quot;:true,&quot;interval&quot;:10,&quot;reload&quot;:false,&quot;mode&quot;:&quot;custom&quot;,&quot;callback&quot;:&quot;lbl_1_timer_0_cb&quot;,&quot;duration&quot;:1000,&quot;stopOnComplete&quot;:true,&quot;delayStart&quot;:0,&quot;actions&quot;:[],&quot;segments&quot;:[],&quot;runImmediately&quot;:true}]" characterSets="[{&quot;type&quot;:&quot;range&quot;,&quot;value&quot;:&quot;0x20-0x7E&quot;}]" zIndex="8" />
-        </hg_view>
-        <hg_view id="view_1" x="-475" y="0" width="360" height="360" backgroundColor="#000000" borderRadius="20" padding="12" overflow="auto" entry="false" zIndex="1">
-            <hg_video id="vid_test" x="0" y="0" width="360" height="360" src="assets/wallpaper_video.mp4" useMsv1="true" loop="true" frameRate="30" zIndex="1" />
         </hg_view>
         <hg_view id="view_cam_ctl" x="611" y="-416" width="360" height="360" backgroundColor="#000000" borderRadius="20" padding="12" overflow="auto" entry="false" animateStep="360" zIndex="1">
             <events>

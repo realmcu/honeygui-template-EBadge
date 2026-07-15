@@ -30,7 +30,7 @@ static void bt_View_switch_in(gui_view_t *view)
     gui_view_set_opacity(view, 255);
 
     // Set background color
-    gui_set_bg_color(gui_rgb(0, 0, 0));
+    gui_view_set_bg_color(view, gui_rgb(0, 0, 0));
 
     gui_view_switch_on_event(view, "easy_demoMainView", SWITCH_OUT_NONE_ANIMATION, SWITCH_IN_NONE_ANIMATION, GUI_EVENT_TOUCH_CLICKED);
 
@@ -82,7 +82,7 @@ static void qrcode_view_switch_in(gui_view_t *view)
     gui_view_set_opacity(view, 255);
 
     // Set background color
-    gui_set_bg_color(gui_rgb(0, 0, 0));
+    gui_view_set_bg_color(view, gui_rgb(0, 0, 0));
 
     gui_view_switch_on_event(view, "easy_demoMainView", SWITCH_OUT_NONE_ANIMATION, SWITCH_IN_NONE_ANIMATION, GUI_EVENT_TOUCH_CLICKED);
 
@@ -111,7 +111,7 @@ static void view_transmit_switch_in(gui_view_t *view)
     gui_view_set_opacity(view, 255);
 
     // Set background color
-    gui_set_bg_color(gui_rgb(0, 0, 0));
+    gui_view_set_bg_color(view, gui_rgb(0, 0, 0));
 
     // Bind timer: 动画 1
     gui_obj_create_timer((gui_obj_t *)view, 20, true, view_transmit_timer_0_cb);
