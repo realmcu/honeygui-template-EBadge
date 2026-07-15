@@ -71,8 +71,11 @@
  * with every non-alphanumeric character replaced by '_'.
  *============================================================================*/
 
-#define SW_BG_DATA   (const char *)"/background_clean_360.bin"
-#define SW_FG_DATA   (const char *)"/foreground_360.bin"
+// #define SW_BG_DATA   (const char *)"/background_clean_360.bin"
+// #define SW_FG_DATA   (const char *)"/foreground_360.bin"
+
+#define SW_BG_DATA   (const char *)"/background_clean.bin"
+#define SW_FG_DATA   (const char *)"/foreground.bin"
 
 #ifdef _HONEYGUI_SIMULATOR_
 // extern const unsigned char _binary_background_clean_scale_bin_start[];
@@ -124,16 +127,25 @@ typedef struct
 } spatial_wallpaper_cfg_t;
 
 /* Edit this block to paste a browser-tuned effect; rebuild to apply. */
+// static spatial_wallpaper_cfg_t g_cfg =
+// {
+//     .persp = 1200.0f, .tilt3d = 8.0f, .fg = 30.0f, .bg = 16.0f,
+//     .lerp  = 0.4f,   .invert = false,
+//     .fg_cap_ratio = 0.6f, .overscan = 52.0f,
+//     .sim_enable = true, .timer_ms = 16, .g_one = 16384,
+//     .sim_tilt_deg = 45.0f, .sim_speed = 0.04f,
+//     .sim_freq_y = 0.73f, .sim_phase_y = 1.0f,
+// };
+
 static spatial_wallpaper_cfg_t g_cfg =
 {
-    .persp = 1200.0f, .tilt3d = 8.0f, .fg = 30.0f, .bg = 16.0f,
-    .lerp  = 0.4f,   .invert = false,
+    .persp = 970.0f, .tilt3d = 8.0f, .fg = 50.0f, .bg = 16.0f,
+    .lerp  = 0.12f,   .invert = false,
     .fg_cap_ratio = 0.6f, .overscan = 52.0f,
     .sim_enable = true, .timer_ms = 16, .g_one = 16384,
     .sim_tilt_deg = 45.0f, .sim_speed = 0.04f,
     .sim_freq_y = 0.73f, .sim_phase_y = 1.0f,
 };
-
 /*============================================================================*
  *                            Types & State
  *============================================================================*/

@@ -12,8 +12,8 @@
 
 #else
 #include "flashdb.h"
-#define USER_RESOURCE_ADDR     (FDB_BF_DATA_PART_OFFSET)
-#define USER_RESOURCE_ADDR_END (FDB_BF_DATA_PART_OFFSET + FDB_BF_DATA_SIZE) // 0x00998000  //9824K Bytes
+#define USER_RESOURCE_ADDR     (RTK_NOR_FLASH_XIP_BASE + FDB_BF_DATA_PART_OFFSET)
+#define USER_RESOURCE_ADDR_END (USER_RESOURCE_ADDR + FDB_BF_DATA_SIZE) // 0x00998000  //9824K Bytes
 
 #endif
 
@@ -550,7 +550,7 @@ void switch_mainface(gui_obj_t *parent, uint8_t idx)
 #ifdef _HONEYGUI_SIMULATOR_
         vid = gui_lite_video_create_from_fs((void *)win, 0, mainface_list[idx].data, 0, 0, SCREEN_SIZE, SCREEN_SIZE);
 #else
-        if (((uint32_t)mainface_list[idx].data) > USER_RESOURCE_ADDR && ((uint32_t)mainface_list[idx].data) < (USER_RESOURCE_ADDR_END))
+        if (((uint32_t)mainface_list[idx].data) >= USER_RESOURCE_ADDR && ((uint32_t)mainface_list[idx].data) < (USER_RESOURCE_ADDR_END))
         {
             vid = gui_lite_video_create_from_mem((void *)win, 0, mainface_list[idx].data, 0, 0, SCREEN_SIZE, SCREEN_SIZE);
         }
@@ -571,7 +571,8 @@ void switch_mainface(gui_obj_t *parent, uint8_t idx)
         img = gui_img_create_from_fs((void *)win, 0, mainface_list[idx].data, 0, 0, 0, 0);
 #else
         gui_log("%s %d 0x%x\n", __FUNCTION__, __LINE__, mainface_list[idx].data);
-        if (((uint32_t)mainface_list[idx].data) > USER_RESOURCE_ADDR && ((uint32_t)mainface_list[idx].data) < (USER_RESOURCE_ADDR_END))
+        gui_log("%s %d 0x%x 0x%x\n", __FUNCTION__, __LINE__, USER_RESOURCE_ADDR, USER_RESOURCE_ADDR_END);
+        if ((((uint32_t)mainface_list[idx].data) >= USER_RESOURCE_ADDR) && ((uint32_t)mainface_list[idx].data) < (USER_RESOURCE_ADDR_END))
         {
             gui_log("%s %d 0x%x\n", __FUNCTION__, __LINE__, mainface_list[idx].data);
             img = gui_img_create_from_mem((void *)win, 0, mainface_list[idx].data, 0, 0, SCREEN_SIZE, SCREEN_SIZE);
@@ -622,7 +623,7 @@ void switch_mainface(gui_obj_t *parent, uint8_t idx)
 #else
         gui_img_t *img_0 = NULL;
         gui_log("%s %d 0x%x\n", __FUNCTION__, __LINE__, mainface_list[idx].data);
-        if (((uint32_t)mainface_list[idx].data) > USER_RESOURCE_ADDR && ((uint32_t)mainface_list[idx].data) < (USER_RESOURCE_ADDR_END))
+        if (((uint32_t)mainface_list[idx].data) >= USER_RESOURCE_ADDR && ((uint32_t)mainface_list[idx].data) < (USER_RESOURCE_ADDR_END))
         {
             gui_log("%s %d 0x%x\n", __FUNCTION__, __LINE__, mainface_list[idx].data);
             img_0 = gui_img_create_from_mem((void *)win, 0, mainface_list[idx].data, 0, 0, SCREEN_SIZE, SCREEN_SIZE);

@@ -69,6 +69,14 @@
     "foreground_360.png": {
       "format": "ARGB8565",
       "compression": "adaptive"
+    },
+    "foreground.png": {
+      "format": "ARGB8565",
+      "compression": "adaptive"
+    },
+    "background_clean.jpg": {
+      "format": "RGB565",
+      "compression": "adaptive"
     }
   }
 }
