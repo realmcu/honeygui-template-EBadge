@@ -1,6 +1,9 @@
 #include "easy_demoMain_user.h"
 #include "tp_algo.h"
 #include "gui_message.h"
+#include "gui_lite3d.h"
+#include "gui_vfs.h"
+#include "gui_lite_video.h"
 #include <stdint.h>
 #include <stddef.h>
 #include <string.h>
@@ -20,10 +23,11 @@
 gui_win_t *win_view = NULL;
 
 uint8_t mainface_idx = 0;
-uint8_t mainface_num = 4;
+uint8_t mainface_num = 5;
 mainface_src_t mainface_list[MAINFACE_NUM_MAX] =
 {
     {"/image/565/wallpaper_danmu.bin", SRC_DANMU},
+    {"/user/gltf_desc_Fox.bin", SRC_3D},
     {"/wallpaper_video.avi", SRC_VIDEO},
     {"/image/565/wallpaper_static_img.bin", SRC_IMG},
     {"/foreground_360.bin", SRC_IMG_SPATIAL},
@@ -69,221 +73,47 @@ static void *prog_arc_array[20] =
 
 int8_t fl_color_idx = 0; //white, red, orange, yellow, green, blue, indigo, violet
 
-void *danmu_bg[MAINFACE_NUM_MAX] = {0};
+// 3D model
+static float rot_angle = 45.0f;
+static l3_model_base_t *fox_3d = NULL;
+static void *temp_3d_data = NULL;
 
 /* ---------------FUNC---------------- */
-typedef enum
+static void fox_rotate_animation(void *param)
 {
-    PURE_PF_RGB565    = 0,  /* 2B: bit[15:11]R bit[10:5]G bit[4:0]B, little-endian      */
-    PURE_PF_ARGB8565  = 1,  /* 3B: RGB565(2B, little-endian) + Alpha(1B)                */
-    PURE_PF_RGB888    = 3,  /* 3B: byte order B,G,R                                     */
-    PURE_PF_ARGB8888  = 4,  /* 4B: byte order B,G,R,A                                  */
-    PURE_PF_XRGB8888  = 5,  /* 4B: byte order B,G,R,X(fill 0)                          */
-    PURE_PF_A8        = 9,  /* 1B: Alpha only (upper 8 bits of color)                   */
-} pure_pixel_format_t;
+    (void)param;
+    if (gui_view_get_next()) return;
 
-/* RLE compression algorithm constants (compress/rle.ts: COMPRESS_RLE = 0) */
-#define PURE_RLE_ALGORITHM   0
-#define PURE_RLE_FEATURE_1   1   /* RLECompression default runLength1 = 1 */
-#define PURE_RLE_FEATURE_2   0   /* default runLength2 = 0 */
-#define PURE_RLE_MAX_RUN     255 /* max repeat count per RLE node */
+    touch_info_t *tp = tp_get_info();
 
-/* gui_rgb_data_head_t flags byte: set compress bit only (bit4) */
-#define PURE_RLE_HEAD_FLAGS  0x10
-
-static void pure_wr_u16le(uint8_t *p, uint16_t v)
-{
-    p[0] = (uint8_t)(v & 0xFF);
-    p[1] = (uint8_t)((v >> 8) & 0xFF);
-}
-
-static void pure_wr_u32le(uint8_t *p, uint32_t v)
-{
-    p[0] = (uint8_t)(v & 0xFF);
-    p[1] = (uint8_t)((v >> 8) & 0xFF);
-    p[2] = (uint8_t)((v >> 16) & 0xFF);
-    p[3] = (uint8_t)((v >> 24) & 0xFF);
-}
-
-/* Bytes per pixel (length of the pixel part in one RLE node). Returns 0 for unsupported formats. */
-static int pure_rle_bpp(uint8_t fmt)
-{
-    switch (fmt)
+    if (tp->pressed || tp->pressing)
     {
-    case PURE_PF_RGB565:   return 2;
-    case PURE_PF_ARGB8565: return 3;
-    case PURE_PF_RGB888:   return 3;
-    case PURE_PF_ARGB8888: return 4;
-    default:               return 0;
+        rot_angle += tp->deltaX / 5.0f;
     }
 }
 
-/* imdc_file_header_t pixel_bytes field encoding (PixelBytes enum):
- *   BYTES_2=0, BYTES_3=1, BYTES_4=2, BYTES_1=3 */
-static uint8_t pure_rle_pixel_bytes_code(uint8_t fmt)
+static void fox_animation_update_cb(void *obj, gui_event_t *e)
 {
-    switch (pure_rle_bpp(fmt))
+    (void)obj;
+    (void)e;
+
+    static uint32_t cur_anim = 0;
+    uint32_t anim_count = l3_gltf_get_animation_count(fox_3d);
+    if (anim_count > 0)
     {
-    case 2:  return 0; /* BYTES_2 */
-    case 3:  return 1; /* BYTES_3 */
-    case 4:  return 2; /* BYTES_4 */
-    case 1:  return 3; /* BYTES_1 */
-    default: return 0;
+      cur_anim = (cur_anim + 1) % anim_count;
+      l3_gltf_set_active_animation(fox_3d, cur_anim);
     }
+
 }
 
-/* Pack 0xAARRGGBB color into out using the target format; returns bytes written (=bpp), or 0 if unsupported. */
-static int pure_rle_pack_pixel(uint32_t argb, uint8_t fmt, uint8_t *out)
+static void fox_global_cb(l3_model_base_t *this)
 {
-    switch (fmt)
-    {
-    case PURE_PF_RGB565:
-        pure_wr_u16le(out, argb);
-        return 2;
+    l3_camera_UVN_initialize(&this->camera, l3_4d_point(0, 0, 0), l3_4d_point(0, 0, 1), 1,
+                             32767,
+                             90, this->viewPortWidth, this->viewPortHeight);
 
-    case PURE_PF_ARGB8565:
-        pure_wr_u16le(out, argb);
-        out[2] = argb >> 16;
-        return 3;
-
-    case PURE_PF_RGB888:        /* BGR */
-    {
-        uint8_t r = (uint8_t)((argb >> 16) & 0xFF);
-        uint8_t g = (uint8_t)((argb >> 8) & 0xFF);
-        uint8_t b = (uint8_t)(argb & 0xFF);
-        out[0] = b; out[1] = g; out[2] = r;
-        return 3;
-    }
-        
-    case PURE_PF_ARGB8888:      /* BGRA */
-    {
-        uint8_t a = (uint8_t)((argb >> 24) & 0xFF);
-        uint8_t r = (uint8_t)((argb >> 16) & 0xFF);
-        uint8_t g = (uint8_t)((argb >> 8) & 0xFF);
-        uint8_t b = (uint8_t)(argb & 0xFF);
-        out[0] = b; out[1] = g; out[2] = r; out[3] = a;
-        return 4;
-    }
-
-    default:
-        return 0;
-    }
-}
-
-/*
- * Calculate the total byte size needed for a solid-color RLE image (for caller pre-allocation).
- * Returns 0 if parameters are invalid (unsupported format / zero width or height).
- */
-static size_t gui_pure_rle_size(uint8_t fmt, uint16_t width, uint16_t height)
-{
-    int bpp = pure_rle_bpp(fmt);
-    if (bpp == 0 || width == 0 || height == 0)
-    {
-        return 0;
-    }
-
-    /* width identical pixels per row -> ceil(width/255) RLE nodes */
-    size_t nodes_per_line = ((size_t)width + (PURE_RLE_MAX_RUN - 1)) / PURE_RLE_MAX_RUN;
-    size_t bytes_per_line = nodes_per_line * (size_t)(1 + bpp);
-
-    size_t header_bytes = 8                                   /* gui_rgb_data_head_t */
-                          + 12                                /* imdc_file_header_t  */
-                          + (size_t)(height + 1) * 4;         /* row offset table    */
-
-    return header_bytes + bytes_per_line * (size_t)height;
-}
-
-/*
- * Generate binary data for a solid-color RLE image.
- *
- *   argb      Input color in 0xAARRGGBB format (A ignored for non-alpha formats; A8 uses A only)
- *   fmt       Image pixel format, see pure_pixel_format_t
- *   width     Image width in pixels
- *   height    Image height in pixels
- *   out_buf   Output buffer pointer (“image pointer”)
- *   buf_size  Output buffer capacity in bytes, used for bounds protection
- *
- * Returns the number of bytes actually written; returns 0 if parameters are invalid or buffer is too small.
- */
-static void *gui_pure_rle_create(uint32_t argb, uint8_t fmt,
-                           uint16_t width, uint16_t height)
-{
-    void *buffer = NULL;
-    int bpp = pure_rle_bpp(fmt);
-    if (bpp == 0 || width == 0 || height == 0)
-    {
-        return buffer;
-    }
-
-    size_t total = gui_pure_rle_size(fmt, width, height);
-    if (total == 0)
-    {
-        return buffer;
-    }
-    buffer = gui_malloc(total);
-    if (buffer == NULL)
-    {
-        return buffer;
-    }
-    uint8_t *p = buffer;
-
-    /* ---- 1. gui_rgb_data_head_t (8B) ---- */
-    p[0] = PURE_RLE_HEAD_FLAGS;     /* flags: compress=1 */
-    p[1] = fmt;                     /* type               */
-    pure_wr_u16le(p + 2, width);    /* width  (int16 LE)  */
-    pure_wr_u16le(p + 4, height);   /* height (int16 LE)  */
-    p[6] = 0;                       /* version            */
-    p[7] = 0;                       /* rsvd2              */
-    p += 8;
-
-    /* ---- 2. imdc_file_header_t (12B) ---- */
-    p[0] = (uint8_t)((PURE_RLE_ALGORITHM & 0x03)
-                     | ((PURE_RLE_FEATURE_1 & 0x03) << 2)
-                     | ((PURE_RLE_FEATURE_2 & 0x03) << 4)
-                     | ((pure_rle_pixel_bytes_code(fmt) & 0x03) << 6));
-    p[1] = 0;                       /* reserved[0] */
-    p[2] = 0;                       /* reserved[1] */
-    p[3] = 0;                       /* reserved[2] */
-    pure_wr_u32le(p + 4, width);    /* raw_pic_width  */
-    pure_wr_u32le(p + 8, height);   /* raw_pic_height */
-    p += 12;
-
-    /* ---- 3. Row offset table (height+1) * 4B ----
-     * offset base = start of imdc header (file offset 8), imdcOffset = 12 + (height+1)*4 */
-    size_t nodes_per_line = ((size_t)width + (PURE_RLE_MAX_RUN - 1)) / PURE_RLE_MAX_RUN;
-    size_t bytes_per_line = nodes_per_line * (size_t)(1 + bpp);
-    uint32_t imdc_offset = (uint32_t)(12 + (size_t)(height + 1) * 4);
-
-    for (uint16_t line = 0; line < height; line++)
-    {
-        /* All rows have the same byte count: lineOffset = line * bytes_per_line */
-        pure_wr_u32le(p, imdc_offset + (uint32_t)((size_t)line * bytes_per_line));
-        p += 4;
-    }
-    /* Last entry = imdc_offset + total compressed data length (end of file) */
-    pure_wr_u32le(p, imdc_offset + (uint32_t)(bytes_per_line * (size_t)height));
-    p += 4;
-
-    /* ---- 4. RLE compressed data ---- */
-    uint8_t pix[4];
-    pure_rle_pack_pixel(argb, fmt, pix);     /* Pre-pack one pixel, reused for the entire image */
-
-    for (uint16_t line = 0; line < height; line++)
-    {
-        uint16_t remain = width;
-        while (remain > 0)
-        {
-            uint8_t run = (remain > PURE_RLE_MAX_RUN)
-                          ? (uint8_t)PURE_RLE_MAX_RUN
-                          : (uint8_t)remain;
-            *p++ = run;                      /* [len] */
-            memcpy(p, pix, (size_t)bpp);     /* [pixel] */
-            p += bpp;
-            remain = (uint16_t)(remain - run);
-        }
-    }
-
-    return buffer;
+    l3_world_initialize(&this->world, 0, 10, 25, 0, rot_angle, 0, 5);
 }
 
 uint32_t get_img_color(uint8_t *img_data)
@@ -585,10 +415,46 @@ void switch_mainface(gui_obj_t *parent, uint8_t idx)
         break;
     }
     case SRC_3D:
+    {
         /* code */
         event_code_l = GUI_EVENT_TOUCH_LEFT_SLIDE_QUICK;
         event_code_r = GUI_EVENT_TOUCH_RIGHT_SLIDE_QUICK;
+        gui_view_set_bg_color((gui_view_t *)parent, gui_rgb(0x41, 0xAD, 0x41));
+        void *addr = (void *)gui_vfs_get_file_address(mainface_list[idx].data);
+        if (!addr)
+        {
+            /* Fallback: read file into memory */
+            gui_vfs_file_t *f = gui_vfs_open(mainface_list[idx].data, GUI_VFS_READ);
+            GUI_ASSERT(f != NULL);
+            gui_vfs_seek(f, 0, GUI_VFS_SEEK_END);
+            int size = gui_vfs_tell(f);
+
+            if (size <= 0)
+            {
+                gui_vfs_close(f);
+                return;
+            }
+            gui_vfs_seek(f, 0, GUI_VFS_SEEK_SET);
+            if (temp_3d_data == NULL)
+            {
+                temp_3d_data = gui_malloc(size);
+            }
+            GUI_ASSERT(temp_3d_data != NULL);
+            gui_vfs_read(f, (void *)temp_3d_data, size);
+            gui_vfs_close(f);
+            addr = temp_3d_data;
+        }
+        fox_3d = l3_create_model(addr, L3_DRAW_FRONT_AND_SORT, 0,
+                            0,
+                            360,
+                            360);
+        l3_set_global_transform(fox_3d, (l3_global_transform_cb)fox_global_cb);
+        gui_lite3d_t *lite3d_fox = gui_lite3d_create(parent, "lite3d-widget",
+                                                    fox_3d, 0, 0, 0, 0);
+        gui_obj_create_timer(GUI_BASE(lite3d_fox), 20, true, fox_rotate_animation);
+        gui_lite3d_on_click(lite3d_fox, fox_animation_update_cb, NULL);
         break;
+    }
     case SRC_IMG_SPATIAL:
     {
         /* code */
@@ -601,24 +467,6 @@ void switch_mainface(gui_obj_t *parent, uint8_t idx)
     {
 #ifdef _HONEYGUI_SIMULATOR_
         gui_img_t *img_0 = gui_img_create_from_fs((void *)win, 0, mainface_list[idx].data, 0, 0, 0, 0);
-        gui_img_set_mode(img_0, IMG_BYPASS_MODE);
-        {
-            int16_t img_y = (SCREEN_SIZE - img_0->base.h) / 2;
-            gui_obj_move((void *)img_0, SCREEN_SIZE, img_y);
-            gui_list_remove(&GUI_BASE(win)->brother_list);
-            const void *src_data = gui_img_get_image_data(img_0);
-            uint32_t color = get_img_color((uint8_t *)src_data);
-            gui_log("bg color = 0x%x\n", color);
-            void *img_bg_data = gui_pure_rle_create(color, ((uint8_t *)src_data)[1], SCREEN_SIZE, SCREEN_SIZE);
-
-            if (img_bg_data != NULL)
-            {
-                gui_img_t *img_bg = gui_img_create_from_mem(parent, 0, img_bg_data, 0, 0, SCREEN_SIZE, SCREEN_SIZE);
-                gui_img_set_mode(img_bg, IMG_BYPASS_MODE);
-                gui_list_insert(&GUI_BASE(img_bg)->brother_list, &GUI_BASE(win)->brother_list);
-                danmu_bg[idx] = img_bg_data;
-            }
-        }
 #else
         gui_img_t *img_0 = NULL;
         gui_log("%s %d 0x%x\n", __FUNCTION__, __LINE__, mainface_list[idx].data);
@@ -631,25 +479,30 @@ void switch_mainface(gui_obj_t *parent, uint8_t idx)
         {
             img_0 = gui_img_create_from_fs((void *)win, 0, mainface_list[idx].data, 0, 0, SCREEN_SIZE, SCREEN_SIZE);
         }
-        gui_img_set_mode(img_0, IMG_BYPASS_MODE);
-        {
-            int16_t img_y = (SCREEN_SIZE - img_0->base.h) / 2;
-            gui_obj_move((void *)img_0, SCREEN_SIZE, img_y);
-            gui_list_remove(&GUI_BASE(win)->brother_list);
-            const void *src_data = gui_img_get_image_data(img_0);
-            uint32_t color = get_img_color((uint8_t *)src_data);
-            gui_log("bg color = 0x%x\n", color);
-            void *img_bg_data = gui_pure_rle_create(color, ((uint8_t *)src_data)[1], SCREEN_SIZE, SCREEN_SIZE);
-
-            if (img_bg_data != NULL)
-            {
-                gui_img_t *img_bg = gui_img_create_from_mem(parent, 0, img_bg_data, 0, 0, SCREEN_SIZE, SCREEN_SIZE);
-                gui_img_set_mode(img_bg, IMG_BYPASS_MODE);
-                gui_list_insert(&GUI_BASE(img_bg)->brother_list, &GUI_BASE(win)->brother_list);
-                danmu_bg[idx] = img_bg_data;
-            }
-        }
 #endif
+        gui_img_set_mode(img_0, IMG_BYPASS_MODE);
+        int16_t img_y = (SCREEN_SIZE - img_0->base.h) / 2;
+        gui_obj_move((void *)img_0, SCREEN_SIZE, img_y);
+        {
+            const void *src_data = gui_img_get_image_data(img_0);
+            uint32_t src_color = get_img_color((uint8_t *)src_data);
+            gui_log("bg color = 0x%x\n", src_color);
+            gui_color_t bg_color;
+            bg_color.color.rgba.a = UINT8_MAX;
+            if (((gui_rgb_data_head_t *)src_data)->type == RGB565)
+            {
+                bg_color.color.rgba.r = src_color >> 8 & 0xFF;
+                bg_color.color.rgba.g = src_color >> 3 & 0xFF;
+                bg_color.color.rgba.b = src_color << 3 & 0xFF;
+            }
+            else
+            {
+                bg_color.color.rgba.r = src_color >> 16 & 0xFF;
+                bg_color.color.rgba.g = src_color >> 8 & 0xFF;
+                bg_color.color.rgba.b = src_color & 0xFF;
+            }
+            gui_view_set_bg_color((gui_view_t *)parent, bg_color);
+        }
         break;
     }
         
@@ -1191,104 +1044,13 @@ void ui_jump_streaming(void)
     gui_send_msg_to_server(&msg);
 }
 
-
-void switch_out_mainface_0(gui_view_t *view)
+void free_3d_temp_data(gui_view_t *view)
 {
     GUI_UNUSED(view);
-    if (danmu_bg[0] != NULL)
+    if (temp_3d_data != NULL && mainface_list[mainface_idx].type != SRC_3D)
     {
-        gui_free(danmu_bg[0]);
-        danmu_bg[0] = NULL;
-    }
-}
-
-void switch_out_mainface_1(gui_view_t *view)
-{
-    GUI_UNUSED(view);
-    if (danmu_bg[1] != NULL)
-    {
-        gui_free(danmu_bg[1]);
-        danmu_bg[1] = NULL;
-    }
-}
-
-void switch_out_mainface_2(gui_view_t *view)
-{
-    GUI_UNUSED(view);
-    if (danmu_bg[2] != NULL)
-    {
-        gui_free(danmu_bg[2]);
-        danmu_bg[2] = NULL;
-    }
-}
-
-void switch_out_mainface_3(gui_view_t *view)
-{
-    GUI_UNUSED(view);
-    if (danmu_bg[3] != NULL)
-    {
-        gui_free(danmu_bg[3]);
-        danmu_bg[3] = NULL;
-    }
-}
-
-void switch_out_mainface_4(gui_view_t *view)
-{
-    GUI_UNUSED(view);
-    if (danmu_bg[4] != NULL)
-    {
-        gui_free(danmu_bg[4]);
-        danmu_bg[4] = NULL;
-    }
-}
-
-void switch_out_mainface_5(gui_view_t *view)
-{
-    GUI_UNUSED(view);
-    if (danmu_bg[5] != NULL)
-    {
-        gui_free(danmu_bg[5]);
-        danmu_bg[5] = NULL;
-    }
-}
-
-void switch_out_mainface_6(gui_view_t *view)
-{
-    GUI_UNUSED(view);
-    if (danmu_bg[6] != NULL)
-    {
-        gui_free(danmu_bg[6]);
-        danmu_bg[6] = NULL;
-    }
-}
-
-void switch_out_mainface_7(gui_view_t *view)
-{
-    GUI_UNUSED(view);
-    if (danmu_bg[7] != NULL)
-    {
-        gui_free(danmu_bg[7]);
-        danmu_bg[7] = NULL;
-    }
-}
-
-void switch_out_mainface_8(gui_view_t *view)
-{
-    GUI_UNUSED(view);
-    if (danmu_bg[8] != NULL)
-    {
-        gui_free(danmu_bg[8]);
-        danmu_bg[8] = NULL;
-    }
-}
-
-void switch_out_mainface_9(gui_view_t *view)
-{
-    GUI_UNUSED(view);
-    if (danmu_bg[9] != NULL)
-    {
-        gui_free(danmu_bg[9]);
-        danmu_bg[9] = NULL;
+        gui_free(temp_3d_data);
+        temp_3d_data = NULL;
     }
 }
 

@@ -23,7 +23,7 @@ gui_stream_t *streaming_1 = NULL;
 // Create easy_demoMainView (hg_view)
 static void easy_demoMainView_switch_out(gui_view_t *view)
 {
-    switch_out_mainface_0(view);
+    GUI_UNUSED(view);
 }
 
 static void easy_demoMainView_switch_in(gui_view_t *view)
@@ -35,7 +35,7 @@ static void easy_demoMainView_switch_in(gui_view_t *view)
     gui_view_set_opacity(view, 255);
 
     // Set background color
-    gui_set_bg_color(gui_rgb(0, 0, 0));
+    gui_view_set_bg_color(view, gui_rgb(0, 0, 0));
 
     // Bind timer: 动画 1
     gui_obj_create_timer((gui_obj_t *)view, 1000, true, easy_demoMainView_timer_0_cb);
@@ -63,7 +63,7 @@ static void mainface_view_1_switch_in(gui_view_t *view)
     gui_view_set_opacity(view, 255);
 
     // Set background color
-    gui_set_bg_color(gui_rgb(0, 0, 0));
+    gui_view_set_bg_color(view, gui_rgb(0, 0, 0));
 
     // Bind timer: 动画 1
     gui_obj_create_timer((gui_obj_t *)view, 1000, true, mainface_view_1_timer_0_cb);
@@ -91,7 +91,7 @@ static void mainface_view_2_switch_in(gui_view_t *view)
     gui_view_set_opacity(view, 255);
 
     // Set background color
-    gui_set_bg_color(gui_rgb(0, 0, 0));
+    gui_view_set_bg_color(view, gui_rgb(0, 0, 0));
 
     // Bind timer: 动画 1
     gui_obj_create_timer((gui_obj_t *)view, 1000, true, mainface_view_2_timer_0_cb);
@@ -119,7 +119,7 @@ static void mainface_view_3_switch_in(gui_view_t *view)
     gui_view_set_opacity(view, 255);
 
     // Set background color
-    gui_set_bg_color(gui_rgb(0, 0, 0));
+    gui_view_set_bg_color(view, gui_rgb(0, 0, 0));
 
     // Bind timer: 动画 1
     gui_obj_create_timer((gui_obj_t *)view, 1000, true, mainface_view_3_timer_0_cb);
@@ -147,7 +147,7 @@ static void mainface_view_4_switch_in(gui_view_t *view)
     gui_view_set_opacity(view, 255);
 
     // Set background color
-    gui_set_bg_color(gui_rgb(0, 0, 0));
+    gui_view_set_bg_color(view, gui_rgb(0, 0, 0));
 
     // Bind timer: 动画 1
     gui_obj_create_timer((gui_obj_t *)view, 1000, true, mainface_view_4_timer_0_cb);
@@ -175,7 +175,7 @@ static void mainface_view_5_switch_in(gui_view_t *view)
     gui_view_set_opacity(view, 255);
 
     // Set background color
-    gui_set_bg_color(gui_rgb(0, 0, 0));
+    gui_view_set_bg_color(view, gui_rgb(0, 0, 0));
 
     // Bind timer: 动画 1
     gui_obj_create_timer((gui_obj_t *)view, 1000, true, mainface_view_5_timer_0_cb);
@@ -203,7 +203,7 @@ static void mainface_view_6_switch_in(gui_view_t *view)
     gui_view_set_opacity(view, 255);
 
     // Set background color
-    gui_set_bg_color(gui_rgb(0, 0, 0));
+    gui_view_set_bg_color(view, gui_rgb(0, 0, 0));
 
     // Bind timer: 动画 1
     gui_obj_create_timer((gui_obj_t *)view, 1000, true, mainface_view_6_timer_0_cb);
@@ -231,7 +231,7 @@ static void mainface_view_7_switch_in(gui_view_t *view)
     gui_view_set_opacity(view, 255);
 
     // Set background color
-    gui_set_bg_color(gui_rgb(0, 0, 0));
+    gui_view_set_bg_color(view, gui_rgb(0, 0, 0));
 
     // Bind timer: 动画 1
     gui_obj_create_timer((gui_obj_t *)view, 1000, true, mainface_view_7_timer_0_cb);
@@ -259,7 +259,7 @@ static void mainface_view_8_switch_in(gui_view_t *view)
     gui_view_set_opacity(view, 255);
 
     // Set background color
-    gui_set_bg_color(gui_rgb(0, 0, 0));
+    gui_view_set_bg_color(view, gui_rgb(0, 0, 0));
 
     // Bind timer: 动画 1
     gui_obj_create_timer((gui_obj_t *)view, 1000, true, mainface_view_7_timer_0_cb);
@@ -287,7 +287,7 @@ static void mainface_view_9_switch_in(gui_view_t *view)
     gui_view_set_opacity(view, 255);
 
     // Set background color
-    gui_set_bg_color(gui_rgb(0, 0, 0));
+    gui_view_set_bg_color(view, gui_rgb(0, 0, 0));
 
     // Bind timer: 动画 1
     gui_obj_create_timer((gui_obj_t *)view, 1000, true, mainface_view_7_timer_0_cb);
@@ -315,7 +315,7 @@ static void top_view_switch_in(gui_view_t *view)
     gui_view_set_opacity(view, 255);
 
     // Set background color
-    gui_set_bg_color(gui_rgb(0, 0, 0));
+    gui_view_set_bg_color(view, gui_rgb(0, 0, 0));
 
     // Bind timer: 动画 1
     gui_obj_create_timer((gui_obj_t *)view, 1000, true, top_view_timer_0_cb);
@@ -394,7 +394,7 @@ static void view_1_switch_in(gui_view_t *view)
     gui_view_set_opacity(view, 255);
 
     // Set background color
-    gui_set_bg_color(gui_rgb(0, 0, 0));
+    gui_view_set_bg_color(view, gui_rgb(0, 0, 0));
 
     GUI_UNUSED(view);
 
@@ -422,7 +422,7 @@ static void view_cam_ctl_switch_in(gui_view_t *view)
     gui_view_set_opacity(view, 255);
 
     // Set background color
-    gui_set_bg_color(gui_rgb(0, 0, 0));
+    gui_view_set_bg_color(view, gui_rgb(0, 0, 0));
 
     gui_view_switch_on_event(view, "easy_demoMainView", SWITCH_OUT_NONE_ANIMATION, SWITCH_IN_NONE_ANIMATION, GUI_EVENT_TOUCH_LEFT_SLIDE_QUICK);
     gui_view_switch_on_event(view, "easy_demoMainView", SWITCH_OUT_NONE_ANIMATION, SWITCH_IN_NONE_ANIMATION, GUI_EVENT_TOUCH_RIGHT_SLIDE_QUICK);
@@ -450,7 +450,7 @@ static void view_fl_switch_in(gui_view_t *view)
     gui_view_set_opacity(view, 255);
 
     // Set background color
-    gui_set_bg_color(gui_rgb(0, 0, 0));
+    gui_view_set_bg_color(view, gui_rgb(0, 0, 0));
 
     // Bind timer: 动画 1
     gui_obj_create_timer((gui_obj_t *)view, 10, true, view_fl_timer_0_cb);
