@@ -88,6 +88,8 @@ static void fox_rotate_animation(void *param)
     static bool was_pressing = false;
     static int16_t last_deltaX = 0;
 
+    if (!enable_switch_mainface) return;
+
     touch_info_t *tp = tp_get_info();
 
     if (tp->pressing)
@@ -471,7 +473,7 @@ void switch_mainface(gui_obj_t *parent, uint8_t idx)
         l3_set_global_transform(fox_3d, (l3_global_transform_cb)fox_global_cb);
         l3_gltf_set_active_animation(fox_3d, cur_anim);
 
-        gui_lite3d_t *lite3d_fox = gui_lite3d_create(parent, "lite3d-widget",
+        gui_lite3d_t *lite3d_fox = gui_lite3d_create(win, "lite3d-widget",
                                                     fox_3d, 0, 0, 0, 0);
 
         gui_obj_create_timer(GUI_BASE(lite3d_fox), 20, true, fox_rotate_animation);
