@@ -77,18 +77,36 @@ int8_t fl_color_idx = 0; //white, red, orange, yellow, green, blue, indigo, viol
 static float rot_angle = 45.0f;
 static l3_model_base_t *fox_3d = NULL;
 static void *temp_3d_data = NULL;
+static uint32_t cur_anim = 1;
 
 /* ---------------FUNC---------------- */
+
 static void fox_rotate_animation(void *param)
 {
     (void)param;
-    if (gui_view_get_next()) return;
+
+    static bool was_pressing = false;
+    static int16_t last_deltaX = 0;
 
     touch_info_t *tp = tp_get_info();
 
-    if (tp->pressed || tp->pressing)
+    if (tp->pressing)
     {
-        rot_angle += tp->deltaX / 5.0f;
+        if (!was_pressing)
+        {
+            /* New touch: record the baseline, don't rotate on the press itself. */
+            last_deltaX = tp->deltaX;
+            was_pressing = true;
+        }
+        else
+        {
+            rot_angle += (tp->deltaX - last_deltaX) / 2.0f;
+            last_deltaX = tp->deltaX;
+        }
+    }
+    else
+    {
+        was_pressing = false;
     }
 }
 
@@ -96,8 +114,7 @@ static void fox_animation_update_cb(void *obj, gui_event_t *e)
 {
     (void)obj;
     (void)e;
-
-    static uint32_t cur_anim = 0;
+    
     uint32_t anim_count = l3_gltf_get_animation_count(fox_3d);
     if (anim_count > 0)
     {
@@ -115,6 +132,7 @@ static void fox_global_cb(l3_model_base_t *this)
 
     l3_world_initialize(&this->world, 0, 10, 25, 0, rot_angle, 0, 5);
 }
+
 
 uint32_t get_img_color(uint8_t *img_data)
 {
@@ -445,14 +463,19 @@ void switch_mainface(gui_obj_t *parent, uint8_t idx)
             gui_vfs_close(f);
             addr = temp_3d_data;
         }
-        fox_3d = l3_create_model(addr, L3_DRAW_FRONT_AND_SORT, 0,
-                            0,
-                            360,
-                            360);
+        fox_3d = l3_create_model((void *)addr, L3_DRAW_FRONT_AND_SORT, 0,
+                        0,
+                        360,
+                        360);
+
         l3_set_global_transform(fox_3d, (l3_global_transform_cb)fox_global_cb);
+        l3_gltf_set_active_animation(fox_3d, cur_anim);
+
         gui_lite3d_t *lite3d_fox = gui_lite3d_create(parent, "lite3d-widget",
                                                     fox_3d, 0, 0, 0, 0);
+
         gui_obj_create_timer(GUI_BASE(lite3d_fox), 20, true, fox_rotate_animation);
+
         gui_lite3d_on_click(lite3d_fox, fox_animation_update_cb, NULL);
         break;
     }
