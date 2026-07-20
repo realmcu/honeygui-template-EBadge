@@ -739,6 +739,12 @@ void click_delete_icon(void *obj, gui_event_t *e)
     case 7:
         view_mainface = "mainface_view_7";
         break;
+    case 8:
+        view_mainface = "mainface_view_8";
+        break;
+    case 9:
+        view_mainface = "mainface_view_9";
+        break;
 
     default:
         break;
@@ -792,6 +798,12 @@ void mainface_list_delete(void *obj)
                 break;
             case 8:
                 view_left = "mainface_view_7";
+                break;
+            case 9:
+                view_left = "mainface_view_8";
+                break;
+            case 10:
+                view_left = "mainface_view_9";
                 break;
 
             default:
@@ -848,7 +860,6 @@ static void mainface_list_add(void *data)
         if(*pdata)      
         {
             mainface_list[mainface_num].type = SRC_DANMU;
-            gui_log("Add danmu\n");
         }  
     }
     mainface_num++;
@@ -881,8 +892,14 @@ static void mainface_list_add(void *data)
     case 7:
         view = "mainface_view_7";
         break;
-
+    case 8:
+        view = "mainface_view_8";
+        break;
+    case 9:
+        view = "mainface_view_9";
+        break;
     default:
+        gui_log("Please add view!\n");
         break;
     }
 

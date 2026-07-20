@@ -586,7 +586,18 @@ void mainface_view_7_timer_0_cb(void *obj)
     switch_mainface(obj, 7);
     gui_obj_stop_timer(obj);
 }
-
+void mainface_view_8_timer_0_cb(void *obj)
+{
+    GUI_UNUSED(obj);
+    switch_mainface(obj, 8);
+    gui_obj_stop_timer(obj);
+}
+void mainface_view_9_timer_0_cb(void *obj)
+{
+    GUI_UNUSED(obj);
+    switch_mainface(obj, 9);
+    gui_obj_stop_timer(obj);
+}
 void lbl_1_timer_0_cb(void *obj)
 {
     GUI_UNUSED(obj);

@@ -1,6 +1,8 @@
 # Build files
 build/
 
+!build/app_romfs*.bin
+
 # Codegen output (regenerated every build)
 
 

@@ -62,6 +62,8 @@ void mainface_view_4_timer_0_cb(void *obj);
 void mainface_view_5_timer_0_cb(void *obj);
 void mainface_view_6_timer_0_cb(void *obj);
 void mainface_view_7_timer_0_cb(void *obj);
+void mainface_view_8_timer_0_cb(void *obj);
+void mainface_view_9_timer_0_cb(void *obj);
 void top_view_timer_0_cb(void *obj);
 void bg_circle_timer_0_cb(void *obj);
 void icon_bat_timer_0_cb(void *obj);
@@ -92,6 +94,8 @@ void mainface_view_4_timer_0_cb(void *obj);
 void mainface_view_5_timer_0_cb(void *obj);
 void mainface_view_6_timer_0_cb(void *obj);
 void mainface_view_7_timer_0_cb(void *obj);
+void mainface_view_8_timer_0_cb(void *obj);
+void mainface_view_9_timer_0_cb(void *obj);
 void lbl_1_timer_0_cb(void *obj);
 void icon_bat_timer_0_cb(void *obj);
 

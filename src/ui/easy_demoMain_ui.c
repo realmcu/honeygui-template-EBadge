@@ -261,7 +261,7 @@ static void mainface_view_8_switch_in(gui_view_t *view)
     gui_view_set_bg_color(view, gui_rgb(0, 0, 0));
 
     // Bind timer: 动画 1
-    gui_obj_create_timer((gui_obj_t *)view, 1000, true, mainface_view_7_timer_0_cb);
+    gui_obj_create_timer((gui_obj_t *)view, 1000, true, mainface_view_8_timer_0_cb);
 
     GUI_UNUSED(view);
 
@@ -289,7 +289,7 @@ static void mainface_view_9_switch_in(gui_view_t *view)
     gui_view_set_bg_color(view, gui_rgb(0, 0, 0));
 
     // Bind timer: 动画 1
-    gui_obj_create_timer((gui_obj_t *)view, 1000, true, mainface_view_7_timer_0_cb);
+    gui_obj_create_timer((gui_obj_t *)view, 1000, true, mainface_view_9_timer_0_cb);
 
     GUI_UNUSED(view);
 
