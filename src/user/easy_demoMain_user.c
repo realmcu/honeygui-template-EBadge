@@ -28,9 +28,10 @@ mainface_src_t mainface_list[MAINFACE_NUM_MAX] =
 {
     {"/image/565/wallpaper_danmu.bin", SRC_DANMU},
     {"/user/gltf_desc_Fox.bin", SRC_3D},
+    {"/foreground_360.bin", SRC_IMG_SPATIAL},
     {"/wallpaper_video.avi", SRC_VIDEO},
     {"/image/565/wallpaper_static_img.bin", SRC_IMG},
-    {"/foreground_360.bin", SRC_IMG_SPATIAL},
+    
 
 };
 bool is_auto_sleep_mode = false;
@@ -962,31 +963,33 @@ void click_camera_ctl_icon(void *obj, gui_event_t *e)
 uint8_t mainface_list_init(void **data_list, uint32_t n)
 {
     uint8_t idx = 0;
+    uint8_t reserved = 3;
     if (data_list == NULL || !n) return idx;
     
     while (data_list[idx] != NULL && ((idx < MAINFACE_NUM_MAX) && (idx < n)))
     {
         void *addr = data_list[2*idx];
+        uint8_t list_idx = idx + reserved;
         
 
-        mainface_list[idx].data = addr;
-        mainface_list[idx].type = SRC_IMG;
+        mainface_list[list_idx].data = addr;
+        mainface_list[list_idx].type = SRC_IMG;
         if (*(uint8_t *)addr == 0x52)
         {
-            mainface_list[idx].type = SRC_VIDEO;
+            mainface_list[list_idx].type = SRC_VIDEO;
         }
 #ifdef _HONEYGUI_SIMULATOR_
 #else
         uint32_t size = (uint32_t)data_list[2*idx + 1];
-        if (mainface_list[idx].type == SRC_IMG && ((uint32_t)addr >= USER_RESOURCE_ADDR ) && (*((uint8_t *)addr + size - 1) == 0x01))
+        if (mainface_list[list_idx].type == SRC_IMG && ((uint32_t)addr >= USER_RESOURCE_ADDR ) && (*((uint8_t *)addr + size - 1) == 0x01))
         {
-            mainface_list[idx].type = SRC_DANMU;
+            mainface_list[list_idx].type = SRC_DANMU;
         }
 #endif
-        gui_log("list init %d, 0x%x %d", idx, mainface_list[idx].data, mainface_list[idx].type);
+        gui_log("list init %d, 0x%x %d", idx, mainface_list[list_idx].data, mainface_list[list_idx].type);
         idx++;
     }
-    mainface_num = idx;
+    mainface_num = idx + reserved;
     return idx;
 }
 
