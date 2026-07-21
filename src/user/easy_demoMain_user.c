@@ -77,7 +77,6 @@ int8_t fl_color_idx = 0; //white, red, orange, yellow, green, blue, indigo, viol
 // 3D model
 static float rot_angle = 45.0f;
 static l3_model_base_t *fox_3d = NULL;
-static void *temp_3d_data = NULL;
 static uint32_t cur_anim = 1;
 
 /* ---------------FUNC---------------- */
@@ -335,6 +334,66 @@ void win_timer_0_cb(void *obj)
     }
 }
 
+void win_timer_gsensor_cb(void *obj)
+{
+    GUI_UNUSED(obj);
+
+#ifndef _HONEYGUI_SIMULATOR_
+    extern bool gsensor_sc7a20_read_xyz(int16_t *x, int16_t *y, int16_t *z);
+    static bool sample_valid = false;
+    static int16_t gx_rec = 0, gy_rec = 0, gz_rec = 0;
+    int16_t gx = 0, gy = 0, gz = 0;
+
+    if (gsensor_sc7a20_read_xyz(&gx, &gy, &gz))
+    {
+        if (sample_valid && gui_view_get_next() == NULL)
+        {
+            int32_t dx = (int32_t)gx - gx_rec;
+            int32_t dy = (int32_t)gy - gy_rec;
+            int32_t dz = (int32_t)gz - gz_rec;
+            int32_t abs_dx = dx < 0 ? -dx : dx;
+            int32_t abs_dy = dy < 0 ? -dy : dy;
+            int32_t abs_dz = dz < 0 ? -dz : dz;
+
+            /* Sensor +y points left and +x points down on the screen. Ignore
+             * small changes and a shake whose dominant component is on z. */
+            const int32_t shake_threshold = 200;
+            if ((abs_dx >= shake_threshold || abs_dy >= shake_threshold) &&
+                (abs_dx >= abs_dz || abs_dy >= abs_dz))
+            {
+                if (abs_dy > abs_dx)
+                {
+                    if (dy > 0)
+                    {
+                        gui_log("shake left\n");
+                    }
+                    else
+                    {
+                        gui_log("shake right\n");
+                    }
+                }
+                else if (dx > 0)
+                {
+                    gui_log("shake down\n");
+                }
+                else
+                {
+                    gui_log("shake up\n");
+                }
+            }
+        }
+        else
+        {
+            sample_valid = true;
+        }
+
+        gx_rec = gx;
+        gy_rec = gy;
+        gz_rec = gz;
+    }
+#endif
+}
+
 void switch_mainface(gui_obj_t *parent, uint8_t idx)
 {
     gui_win_t *win = gui_win_create(parent, 0, 0, 0, 360, 360);
@@ -442,34 +501,7 @@ void switch_mainface(gui_obj_t *parent, uint8_t idx)
         event_code_l = GUI_EVENT_TOUCH_LEFT_SLIDE_QUICK;
         event_code_r = GUI_EVENT_TOUCH_RIGHT_SLIDE_QUICK;
         gui_view_set_bg_color((gui_view_t *)parent, gui_rgb(0x41, 0xAD, 0x41));
-        void *addr = (void *)gui_vfs_get_file_address(mainface_list[idx].data);
-        if (!addr)
-        {
-            /* Fallback: read file into memory */
-            gui_vfs_file_t *f = gui_vfs_open(mainface_list[idx].data, GUI_VFS_READ);
-            GUI_ASSERT(f != NULL);
-            gui_vfs_seek(f, 0, GUI_VFS_SEEK_END);
-            int size = gui_vfs_tell(f);
-
-            if (size <= 0)
-            {
-                gui_vfs_close(f);
-                return;
-            }
-            gui_vfs_seek(f, 0, GUI_VFS_SEEK_SET);
-            if (temp_3d_data == NULL)
-            {
-                temp_3d_data = gui_malloc(size);
-            }
-            GUI_ASSERT(temp_3d_data != NULL);
-            gui_vfs_read(f, (void *)temp_3d_data, size);
-            gui_vfs_close(f);
-            addr = temp_3d_data;
-        }
-        fox_3d = l3_create_model((void *)addr, L3_DRAW_FRONT_AND_SORT, 0,
-                        0,
-                        360,
-                        360);
+        fox_3d = l3_create_model_fs((void *)mainface_list[idx].data, L3_DRAW_FRONT_AND_SORT, 0, 0, 360, 360);
 
         l3_set_global_transform(fox_3d, (l3_global_transform_cb)fox_global_cb);
         l3_gltf_set_active_animation(fox_3d, cur_anim);
@@ -899,6 +931,7 @@ static void mainface_list_add(void *data)
     case 9:
         view = "mainface_view_9";
         break;
+
     default:
         gui_log("Please add view!\n");
         break;
@@ -1090,17 +1123,65 @@ void ui_jump_streaming(void)
     gui_send_msg_to_server(&msg);
 }
 
-void free_3d_temp_data(gui_view_t *view)
+void switch_in_mainface_0(gui_view_t *view)
 {
     GUI_UNUSED(view);
-    if (temp_3d_data != NULL && mainface_list[mainface_idx].type != SRC_3D)
-    {
-        gui_free(temp_3d_data);
-        temp_3d_data = NULL;
-    }
+    switch_mainface(GUI_BASE(view), 0);
 }
 
+void switch_in_mainface_1(gui_view_t *view)
+{
+    GUI_UNUSED(view);
+    switch_mainface(GUI_BASE(view), 1);
+}
 
+void switch_in_mainface_2(gui_view_t *view)
+{
+    GUI_UNUSED(view);
+    switch_mainface(GUI_BASE(view), 2);
+}
+
+void switch_in_mainface_3(gui_view_t *view)
+{
+    GUI_UNUSED(view);
+    switch_mainface(GUI_BASE(view), 3);
+}
+
+void switch_in_mainface_4(gui_view_t *view)
+{
+    GUI_UNUSED(view);
+    switch_mainface(GUI_BASE(view), 4);
+}
+
+void switch_in_mainface_5(gui_view_t *view)
+{
+    GUI_UNUSED(view);
+    switch_mainface(GUI_BASE(view), 5);
+}
+
+void switch_in_mainface_6(gui_view_t *view)
+{
+    GUI_UNUSED(view);
+    switch_mainface(GUI_BASE(view), 6);
+}
+
+void switch_in_mainface_7(gui_view_t *view)
+{
+    GUI_UNUSED(view);
+    switch_mainface(GUI_BASE(view), 7);
+}
+
+void switch_in_mainface_8(gui_view_t *view)
+{
+    GUI_UNUSED(view);
+    switch_mainface(GUI_BASE(view), 8);
+}
+
+void switch_in_mainface_9(gui_view_t *view)
+{
+    GUI_UNUSED(view);
+    switch_mainface(GUI_BASE(view), 9);
+}
 
 
 /* ============================ Live-video stream ============================

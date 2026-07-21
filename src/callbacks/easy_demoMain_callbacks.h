@@ -6,16 +6,6 @@
 #include "gui_obj_focus.h"
 
 // Timer animation counters (defined in callbacks.c)
-extern uint16_t easy_demoMainView_timer_cnt;
-extern uint16_t mainface_view_1_timer_cnt;
-extern uint16_t mainface_view_2_timer_cnt;
-extern uint16_t mainface_view_3_timer_cnt;
-extern uint16_t mainface_view_4_timer_cnt;
-extern uint16_t mainface_view_5_timer_cnt;
-extern uint16_t mainface_view_6_timer_cnt;
-extern uint16_t mainface_view_7_timer_cnt;
-extern uint16_t mainface_view_8_timer_cnt;
-extern uint16_t mainface_view_9_timer_cnt;
 extern uint16_t top_view_timer_cnt;
 extern uint16_t bg_circle_timer_cnt;
 extern uint16_t icon_bat_timer_cnt;
@@ -54,16 +44,6 @@ void top_view_key_1_cb(void *obj, gui_event_t *e);
 void view_fl_key_0_cb(void *obj, gui_event_t *e);
 
 // User-configured timer callback function declarations
-void easy_demoMainView_timer_0_cb(void *obj);
-void mainface_view_1_timer_0_cb(void *obj);
-void mainface_view_2_timer_0_cb(void *obj);
-void mainface_view_3_timer_0_cb(void *obj);
-void mainface_view_4_timer_0_cb(void *obj);
-void mainface_view_5_timer_0_cb(void *obj);
-void mainface_view_6_timer_0_cb(void *obj);
-void mainface_view_7_timer_0_cb(void *obj);
-void mainface_view_8_timer_0_cb(void *obj);
-void mainface_view_9_timer_0_cb(void *obj);
 void top_view_timer_0_cb(void *obj);
 void bg_circle_timer_0_cb(void *obj);
 void icon_bat_timer_0_cb(void *obj);
@@ -86,16 +66,6 @@ void mainface_view_6_update_idx_cb(void *obj);
 void mainface_view_7_update_idx_cb(void *obj);
 void mainface_view_8_update_idx_cb(void *obj);
 void mainface_view_9_update_idx_cb(void *obj);
-void easy_demoMainView_timer_0_cb(void *obj);
-void mainface_view_1_timer_0_cb(void *obj);
-void mainface_view_2_timer_0_cb(void *obj);
-void mainface_view_3_timer_0_cb(void *obj);
-void mainface_view_4_timer_0_cb(void *obj);
-void mainface_view_5_timer_0_cb(void *obj);
-void mainface_view_6_timer_0_cb(void *obj);
-void mainface_view_7_timer_0_cb(void *obj);
-void mainface_view_8_timer_0_cb(void *obj);
-void mainface_view_9_timer_0_cb(void *obj);
 void lbl_1_timer_0_cb(void *obj);
 void icon_bat_timer_0_cb(void *obj);
 

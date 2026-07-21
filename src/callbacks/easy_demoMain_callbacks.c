@@ -6,16 +6,6 @@
 #include <time.h>
 
 // Timer animation counters
-uint16_t easy_demoMainView_timer_cnt = 0;
-uint16_t mainface_view_1_timer_cnt = 0;
-uint16_t mainface_view_2_timer_cnt = 0;
-uint16_t mainface_view_3_timer_cnt = 0;
-uint16_t mainface_view_4_timer_cnt = 0;
-uint16_t mainface_view_5_timer_cnt = 0;
-uint16_t mainface_view_6_timer_cnt = 0;
-uint16_t mainface_view_7_timer_cnt = 0;
-uint16_t mainface_view_8_timer_cnt = 0;
-uint16_t mainface_view_9_timer_cnt = 0;
 uint16_t top_view_timer_cnt = 0;
 uint16_t bg_circle_timer_cnt = 0;
 uint16_t icon_bat_timer_cnt = 0;
@@ -531,73 +521,7 @@ void mainface_view_9_update_idx_cb(void *obj)
     gui_obj_focus_set(obj);
     win_timer_0_cb(obj);
 }
-void easy_demoMainView_timer_0_cb(void *obj)
-{
-    GUI_UNUSED(obj);
-    switch_mainface(obj, 0);
-    gui_obj_stop_timer(obj);
-}
 
-void mainface_view_1_timer_0_cb(void *obj)
-{
-    GUI_UNUSED(obj);
-    switch_mainface(obj, 1);
-    gui_obj_stop_timer(obj);
-}
-
-void mainface_view_2_timer_0_cb(void *obj)
-{
-    GUI_UNUSED(obj);
-    switch_mainface(obj, 2);
-    gui_obj_stop_timer(obj);
-}
-
-void mainface_view_3_timer_0_cb(void *obj)
-{
-    GUI_UNUSED(obj);
-    switch_mainface(obj, 3);
-    gui_obj_stop_timer(obj);
-}
-
-void mainface_view_4_timer_0_cb(void *obj)
-{
-    GUI_UNUSED(obj);
-    switch_mainface(obj, 4);
-    gui_obj_stop_timer(obj);
-}
-
-void mainface_view_5_timer_0_cb(void *obj)
-{
-    GUI_UNUSED(obj);
-    switch_mainface(obj, 5);
-    gui_obj_stop_timer(obj);
-}
-
-void mainface_view_6_timer_0_cb(void *obj)
-{
-    GUI_UNUSED(obj);
-    switch_mainface(obj, 6);
-    gui_obj_stop_timer(obj);
-}
-
-void mainface_view_7_timer_0_cb(void *obj)
-{
-    GUI_UNUSED(obj);
-    switch_mainface(obj, 7);
-    gui_obj_stop_timer(obj);
-}
-void mainface_view_8_timer_0_cb(void *obj)
-{
-    GUI_UNUSED(obj);
-    switch_mainface(obj, 8);
-    gui_obj_stop_timer(obj);
-}
-void mainface_view_9_timer_0_cb(void *obj)
-{
-    GUI_UNUSED(obj);
-    switch_mainface(obj, 9);
-    gui_obj_stop_timer(obj);
-}
 void lbl_1_timer_0_cb(void *obj)
 {
     GUI_UNUSED(obj);

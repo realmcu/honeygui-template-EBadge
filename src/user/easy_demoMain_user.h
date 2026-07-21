@@ -80,9 +80,16 @@ void click_delete_icon_detail(void *obj, gui_event_t *e);
 void click_back_icon(void *obj, gui_event_t *e);
 void click_camera_ctl_icon(void *obj, gui_event_t *e);
 
-void free_3d_temp_data(gui_view_t *view);
-
-
+void switch_in_mainface_0(gui_view_t *view);
+void switch_in_mainface_1(gui_view_t *view);
+void switch_in_mainface_2(gui_view_t *view);
+void switch_in_mainface_3(gui_view_t *view);
+void switch_in_mainface_4(gui_view_t *view);
+void switch_in_mainface_5(gui_view_t *view);
+void switch_in_mainface_6(gui_view_t *view);
+void switch_in_mainface_7(gui_view_t *view);
+void switch_in_mainface_8(gui_view_t *view);
+void switch_in_mainface_9(gui_view_t *view);
 
 /* Interact api */ 
 uint8_t mainface_list_init(void **data_list, uint32_t n); //ret: user's mainface num

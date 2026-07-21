@@ -22,7 +22,7 @@ gui_stream_t *streaming_1 = NULL;
 // Create easy_demoMainView (hg_view)
 static void easy_demoMainView_switch_out(gui_view_t *view)
 {
-    free_3d_temp_data(view);
+    GUI_UNUSED(view);
 }
 
 static void easy_demoMainView_switch_in(gui_view_t *view)
@@ -36,21 +36,19 @@ static void easy_demoMainView_switch_in(gui_view_t *view)
     // Set background color
     gui_view_set_bg_color(view, gui_rgb(0, 0, 0));
 
-    // Bind timer: 动画 1
-    gui_obj_create_timer((gui_obj_t *)view, 1000, true, easy_demoMainView_timer_0_cb);
-
-    GUI_UNUSED(view);
 
     gui_obj_add_event_cb((gui_obj_t *)view, (gui_event_cb_t)easy_demoMainView_key_0_cb, GUI_EVENT_KB_SHORT_PRESSED, NULL);
     gui_obj_add_event_cb((gui_obj_t *)view, (gui_event_cb_t)easy_demoMainView_key_1_cb, GUI_EVENT_KB_LONG_PRESSED, NULL);
     gui_obj_focus_set((gui_obj_t *)view);
+
+    switch_in_mainface_0(view);
 }
-GUI_VIEW_INSTANCE("easy_demoMainView", false, easy_demoMainView_switch_in, easy_demoMainView_switch_out, false);
+GUI_VIEW_INSTANCE("easy_demoMainView", false, easy_demoMainView_switch_in, easy_demoMainView_switch_out, true);
 
 // Create mainface_view_1 (hg_view)
 static void mainface_view_1_switch_out(gui_view_t *view)
 {
-    free_3d_temp_data(view);
+    GUI_UNUSED(view);
 }
 
 static void mainface_view_1_switch_in(gui_view_t *view)
@@ -64,21 +62,19 @@ static void mainface_view_1_switch_in(gui_view_t *view)
     // Set background color
     gui_view_set_bg_color(view, gui_rgb(0, 0, 0));
 
-    // Bind timer: 动画 1
-    gui_obj_create_timer((gui_obj_t *)view, 1000, true, mainface_view_1_timer_0_cb);
-
-    GUI_UNUSED(view);
 
     gui_obj_add_event_cb((gui_obj_t *)view, (gui_event_cb_t)mainface_view_1_key_0_cb, GUI_EVENT_KB_SHORT_PRESSED, NULL);
     gui_obj_add_event_cb((gui_obj_t *)view, (gui_event_cb_t)mainface_view_1_key_1_cb, GUI_EVENT_KB_LONG_PRESSED, NULL);
     gui_obj_focus_set((gui_obj_t *)view);
+
+    switch_in_mainface_1(view);
 }
-GUI_VIEW_INSTANCE("mainface_view_1", false, mainface_view_1_switch_in, mainface_view_1_switch_out, false);
+GUI_VIEW_INSTANCE("mainface_view_1", false, mainface_view_1_switch_in, mainface_view_1_switch_out, true);
 
 // Create mainface_view_2 (hg_view)
 static void mainface_view_2_switch_out(gui_view_t *view)
 {
-    free_3d_temp_data(view);
+    GUI_UNUSED(view);
 }
 
 static void mainface_view_2_switch_in(gui_view_t *view)
@@ -92,21 +88,19 @@ static void mainface_view_2_switch_in(gui_view_t *view)
     // Set background color
     gui_view_set_bg_color(view, gui_rgb(0, 0, 0));
 
-    // Bind timer: 动画 1
-    gui_obj_create_timer((gui_obj_t *)view, 1000, true, mainface_view_2_timer_0_cb);
-
-    GUI_UNUSED(view);
 
     gui_obj_add_event_cb((gui_obj_t *)view, (gui_event_cb_t)mainface_view_2_key_0_cb, GUI_EVENT_KB_SHORT_PRESSED, NULL);
     gui_obj_add_event_cb((gui_obj_t *)view, (gui_event_cb_t)mainface_view_2_key_1_cb, GUI_EVENT_KB_LONG_PRESSED, NULL);
     gui_obj_focus_set((gui_obj_t *)view);
+
+    switch_in_mainface_2(view);
 }
-GUI_VIEW_INSTANCE("mainface_view_2", false, mainface_view_2_switch_in, mainface_view_2_switch_out, false);
+GUI_VIEW_INSTANCE("mainface_view_2", false, mainface_view_2_switch_in, mainface_view_2_switch_out, true);
 
 // Create mainface_view_3 (hg_view)
 static void mainface_view_3_switch_out(gui_view_t *view)
 {
-    free_3d_temp_data(view);
+    GUI_UNUSED(view);
 }
 
 static void mainface_view_3_switch_in(gui_view_t *view)
@@ -120,21 +114,19 @@ static void mainface_view_3_switch_in(gui_view_t *view)
     // Set background color
     gui_view_set_bg_color(view, gui_rgb(0, 0, 0));
 
-    // Bind timer: 动画 1
-    gui_obj_create_timer((gui_obj_t *)view, 1000, true, mainface_view_3_timer_0_cb);
-
-    GUI_UNUSED(view);
 
     gui_obj_add_event_cb((gui_obj_t *)view, (gui_event_cb_t)mainface_view_3_key_0_cb, GUI_EVENT_KB_SHORT_PRESSED, NULL);
     gui_obj_add_event_cb((gui_obj_t *)view, (gui_event_cb_t)mainface_view_3_key_1_cb, GUI_EVENT_KB_LONG_PRESSED, NULL);
     gui_obj_focus_set((gui_obj_t *)view);
+
+    switch_in_mainface_3(view);
 }
-GUI_VIEW_INSTANCE("mainface_view_3", false, mainface_view_3_switch_in, mainface_view_3_switch_out, false);
+GUI_VIEW_INSTANCE("mainface_view_3", false, mainface_view_3_switch_in, mainface_view_3_switch_out, true);
 
 // Create mainface_view_4 (hg_view)
 static void mainface_view_4_switch_out(gui_view_t *view)
 {
-    free_3d_temp_data(view);
+    GUI_UNUSED(view);
 }
 
 static void mainface_view_4_switch_in(gui_view_t *view)
@@ -148,21 +140,19 @@ static void mainface_view_4_switch_in(gui_view_t *view)
     // Set background color
     gui_view_set_bg_color(view, gui_rgb(0, 0, 0));
 
-    // Bind timer: 动画 1
-    gui_obj_create_timer((gui_obj_t *)view, 1000, true, mainface_view_4_timer_0_cb);
-
-    GUI_UNUSED(view);
 
     gui_obj_add_event_cb((gui_obj_t *)view, (gui_event_cb_t)mainface_view_4_key_0_cb, GUI_EVENT_KB_SHORT_PRESSED, NULL);
     gui_obj_add_event_cb((gui_obj_t *)view, (gui_event_cb_t)mainface_view_4_key_1_cb, GUI_EVENT_KB_LONG_PRESSED, NULL);
     gui_obj_focus_set((gui_obj_t *)view);
+
+    switch_in_mainface_4(view);
 }
-GUI_VIEW_INSTANCE("mainface_view_4", false, mainface_view_4_switch_in, mainface_view_4_switch_out, false);
+GUI_VIEW_INSTANCE("mainface_view_4", false, mainface_view_4_switch_in, mainface_view_4_switch_out, true);
 
 // Create mainface_view_5 (hg_view)
 static void mainface_view_5_switch_out(gui_view_t *view)
 {
-    free_3d_temp_data(view);
+    GUI_UNUSED(view);
 }
 
 static void mainface_view_5_switch_in(gui_view_t *view)
@@ -176,21 +166,19 @@ static void mainface_view_5_switch_in(gui_view_t *view)
     // Set background color
     gui_view_set_bg_color(view, gui_rgb(0, 0, 0));
 
-    // Bind timer: 动画 1
-    gui_obj_create_timer((gui_obj_t *)view, 1000, true, mainface_view_5_timer_0_cb);
-
-    GUI_UNUSED(view);
 
     gui_obj_add_event_cb((gui_obj_t *)view, (gui_event_cb_t)mainface_view_5_key_0_cb, GUI_EVENT_KB_SHORT_PRESSED, NULL);
     gui_obj_add_event_cb((gui_obj_t *)view, (gui_event_cb_t)mainface_view_5_key_1_cb, GUI_EVENT_KB_LONG_PRESSED, NULL);
     gui_obj_focus_set((gui_obj_t *)view);
+
+    switch_in_mainface_5(view);
 }
-GUI_VIEW_INSTANCE("mainface_view_5", false, mainface_view_5_switch_in, mainface_view_5_switch_out, false);
+GUI_VIEW_INSTANCE("mainface_view_5", false, mainface_view_5_switch_in, mainface_view_5_switch_out, true);
 
 // Create mainface_view_6 (hg_view)
 static void mainface_view_6_switch_out(gui_view_t *view)
 {
-    free_3d_temp_data(view);
+    GUI_UNUSED(view);
 }
 
 static void mainface_view_6_switch_in(gui_view_t *view)
@@ -204,21 +192,19 @@ static void mainface_view_6_switch_in(gui_view_t *view)
     // Set background color
     gui_view_set_bg_color(view, gui_rgb(0, 0, 0));
 
-    // Bind timer: 动画 1
-    gui_obj_create_timer((gui_obj_t *)view, 1000, true, mainface_view_6_timer_0_cb);
-
-    GUI_UNUSED(view);
 
     gui_obj_add_event_cb((gui_obj_t *)view, (gui_event_cb_t)mainface_view_6_key_0_cb, GUI_EVENT_KB_SHORT_PRESSED, NULL);
     gui_obj_add_event_cb((gui_obj_t *)view, (gui_event_cb_t)mainface_view_6_key_1_cb, GUI_EVENT_KB_LONG_PRESSED, NULL);
     gui_obj_focus_set((gui_obj_t *)view);
+
+    switch_in_mainface_6(view);
 }
-GUI_VIEW_INSTANCE("mainface_view_6", false, mainface_view_6_switch_in, mainface_view_6_switch_out, false);
+GUI_VIEW_INSTANCE("mainface_view_6", false, mainface_view_6_switch_in, mainface_view_6_switch_out, true);
 
 // Create mainface_view_7 (hg_view)
 static void mainface_view_7_switch_out(gui_view_t *view)
 {
-    free_3d_temp_data(view);
+    GUI_UNUSED(view);
 }
 
 static void mainface_view_7_switch_in(gui_view_t *view)
@@ -232,21 +218,19 @@ static void mainface_view_7_switch_in(gui_view_t *view)
     // Set background color
     gui_view_set_bg_color(view, gui_rgb(0, 0, 0));
 
-    // Bind timer: 动画 1
-    gui_obj_create_timer((gui_obj_t *)view, 1000, true, mainface_view_7_timer_0_cb);
-
-    GUI_UNUSED(view);
 
     gui_obj_add_event_cb((gui_obj_t *)view, (gui_event_cb_t)mainface_view_7_key_0_cb, GUI_EVENT_KB_SHORT_PRESSED, NULL);
     gui_obj_add_event_cb((gui_obj_t *)view, (gui_event_cb_t)mainface_view_7_key_1_cb, GUI_EVENT_KB_LONG_PRESSED, NULL);
     gui_obj_focus_set((gui_obj_t *)view);
+
+    switch_in_mainface_7(view);
 }
-GUI_VIEW_INSTANCE("mainface_view_7", false, mainface_view_7_switch_in, mainface_view_7_switch_out, false);
+GUI_VIEW_INSTANCE("mainface_view_7", false, mainface_view_7_switch_in, mainface_view_7_switch_out, true);
 
 // Create mainface_view_8 (hg_view)
 static void mainface_view_8_switch_out(gui_view_t *view)
 {
-    free_3d_temp_data(view);
+    GUI_UNUSED(view);
 }
 
 static void mainface_view_8_switch_in(gui_view_t *view)
@@ -260,21 +244,19 @@ static void mainface_view_8_switch_in(gui_view_t *view)
     // Set background color
     gui_view_set_bg_color(view, gui_rgb(0, 0, 0));
 
-    // Bind timer: 动画 1
-    gui_obj_create_timer((gui_obj_t *)view, 1000, true, mainface_view_8_timer_0_cb);
-
-    GUI_UNUSED(view);
 
     gui_obj_add_event_cb((gui_obj_t *)view, (gui_event_cb_t)mainface_view_8_key_0_cb, GUI_EVENT_KB_SHORT_PRESSED, NULL);
     gui_obj_add_event_cb((gui_obj_t *)view, (gui_event_cb_t)mainface_view_8_key_1_cb, GUI_EVENT_KB_LONG_PRESSED, NULL);
     gui_obj_focus_set((gui_obj_t *)view);
+
+    switch_in_mainface_8(view);
 }
-GUI_VIEW_INSTANCE("mainface_view_8", false, mainface_view_8_switch_in, mainface_view_8_switch_out, false);
+GUI_VIEW_INSTANCE("mainface_view_8", false, mainface_view_8_switch_in, mainface_view_8_switch_out, true);
 
 // Create mainface_view_9 (hg_view)
 static void mainface_view_9_switch_out(gui_view_t *view)
 {
-    free_3d_temp_data(view);
+    GUI_UNUSED(view);
 }
 
 static void mainface_view_9_switch_in(gui_view_t *view)
@@ -288,16 +270,14 @@ static void mainface_view_9_switch_in(gui_view_t *view)
     // Set background color
     gui_view_set_bg_color(view, gui_rgb(0, 0, 0));
 
-    // Bind timer: 动画 1
-    gui_obj_create_timer((gui_obj_t *)view, 1000, true, mainface_view_9_timer_0_cb);
-
-    GUI_UNUSED(view);
 
     gui_obj_add_event_cb((gui_obj_t *)view, (gui_event_cb_t)mainface_view_9_key_0_cb, GUI_EVENT_KB_SHORT_PRESSED, NULL);
     gui_obj_add_event_cb((gui_obj_t *)view, (gui_event_cb_t)mainface_view_9_key_1_cb, GUI_EVENT_KB_LONG_PRESSED, NULL);
     gui_obj_focus_set((gui_obj_t *)view);
+
+    switch_in_mainface_9(view);
 }
-GUI_VIEW_INSTANCE("mainface_view_9", false, mainface_view_9_switch_in, mainface_view_9_switch_out, false);
+GUI_VIEW_INSTANCE("mainface_view_9", false, mainface_view_9_switch_in, mainface_view_9_switch_out, true);
 
 // Create top_view (hg_view)
 static void top_view_switch_out(gui_view_t *view)
