@@ -28,8 +28,8 @@ uint8_t mainface_idx = 0;
 uint8_t mainface_num = 5;
 mainface_src_t mainface_list[MAINFACE_NUM_MAX] =
 {
-    {"/image/565/wallpaper_danmu.bin",      SRC_DANMU,          NULL, "/user/hello_40A840.bin", 0xff40A840},
-    {"/user/gltf_desc_Fox.bin",             SRC_3D,             NULL, "/user/fox_0040F8.bin", 0xff0040F8},
+    {"/image/565/wallpaper_danmu.bin",      SRC_DANMU,          NULL, "/user/hello_0040F8.bin", 0xff0040F8},
+    {"/user/gltf_desc_Fox.bin",             SRC_3D,             NULL, "/user/fox_40A840.bin", 0xff40A840},
     {"/foreground_360.bin",                 SRC_IMG_SPATIAL,    NULL, "/user/eva_D0C9B9.bin", 0xffD0C9B9},
     {"/wallpaper_video.avi",                SRC_VIDEO,          NULL, "/user/wsq_F4EFD9.bin", 0xffF4EFD9},
     {"/image/565/wallpaper_static_img.bin", SRC_IMG,            NULL, "/user/pig_F8C8C8.bin", 0xffF8C8C8},
