@@ -11,7 +11,7 @@
 
 
 // Add custom declarations here
-#define  SCREEN_SIZE  360
+#define  SCREEN_SIZE  466
 #define  MAINFACE_NUM_MAX  10
 
 

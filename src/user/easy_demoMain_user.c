@@ -213,16 +213,16 @@ void create_win_del(void)
 {
     if (has_created_win_del) return;
     has_created_win_del = true;
-    gui_win_t *win_del = gui_win_create(gui_obj_get_root(), "win_del", 0, 0, 360, 360);
+    gui_win_t *win_del = gui_win_create(gui_obj_get_root(), "win_del", 0, 0, SCREEN_SIZE, SCREEN_SIZE);
 
-    gui_img_t *img = gui_img_create_from_fs(win_del, 0, "/image/A8/circle_360_bg.bin", 0, 180, 360, 360);
+    gui_img_t *img = gui_img_create_from_fs(win_del, 0, "/image/A8/circle_360_bg.bin", 0, SCREEN_SIZE / 2, SCREEN_SIZE, SCREEN_SIZE);
     gui_img_set_mode(img, IMG_SRC_OVER_MODE);
     gui_img_set_opacity(img, 122);
 
-    img = gui_img_create_from_fs(win_del, 0, "/image/A8/delete_icon.bin", 63, 231, 100, 100);
+    img = gui_img_create_from_fs(win_del, 0, "/image/A8/delete_icon.bin", 88, 292, 100, 100);
     gui_obj_add_event_cb(img, (gui_event_cb_t)click_delete_icon_detail, GUI_EVENT_TOUCH_CLICKED, NULL);
 
-    img = gui_img_create_from_fs(win_del, 0, "/image/A8/back_icon.bin", 198, 231, 100, 100);
+    img = gui_img_create_from_fs(win_del, 0, "/image/A8/back_icon.bin", 258, 292, 100, 100);
     gui_obj_add_event_cb(img, (gui_event_cb_t)click_back_icon, GUI_EVENT_TOUCH_CLICKED, NULL);
 
     gui_obj_focus_set(GUI_BASE(win_del));
@@ -396,7 +396,7 @@ void win_timer_gsensor_cb(void *obj)
 
 void switch_mainface(gui_obj_t *parent, uint8_t idx)
 {
-    gui_win_t *win = gui_win_create(parent, 0, 0, 0, 360, 360);
+    gui_win_t *win = gui_win_create(parent, 0, 0, 0, SCREEN_SIZE, SCREEN_SIZE);
     win->base.user_data = &mainface_list[idx];
     mainface_idx = idx;
     void (*timer_cb)(void *) = NULL;
@@ -440,9 +440,9 @@ void switch_mainface(gui_obj_t *parent, uint8_t idx)
 
     if (mainface_num == 0)
     {
-        gui_text_t *text = gui_text_create((gui_obj_t *)win, 0, 0, 0, 360, 360);
+        gui_text_t *text = gui_text_create((gui_obj_t *)win, 0, 0, 0, SCREEN_SIZE, SCREEN_SIZE);
         gui_text_set((gui_text_t *)text, "Please add a mainface", GUI_FONT_SRC_BMP, gui_rgb(255, 255, 255), 21, 20);
-        gui_text_type_set((gui_text_t *)text, "/font/Inter_24pt_SemiBold_size20_bits4_bitmap.bin", FONT_SRC_FILESYS);
+        gui_text_type_set((gui_text_t *)text, "/font/Inter_24pt_SemiBold_size28_bits4_bitmap.bin", FONT_SRC_FILESYS);
         gui_text_mode_set((gui_text_t *)text, MID_CENTER);
 
         gui_view_switch_on_event((void *)parent, "top_view", SWITCH_INIT_STATE, SWITCH_IN_FROM_TOP_USE_TRANSLATION, GUI_EVENT_TOUCH_MOVE_DOWN);
@@ -501,7 +501,7 @@ void switch_mainface(gui_obj_t *parent, uint8_t idx)
         event_code_l = GUI_EVENT_TOUCH_LEFT_SLIDE_QUICK;
         event_code_r = GUI_EVENT_TOUCH_RIGHT_SLIDE_QUICK;
         gui_view_set_bg_color((gui_view_t *)parent, gui_rgb(0x41, 0xAD, 0x41));
-        fox_3d = l3_create_model_fs((void *)mainface_list[idx].data, L3_DRAW_FRONT_AND_SORT, 0, 0, 360, 360);
+        fox_3d = l3_create_model_fs((void *)mainface_list[idx].data, L3_DRAW_FRONT_AND_SORT, 0, 0, SCREEN_SIZE, SCREEN_SIZE);
 
         l3_set_global_transform(fox_3d, (l3_global_transform_cb)fox_global_cb);
         l3_gltf_set_active_animation(fox_3d, cur_anim);
@@ -569,9 +569,9 @@ void switch_mainface(gui_obj_t *parent, uint8_t idx)
         break;
     }
     
-    gui_img_t *img = gui_img_create_from_fs(win, 0, "/image/lock_icon.bin", 90, 90, 0, 0);
+    gui_img_t *img = gui_img_create_from_fs(win, 0, "/image/lock_icon.bin", 143, 143, 0, 0);
     gui_obj_hidden((gui_obj_t *)img, true);
-    img = gui_img_create_from_fs(win, 0, prog_arc_array[0], 90, 90, 0, 0);
+    img = gui_img_create_from_fs(win, 0, prog_arc_array[0], 143, 143, 0, 0);
     gui_obj_hidden((gui_obj_t *)img, true);
 
     if (dev_mode != MODE_DELETE && !enable_switch_mainface) return;

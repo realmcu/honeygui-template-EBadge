@@ -23,14 +23,7 @@ void easy_demoMainView_key_0_cb(void *obj, gui_event_t *e)
     {
         gui_view_switch_direct(gui_view_get_current(), "bt_View", SWITCH_OUT_NONE_ANIMATION, SWITCH_IN_NONE_ANIMATION);
     }
-}
-
-void easy_demoMainView_key_1_cb(void *obj, gui_event_t *e)
-{
-    GUI_UNUSED(obj);
-    GUI_UNUSED(e);
-    // Check key name
-    if (strcmp(e->indev_name, "Power") == 0)
+    else if (strcmp(e->indev_name, "Power") == 0)
     {
         gui_view_switch_direct(gui_view_get_current(), "menuMainView", SWITCH_INIT_STATE, SWITCH_IN_NONE_ANIMATION);
     }
@@ -45,14 +38,7 @@ void mainface_view_1_key_0_cb(void *obj, gui_event_t *e)
     {
         gui_view_switch_direct(gui_view_get_current(), "bt_View", SWITCH_INIT_STATE, SWITCH_IN_NONE_ANIMATION);
     }
-}
-
-void mainface_view_1_key_1_cb(void *obj, gui_event_t *e)
-{
-    GUI_UNUSED(obj);
-    GUI_UNUSED(e);
-    // Check key name
-    if (strcmp(e->indev_name, "Power") == 0)
+    else if (strcmp(e->indev_name, "Power") == 0)
     {
         gui_view_switch_direct(gui_view_get_current(), "menuMainView", SWITCH_INIT_STATE, SWITCH_IN_NONE_ANIMATION);
     }
@@ -67,14 +53,7 @@ void mainface_view_2_key_0_cb(void *obj, gui_event_t *e)
     {
         gui_view_switch_direct(gui_view_get_current(), "bt_View", SWITCH_INIT_STATE, SWITCH_IN_NONE_ANIMATION);
     }
-}
-
-void mainface_view_2_key_1_cb(void *obj, gui_event_t *e)
-{
-    GUI_UNUSED(obj);
-    GUI_UNUSED(e);
-    // Check key name
-    if (strcmp(e->indev_name, "Power") == 0)
+    else if (strcmp(e->indev_name, "Power") == 0)
     {
         gui_view_switch_direct(gui_view_get_current(), "menuMainView", SWITCH_INIT_STATE, SWITCH_IN_NONE_ANIMATION);
     }
@@ -89,14 +68,7 @@ void mainface_view_3_key_0_cb(void *obj, gui_event_t *e)
     {
         gui_view_switch_direct(gui_view_get_current(), "bt_View", SWITCH_INIT_STATE, SWITCH_IN_NONE_ANIMATION);
     }
-}
-
-void mainface_view_3_key_1_cb(void *obj, gui_event_t *e)
-{
-    GUI_UNUSED(obj);
-    GUI_UNUSED(e);
-    // Check key name
-    if (strcmp(e->indev_name, "Power") == 0)
+    else if (strcmp(e->indev_name, "Power") == 0)
     {
         gui_view_switch_direct(gui_view_get_current(), "menuMainView", SWITCH_INIT_STATE, SWITCH_IN_NONE_ANIMATION);
     }
@@ -111,14 +83,7 @@ void mainface_view_4_key_0_cb(void *obj, gui_event_t *e)
     {
         gui_view_switch_direct(gui_view_get_current(), "bt_View", SWITCH_INIT_STATE, SWITCH_IN_NONE_ANIMATION);
     }
-}
-
-void mainface_view_4_key_1_cb(void *obj, gui_event_t *e)
-{
-    GUI_UNUSED(obj);
-    GUI_UNUSED(e);
-    // Check key name
-    if (strcmp(e->indev_name, "Power") == 0)
+    else if (strcmp(e->indev_name, "Power") == 0)
     {
         gui_view_switch_direct(gui_view_get_current(), "menuMainView", SWITCH_INIT_STATE, SWITCH_IN_NONE_ANIMATION);
     }
@@ -133,14 +98,7 @@ void mainface_view_5_key_0_cb(void *obj, gui_event_t *e)
     {
         gui_view_switch_direct(gui_view_get_current(), "bt_View", SWITCH_INIT_STATE, SWITCH_IN_NONE_ANIMATION);
     }
-}
-
-void mainface_view_5_key_1_cb(void *obj, gui_event_t *e)
-{
-    GUI_UNUSED(obj);
-    GUI_UNUSED(e);
-    // Check key name
-    if (strcmp(e->indev_name, "Power") == 0)
+    else if (strcmp(e->indev_name, "Power") == 0)
     {
         gui_view_switch_direct(gui_view_get_current(), "menuMainView", SWITCH_INIT_STATE, SWITCH_IN_NONE_ANIMATION);
     }
@@ -155,14 +113,7 @@ void mainface_view_6_key_0_cb(void *obj, gui_event_t *e)
     {
         gui_view_switch_direct(gui_view_get_current(), "bt_View", SWITCH_INIT_STATE, SWITCH_IN_NONE_ANIMATION);
     }
-}
-
-void mainface_view_6_key_1_cb(void *obj, gui_event_t *e)
-{
-    GUI_UNUSED(obj);
-    GUI_UNUSED(e);
-    // Check key name
-    if (strcmp(e->indev_name, "Power") == 0)
+    else if (strcmp(e->indev_name, "Power") == 0)
     {
         gui_view_switch_direct(gui_view_get_current(), "menuMainView", SWITCH_INIT_STATE, SWITCH_IN_NONE_ANIMATION);
     }
@@ -177,14 +128,7 @@ void mainface_view_7_key_0_cb(void *obj, gui_event_t *e)
     {
         gui_view_switch_direct(gui_view_get_current(), "bt_View", SWITCH_INIT_STATE, SWITCH_IN_NONE_ANIMATION);
     }
-}
-
-void mainface_view_7_key_1_cb(void *obj, gui_event_t *e)
-{
-    GUI_UNUSED(obj);
-    GUI_UNUSED(e);
-    // Check key name
-    if (strcmp(e->indev_name, "Power") == 0)
+    else if (strcmp(e->indev_name, "Power") == 0)
     {
         gui_view_switch_direct(gui_view_get_current(), "menuMainView", SWITCH_INIT_STATE, SWITCH_IN_NONE_ANIMATION);
     }
@@ -199,14 +143,7 @@ void mainface_view_8_key_0_cb(void *obj, gui_event_t *e)
     {
         gui_view_switch_direct(gui_view_get_current(), "bt_View", SWITCH_INIT_STATE, SWITCH_IN_NONE_ANIMATION);
     }
-}
-
-void mainface_view_8_key_1_cb(void *obj, gui_event_t *e)
-{
-    GUI_UNUSED(obj);
-    GUI_UNUSED(e);
-    // Check key name
-    if (strcmp(e->indev_name, "Power") == 0)
+    else if (strcmp(e->indev_name, "Power") == 0)
     {
         gui_view_switch_direct(gui_view_get_current(), "menuMainView", SWITCH_INIT_STATE, SWITCH_IN_NONE_ANIMATION);
     }
@@ -221,14 +158,7 @@ void mainface_view_9_key_0_cb(void *obj, gui_event_t *e)
     {
         gui_view_switch_direct(gui_view_get_current(), "bt_View", SWITCH_INIT_STATE, SWITCH_IN_NONE_ANIMATION);
     }
-}
-
-void mainface_view_9_key_1_cb(void *obj, gui_event_t *e)
-{
-    GUI_UNUSED(obj);
-    GUI_UNUSED(e);
-    // Check key name
-    if (strcmp(e->indev_name, "Power") == 0)
+    else if (strcmp(e->indev_name, "Power") == 0)
     {
         gui_view_switch_direct(gui_view_get_current(), "menuMainView", SWITCH_INIT_STATE, SWITCH_IN_NONE_ANIMATION);
     }

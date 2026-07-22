@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "name": "easy_demo",
   "appId": "com.example.easy_demo",
-  "resolution": "360X360",
+  "resolution": "466X466",
   "cornerRadius": -1,
   "targetEngine": "honeygui",
   "minSdk": "API 2: HoneyGUI V1.1.0",

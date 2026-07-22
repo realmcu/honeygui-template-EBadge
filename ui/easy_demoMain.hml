@@ -5,107 +5,107 @@
         <author name="Anonymous" />
     </meta>
     <view>
-        <hg_view id="easy_demoMainView" x="11" y="0" width="360" height="360" backgroundColor="#000000" entry="true" animateStep="36" switchInFunctionName="switch_in_mainface_0" snapShot="true" zIndex="0">
+        <hg_view id="easy_demoMainView" x="11" y="0" width="466" height="466" backgroundColor="#000000" entry="true" animateStep="500" switchInFunctionName="switch_in_mainface_0" snapShot="true" zIndex="0">
             <events>
                 <event type="onKeyShortPress" keyName="Menu">
                     <action type="switchView" target="bt_View" switchOutStyle="SWITCH_OUT_NONE_ANIMATION" switchInStyle="SWITCH_IN_NONE_ANIMATION" />
                 </event>
-                <event type="onKeyLongPress" keyName="Power">
+                <event type="onKeyShortPress" keyName="Power">
                     <action type="switchView" target="menuMainView" switchOutStyle="SWITCH_INIT_STATE" switchInStyle="SWITCH_IN_NONE_ANIMATION" />
                 </event>
             </events>
         </hg_view>
-        <hg_view id="mainface_view_1" x="584" y="0" width="360" height="360" backgroundColor="#000000" entry="false" animateStep="36" switchInFunctionName="switch_in_mainface_1" snapShot="true" zIndex="0">
+        <hg_view id="mainface_view_1" x="584" y="0" width="466" height="466" backgroundColor="#000000" entry="false" animateStep="500" switchInFunctionName="switch_in_mainface_1" snapShot="true" zIndex="0">
             <events>
                 <event type="onKeyShortPress" keyName="Menu">
                     <action type="switchView" target="bt_View" switchOutStyle="SWITCH_INIT_STATE" switchInStyle="SWITCH_IN_NONE_ANIMATION" />
                 </event>
-                <event type="onKeyLongPress" keyName="Power">
+                <event type="onKeyShortPress" keyName="Power">
                     <action type="switchView" target="menuMainView" switchOutStyle="SWITCH_INIT_STATE" switchInStyle="SWITCH_IN_NONE_ANIMATION" />
                 </event>
             </events>
         </hg_view>
-        <hg_view id="mainface_view_2" x="1210" y="8" width="360" height="360" backgroundColor="#000000" entry="false" animateStep="36" switchInFunctionName="switch_in_mainface_2" snapShot="true" zIndex="0">
+        <hg_view id="mainface_view_2" x="1210" y="8" width="466" height="466" backgroundColor="#000000" entry="false" animateStep="36" switchInFunctionName="switch_in_mainface_2" snapShot="true" zIndex="0">
             <events>
                 <event type="onKeyShortPress" keyName="Menu">
                     <action type="switchView" target="bt_View" switchOutStyle="SWITCH_INIT_STATE" switchInStyle="SWITCH_IN_NONE_ANIMATION" />
                 </event>
-                <event type="onKeyLongPress" keyName="Power">
+                <event type="onKeyShortPress" keyName="Power">
                     <action type="switchView" target="menuMainView" switchOutStyle="SWITCH_INIT_STATE" switchInStyle="SWITCH_IN_NONE_ANIMATION" />
                 </event>
             </events>
         </hg_view>
-        <hg_view id="mainface_view_3" x="1803" y="8" width="360" height="360" backgroundColor="#000000" entry="false" animateStep="36" switchInFunctionName="switch_in_mainface_3" snapShot="true" zIndex="0">
+        <hg_view id="mainface_view_3" x="1803" y="8" width="466" height="466" backgroundColor="#000000" entry="false" animateStep="500" switchInFunctionName="switch_in_mainface_3" snapShot="true" zIndex="0">
             <events>
                 <event type="onKeyShortPress" keyName="Menu">
                     <action type="switchView" target="bt_View" switchOutStyle="SWITCH_INIT_STATE" switchInStyle="SWITCH_IN_NONE_ANIMATION" />
                 </event>
-                <event type="onKeyLongPress" keyName="Power">
+                <event type="onKeyShortPress" keyName="Power">
                     <action type="switchView" target="menuMainView" switchOutStyle="SWITCH_INIT_STATE" switchInStyle="SWITCH_IN_NONE_ANIMATION" />
                 </event>
             </events>
         </hg_view>
-        <hg_view id="mainface_view_4" x="2343" y="8" width="360" height="360" backgroundColor="#000000" entry="false" animateStep="36" switchInFunctionName="switch_in_mainface_4" snapShot="true" zIndex="0">
+        <hg_view id="mainface_view_4" x="2343" y="8" width="466" height="466" backgroundColor="#000000" entry="false" animateStep="500" switchInFunctionName="switch_in_mainface_4" snapShot="true" zIndex="0">
             <events>
                 <event type="onKeyShortPress" keyName="Menu">
                     <action type="switchView" target="bt_View" switchOutStyle="SWITCH_INIT_STATE" switchInStyle="SWITCH_IN_NONE_ANIMATION" />
                 </event>
-                <event type="onKeyLongPress" keyName="Power">
+                <event type="onKeyShortPress" keyName="Power">
                     <action type="switchView" target="menuMainView" switchOutStyle="SWITCH_INIT_STATE" switchInStyle="SWITCH_IN_NONE_ANIMATION" />
                 </event>
             </events>
         </hg_view>
-        <hg_view id="mainface_view_5" x="2890" y="0" width="360" height="360" backgroundColor="#000000" entry="false" animateStep="36" switchInFunctionName="switch_in_mainface_5" snapShot="true" zIndex="0">
+        <hg_view id="mainface_view_5" x="2890" y="0" width="466" height="466" backgroundColor="#000000" entry="false" animateStep="500" switchInFunctionName="switch_in_mainface_5" snapShot="true" zIndex="0">
             <events>
                 <event type="onKeyShortPress" keyName="Menu">
                     <action type="switchView" target="bt_View" switchOutStyle="SWITCH_INIT_STATE" switchInStyle="SWITCH_IN_NONE_ANIMATION" />
                 </event>
-                <event type="onKeyLongPress" keyName="Power">
+                <event type="onKeyShortPress" keyName="Power">
                     <action type="switchView" target="menuMainView" switchOutStyle="SWITCH_INIT_STATE" switchInStyle="SWITCH_IN_NONE_ANIMATION" />
                 </event>
             </events>
         </hg_view>
-        <hg_view id="mainface_view_6" x="3457" y="0" width="360" height="360" backgroundColor="#000000" entry="false" animateStep="36" switchInFunctionName="switch_in_mainface_6" snapShot="true" zIndex="0">
+        <hg_view id="mainface_view_6" x="3457" y="0" width="466" height="466" backgroundColor="#000000" entry="false" animateStep="500" switchInFunctionName="switch_in_mainface_6" snapShot="true" zIndex="0">
             <events>
                 <event type="onKeyShortPress" keyName="Menu">
                     <action type="switchView" target="bt_View" switchOutStyle="SWITCH_INIT_STATE" switchInStyle="SWITCH_IN_NONE_ANIMATION" />
                 </event>
-                <event type="onKeyLongPress" keyName="Power">
+                <event type="onKeyShortPress" keyName="Power">
                     <action type="switchView" target="menuMainView" switchOutStyle="SWITCH_INIT_STATE" switchInStyle="SWITCH_IN_NONE_ANIMATION" />
                 </event>
             </events>
         </hg_view>
-        <hg_view id="mainface_view_7" x="4000" y="0" width="360" height="360" backgroundColor="#000000" entry="false" animateStep="36" switchInFunctionName="switch_in_mainface_7" snapShot="true" zIndex="0">
+        <hg_view id="mainface_view_7" x="4000" y="0" width="466" height="466" backgroundColor="#000000" entry="false" animateStep="500" switchInFunctionName="switch_in_mainface_7" snapShot="true" zIndex="0">
             <events>
                 <event type="onKeyShortPress" keyName="Menu">
                     <action type="switchView" target="bt_View" switchOutStyle="SWITCH_INIT_STATE" switchInStyle="SWITCH_IN_NONE_ANIMATION" />
                 </event>
-                <event type="onKeyLongPress" keyName="Power">
+                <event type="onKeyShortPress" keyName="Power">
                     <action type="switchView" target="menuMainView" switchOutStyle="SWITCH_INIT_STATE" switchInStyle="SWITCH_IN_NONE_ANIMATION" />
                 </event>
             </events>
         </hg_view>
-        <hg_view id="mainface_view_8" x="4587" y="8" width="360" height="360" backgroundColor="#000000" entry="false" animateStep="36" switchInFunctionName="switch_in_mainface_8" snapShot="true" zIndex="0">
+        <hg_view id="mainface_view_8" x="4587" y="8" width="466" height="466" backgroundColor="#000000" entry="false" animateStep="500" switchInFunctionName="switch_in_mainface_8" snapShot="true" zIndex="0">
             <events>
                 <event type="onKeyShortPress" keyName="Menu">
                     <action type="switchView" target="bt_View" switchOutStyle="SWITCH_INIT_STATE" switchInStyle="SWITCH_IN_NONE_ANIMATION" />
                 </event>
-                <event type="onKeyLongPress" keyName="Power">
+                <event type="onKeyShortPress" keyName="Power">
                     <action type="switchView" target="menuMainView" switchOutStyle="SWITCH_INIT_STATE" switchInStyle="SWITCH_IN_NONE_ANIMATION" />
                 </event>
             </events>
         </hg_view>
-        <hg_view id="mainface_view_9" x="5122" y="8" width="360" height="360" backgroundColor="#000000" entry="false" animateStep="36" switchInFunctionName="switch_in_mainface_9" snapShot="true" zIndex="0">
+        <hg_view id="mainface_view_9" x="5122" y="8" width="466" height="466" backgroundColor="#000000" entry="false" animateStep="500" switchInFunctionName="switch_in_mainface_9" snapShot="true" zIndex="0">
             <events>
                 <event type="onKeyShortPress" keyName="Menu">
                     <action type="switchView" target="bt_View" switchOutStyle="SWITCH_INIT_STATE" switchInStyle="SWITCH_IN_NONE_ANIMATION" />
                 </event>
-                <event type="onKeyLongPress" keyName="Power">
+                <event type="onKeyShortPress" keyName="Power">
                     <action type="switchView" target="menuMainView" switchOutStyle="SWITCH_INIT_STATE" switchInStyle="SWITCH_IN_NONE_ANIMATION" />
                 </event>
             </events>
         </hg_view>
-        <hg_view id="top_view" x="11" y="-416" width="360" height="360" backgroundColor="#000000" borderRadius="20" padding="12" overflow="auto" entry="false" animateStep="360" timers="[{&quot;id&quot;:&quot;timer_0&quot;,&quot;name&quot;:&quot;动画 1&quot;,&quot;enabled&quot;:true,&quot;interval&quot;:1000,&quot;reload&quot;:true,&quot;mode&quot;:&quot;custom&quot;,&quot;callback&quot;:&quot;top_view_timer_0_cb&quot;,&quot;duration&quot;:1000,&quot;stopOnComplete&quot;:true,&quot;delayStart&quot;:0,&quot;actions&quot;:[],&quot;segments&quot;:[],&quot;runImmediately&quot;:true}]" zIndex="1">
+        <hg_view id="top_view" x="-11" y="-565" width="466" height="466" backgroundColor="#000000" borderRadius="20" padding="12" overflow="auto" entry="false" animateStep="360" timers="[{&quot;id&quot;:&quot;timer_0&quot;,&quot;name&quot;:&quot;动画 1&quot;,&quot;enabled&quot;:true,&quot;interval&quot;:1000,&quot;reload&quot;:true,&quot;mode&quot;:&quot;custom&quot;,&quot;callback&quot;:&quot;top_view_timer_0_cb&quot;,&quot;duration&quot;:1000,&quot;stopOnComplete&quot;:true,&quot;delayStart&quot;:0,&quot;actions&quot;:[],&quot;segments&quot;:[],&quot;runImmediately&quot;:true}]" zIndex="1">
             <events>
                 <event type="onKeyShortPress" keyName="Menu">
                     <action type="switchView" target="bt_View" switchOutStyle="SWITCH_OUT_NONE_ANIMATION" switchInStyle="SWITCH_IN_NONE_ANIMATION" />
@@ -114,53 +114,53 @@
                     <action type="switchView" target="menuMainView" switchOutStyle="SWITCH_OUT_NONE_ANIMATION" switchInStyle="SWITCH_IN_NONE_ANIMATION" />
                 </event>
             </events>
-            <hg_image id="bg_circle" x="0" y="0" width="360" height="360" transform="{&quot;opacity&quot;:100}" src="assets/image/A8/circle_360_bg.png" blendMode="IMG_SRC_OVER_MODE" fgColor="0xFF000000" timers="[{&quot;id&quot;:&quot;timer_0&quot;,&quot;name&quot;:&quot;动画 1&quot;,&quot;enabled&quot;:true,&quot;interval&quot;:20,&quot;reload&quot;:true,&quot;mode&quot;:&quot;custom&quot;,&quot;callback&quot;:&quot;bg_circle_timer_0_cb&quot;,&quot;duration&quot;:1000,&quot;stopOnComplete&quot;:true,&quot;delayStart&quot;:0,&quot;actions&quot;:[],&quot;segments&quot;:[],&quot;runImmediately&quot;:true}]" zIndex="0" />
-            <hg_image id="icon_del" x="230" y="75" width="100" height="100" src="assets/image/A8/delete_icon.png" blendMode="IMG_SRC_OVER_MODE" zIndex="1">
+            <hg_image id="bg_circle" x="0" y="0" width="466" height="466" transform="{&quot;opacity&quot;:100}" src="assets/image/A8/circle_360_bg.png" blendMode="IMG_SRC_OVER_MODE" fgColor="0xFF000000" timers="[{&quot;id&quot;:&quot;timer_0&quot;,&quot;name&quot;:&quot;动画 1&quot;,&quot;enabled&quot;:true,&quot;interval&quot;:20,&quot;reload&quot;:true,&quot;mode&quot;:&quot;custom&quot;,&quot;callback&quot;:&quot;bg_circle_timer_0_cb&quot;,&quot;duration&quot;:1000,&quot;stopOnComplete&quot;:true,&quot;delayStart&quot;:0,&quot;actions&quot;:[],&quot;segments&quot;:[],&quot;runImmediately&quot;:true}]" zIndex="0" />
+            <hg_image id="icon_del" x="309" y="98" width="120" height="120" src="assets/image/A8/delete_icon.png" blendMode="IMG_SRC_OVER_MODE" zIndex="1">
                 <events>
                     <event type="onClick">
                         <action type="callFunction" functionName="click_delete_icon" />
                     </event>
                 </events>
             </hg_image>
-            <hg_image id="icon_fl" x="30" y="75" width="100" height="100" src="assets/image/A8/flashlight_icon.png" blendMode="IMG_SRC_OVER_MODE" zIndex="2">
+            <hg_image id="icon_fl" x="35" y="98" width="120" height="120" src="assets/image/A8/flashlight_icon.png" blendMode="IMG_SRC_OVER_MODE" zIndex="2">
                 <events>
                     <event type="onClick">
                         <action type="switchView" target="view_fl" switchOutStyle="SWITCH_INIT_STATE" switchInStyle="SWITCH_IN_NONE_ANIMATION" />
                     </event>
                 </events>
             </hg_image>
-            <hg_image id="icon_connect" x="230" y="190" width="100" height="100" src="assets/image/A8/connect_icon.png" blendMode="IMG_SRC_OVER_MODE" zIndex="3">
+            <hg_image id="icon_connect" x="309" y="248" width="120" height="120" src="assets/image/A8/connect_icon.png" blendMode="IMG_SRC_OVER_MODE" zIndex="3">
                 <events>
                     <event type="onClick">
                         <action type="callFunction" functionName="click_share_icon" />
                     </event>
                 </events>
             </hg_image>
-            <hg_image id="icon_bat" x="151" y="142" width="58" height="34" src="assets/image/A8/bat_100_icon.png" blendMode="IMG_SRC_OVER_MODE" timers="[{&quot;id&quot;:&quot;timer_0&quot;,&quot;name&quot;:&quot;动画 1&quot;,&quot;enabled&quot;:true,&quot;interval&quot;:1000,&quot;reload&quot;:true,&quot;mode&quot;:&quot;custom&quot;,&quot;callback&quot;:&quot;icon_bat_timer_0_cb&quot;,&quot;duration&quot;:1000,&quot;stopOnComplete&quot;:true,&quot;delayStart&quot;:0,&quot;actions&quot;:[],&quot;segments&quot;:[],&quot;runImmediately&quot;:true}]" zIndex="4" />
-            <hg_image id="icon_sl" x="30" y="190" width="100" height="100" src="assets/image/screen_light_6_icon.png" blendMode="IMG_SRC_OVER_MODE" zIndex="5">
+            <hg_image id="icon_bat" x="198" y="175" width="70" height="41" src="assets/image/A8/bat_100_icon.png" blendMode="IMG_SRC_OVER_MODE" timers="[{&quot;id&quot;:&quot;timer_0&quot;,&quot;name&quot;:&quot;动画 1&quot;,&quot;enabled&quot;:true,&quot;interval&quot;:1000,&quot;reload&quot;:true,&quot;mode&quot;:&quot;custom&quot;,&quot;callback&quot;:&quot;icon_bat_timer_0_cb&quot;,&quot;duration&quot;:1000,&quot;stopOnComplete&quot;:true,&quot;delayStart&quot;:0,&quot;actions&quot;:[],&quot;segments&quot;:[],&quot;runImmediately&quot;:true}]" zIndex="4" />
+            <hg_image id="icon_sl" x="35" y="248" width="120" height="120" src="assets/image/screen_light_6_icon.png" blendMode="IMG_SRC_OVER_MODE" zIndex="5">
                 <events>
                     <event type="onClick">
                         <action type="callFunction" functionName="click_screen_light_icon" />
                     </event>
                 </events>
             </hg_image>
-            <hg_image id="icon_as" x="130" y="10" width="100" height="100" src="assets/image/auto_sleep_off_icon.png" blendMode="IMG_SRC_OVER_MODE" zIndex="6">
+            <hg_image id="icon_as" x="173" y="17" width="120" height="120" src="assets/image/auto_sleep_off_icon.png" blendMode="IMG_SRC_OVER_MODE" zIndex="6">
                 <events>
                     <event type="onClick">
                         <action type="callFunction" message="click_auto_sleep" functionName="click_auto_sleep_icon" />
                     </event>
                 </events>
             </hg_image>
-            <hg_image id="icon_cam" x="130" y="250" width="100" height="100" src="assets/image/A8/camera_icon.png" zIndex="7">
+            <hg_image id="icon_cam" x="173" y="332" width="120" height="120" src="assets/image/A8/camera_icon.png" blendMode="IMG_SRC_OVER_MODE" zIndex="7">
                 <events>
                     <event type="onClick">
                         <action type="switchView" target="view_cam_ctl" switchOutStyle="SWITCH_OUT_NONE_ANIMATION" switchInStyle="SWITCH_IN_NONE_ANIMATION" />
                     </event>
                 </events>
             </hg_image>
-            <hg_label id="lbl_1" x="0" y="180" width="360" height="24" hAlign="CENTER" vAlign="MID" color="#ffffff" letterSpacing="0" lineSpacing="0" wordWrap="false" wordBreak="false" text="Auto sleep mode" fontFile="/font/Inter_24pt_SemiBold.ttf" fontSize="16" timers="[{&quot;id&quot;:&quot;timer_0&quot;,&quot;name&quot;:&quot;动画 1&quot;,&quot;enabled&quot;:true,&quot;interval&quot;:10,&quot;reload&quot;:false,&quot;mode&quot;:&quot;custom&quot;,&quot;callback&quot;:&quot;lbl_1_timer_0_cb&quot;,&quot;duration&quot;:1000,&quot;stopOnComplete&quot;:true,&quot;delayStart&quot;:0,&quot;actions&quot;:[],&quot;segments&quot;:[],&quot;runImmediately&quot;:true}]" characterSets="[{&quot;type&quot;:&quot;range&quot;,&quot;value&quot;:&quot;0x20-0x7E&quot;}]" zIndex="8" />
+            <hg_label id="lbl_1" x="53" y="220" width="360" height="37" hAlign="CENTER" vAlign="MID" color="#ffffff" letterSpacing="0" lineSpacing="0" wordWrap="false" wordBreak="false" text="Auto sleep mode" fontFile="/font/Inter_24pt_SemiBold.ttf" fontSize="24" timers="[{&quot;id&quot;:&quot;timer_0&quot;,&quot;name&quot;:&quot;动画 1&quot;,&quot;enabled&quot;:true,&quot;interval&quot;:10,&quot;reload&quot;:false,&quot;mode&quot;:&quot;custom&quot;,&quot;callback&quot;:&quot;lbl_1_timer_0_cb&quot;,&quot;duration&quot;:1000,&quot;stopOnComplete&quot;:true,&quot;delayStart&quot;:0,&quot;actions&quot;:[],&quot;segments&quot;:[],&quot;runImmediately&quot;:true}]" characterSets="[{&quot;type&quot;:&quot;range&quot;,&quot;value&quot;:&quot;0x20-0x7E&quot;}]" zIndex="8" />
         </hg_view>
-        <hg_view id="view_cam_ctl" x="611" y="-416" width="360" height="360" backgroundColor="#000000" borderRadius="20" padding="12" overflow="auto" entry="false" animateStep="360" zIndex="1">
+        <hg_view id="view_cam_ctl" x="589" y="-565" width="466" height="466" backgroundColor="#000000" borderRadius="20" padding="12" overflow="auto" entry="false" animateStep="360" zIndex="1">
             <events>
                 <event type="onSwipeLeftQuick">
                     <action type="switchView" target="easy_demoMainView" switchOutStyle="SWITCH_OUT_NONE_ANIMATION" switchInStyle="SWITCH_IN_NONE_ANIMATION" />
@@ -171,7 +171,7 @@
             </events>
             <hg_streaming id="streaming_1" x="0" y="0" width="368" height="368" codec="h264" updateInterval="10" dropMode="none" transporter="gui_stream_transport_get()" zIndex="1" />
         </hg_view>
-        <hg_view id="view_fl" x="-487" y="-416" width="360" height="360" backgroundColor="#000000" borderRadius="20" padding="12" overflow="auto" entry="false" animateStep="360" timers="[{&quot;id&quot;:&quot;timer_0&quot;,&quot;name&quot;:&quot;动画 1&quot;,&quot;enabled&quot;:true,&quot;interval&quot;:10,&quot;reload&quot;:true,&quot;mode&quot;:&quot;custom&quot;,&quot;callback&quot;:&quot;view_fl_timer_0_cb&quot;,&quot;duration&quot;:1000,&quot;stopOnComplete&quot;:true,&quot;delayStart&quot;:0,&quot;actions&quot;:[],&quot;segments&quot;:[],&quot;runImmediately&quot;:true}]" zIndex="2">
+        <hg_view id="view_fl" x="-509" y="-565" width="466" height="466" backgroundColor="#000000" borderRadius="20" padding="12" overflow="auto" entry="false" animateStep="360" timers="[{&quot;id&quot;:&quot;timer_0&quot;,&quot;name&quot;:&quot;动画 1&quot;,&quot;enabled&quot;:true,&quot;interval&quot;:10,&quot;reload&quot;:true,&quot;mode&quot;:&quot;custom&quot;,&quot;callback&quot;:&quot;view_fl_timer_0_cb&quot;,&quot;duration&quot;:1000,&quot;stopOnComplete&quot;:true,&quot;delayStart&quot;:0,&quot;actions&quot;:[],&quot;segments&quot;:[],&quot;runImmediately&quot;:true}]" zIndex="2">
             <events>
                 <event type="onKeyShortPress" keyName="Menu">
                     <action type="switchView" target="top_view" switchOutStyle="SWITCH_OUT_NONE_ANIMATION" switchInStyle="SWITCH_IN_NONE_ANIMATION" />

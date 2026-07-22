@@ -23,7 +23,7 @@
     },
     "image/565": {
       "format": "RGB565",
-      "compression": "none"
+      "compression": "rle"
     },
     "image/565/wallpaper_6.png": {
       "compression": "none"
@@ -77,6 +77,14 @@
     "background_clean.jpg": {
       "format": "RGB565",
       "compression": "adaptive"
+    },
+    "image": {
+      "compression": "rle",
+      "format": "ARGB8565"
+    },
+    "image/A8": {
+      "format": "ARGB8565",
+      "compression": "rle"
     }
   }
 }

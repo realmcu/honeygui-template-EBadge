@@ -67,11 +67,11 @@ void circle_scale_timer_0_cb(void *obj)
         uint16_t seg_cnt = circle_scale_timer_cnt - seg0_start;
         const uint16_t seg_cnt_max = seg0_end - seg0_start;
         
-            // Adjust scale: (0.62, 0.62) -> (0.43, 0.43)
-            const float zoom_x_origin = 0.62;
-            const float zoom_x_target = 0.43;
-            const float zoom_y_origin = 0.62;
-            const float zoom_y_target = 0.43;
+            // Adjust scale: (0.74, 0.74) -> (0.52, 0.52)
+            const float zoom_x_origin = 0.74;
+            const float zoom_x_target = 0.52;
+            const float zoom_y_origin = 0.74;
+            const float zoom_y_target = 0.52;
             float zoom_x_cur = zoom_x_origin + (zoom_x_target - zoom_x_origin) * seg_cnt / seg_cnt_max;
             float zoom_y_cur = zoom_y_origin + (zoom_y_target - zoom_y_origin) * seg_cnt / seg_cnt_max;
             gui_img_scale((gui_img_t *)target, zoom_x_cur, zoom_y_cur);
@@ -82,11 +82,11 @@ void circle_scale_timer_0_cb(void *obj)
         uint16_t seg_cnt = circle_scale_timer_cnt - seg1_start;
         const uint16_t seg_cnt_max = seg1_end - seg1_start;
         
-            // Adjust scale: (0.43, 0.43) -> (0.62, 0.62)
-            const float zoom_x_origin = 0.43;
-            const float zoom_x_target = 0.62;
-            const float zoom_y_origin = 0.43;
-            const float zoom_y_target = 0.62;
+            // Adjust scale: (0.52, 0.52) -> (0.74, 0.74)
+            const float zoom_x_origin = 0.52;
+            const float zoom_x_target = 0.74;
+            const float zoom_y_origin = 0.52;
+            const float zoom_y_target = 0.74;
             float zoom_x_cur = zoom_x_origin + (zoom_x_target - zoom_x_origin) * seg_cnt / seg_cnt_max;
             float zoom_y_cur = zoom_y_origin + (zoom_y_target - zoom_y_origin) * seg_cnt / seg_cnt_max;
             gui_img_scale((gui_img_t *)target, zoom_x_cur, zoom_y_cur);
