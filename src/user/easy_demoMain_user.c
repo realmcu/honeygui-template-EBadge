@@ -26,11 +26,11 @@ uint8_t mainface_idx = 0;
 uint8_t mainface_num = 5;
 mainface_src_t mainface_list[MAINFACE_NUM_MAX] =
 {
-    {"/image/565/wallpaper_danmu.bin", SRC_DANMU},
-    {"/user/gltf_desc_Fox.bin", SRC_3D},
-    {"/foreground_360.bin", SRC_IMG_SPATIAL},
-    {"/wallpaper_video.avi", SRC_VIDEO},
-    {"/image/565/wallpaper_static_img.bin", SRC_IMG},
+    {"/image/565/wallpaper_danmu.bin",      SRC_DANMU,          NULL, NULL, 0x00},
+    {"/user/gltf_desc_Fox.bin",             SRC_3D,             NULL, NULL, 0x00},
+    {"/foreground_360.bin",                 SRC_IMG_SPATIAL,    NULL, NULL, 0x00},
+    {"/wallpaper_video.avi",                SRC_VIDEO,          NULL, NULL, 0x00},
+    {"/image/565/wallpaper_static_img.bin", SRC_IMG,            NULL, NULL, 0x00},
     
 
 };
@@ -486,6 +486,12 @@ void switch_mainface(gui_obj_t *parent, uint8_t idx)
         {
             gui_log("%s %d 0x%x\n", __FUNCTION__, __LINE__, mainface_list[idx].data);
             img = gui_img_create_from_mem((void *)win, 0, mainface_list[idx].data, 0, 0, SCREEN_SIZE, SCREEN_SIZE);
+            // img = gui_img_create_from_mem((void *)win, 0, mainface_list[idx].img_preview, SCREEN_SIZE/2-80, SCREEN_SIZE/2-80, SCREEN_SIZE, SCREEN_SIZE);
+
+            // gui_color_t color = gui_rgb((mainface_list[idx].color >> 11) << 3, ((mainface_list[idx].color >> 5) & 0x3f) << 2, (mainface_list[idx].color & 0x1f) << 3);
+            // gui_view_set_bg_color((gui_view_t *)parent, color);
+            // gui_fb_change();
+            // gui_log("color 0x%x\n", color);
         }
         else
         {
@@ -680,6 +686,23 @@ void switch_mainface(gui_obj_t *parent, uint8_t idx)
     gui_view_switch_on_event((void *)parent, view_left, SWITCH_OUT_TO_RIGHT_USE_TRANSLATION, SWITCH_IN_FROM_LEFT_USE_TRANSLATION, event_code_r);
 }
 
+
+#ifdef _HONEYGUI_SIMULATOR_
+    // TODO
+#else
+#include "hmi_ble_central.h"
+#include "hmi_l2.h"
+extern bool hmi_ble_central_send_file(uint8_t type, const uint8_t *src, uint32_t total,
+                               const char *fname, xfer_client_done_cb_t done_cb);
+
+void done_cb(T_XFER_CLIENT_RESULT result, uint32_t bytes_sent)
+{
+    printf("done_cb %d, sent %d\n", result, bytes_sent);
+}
+
+#endif
+
+
 void click_auto_sleep_icon(void *obj, gui_event_t *e)
 {
     GUI_UNUSED(obj);
@@ -695,13 +718,29 @@ void click_auto_sleep_icon(void *obj, gui_event_t *e)
         gui_img_set_src(icon_as, (const uint8_t *)"/image/auto_sleep_off_icon.bin", IMG_SRC_FILESYS);
         gui_obj_hidden(GUI_BASE(lbl_1), true);
     }
+
+
 #ifdef _HONEYGUI_SIMULATOR_
     // TODO
 #else
-    // TODO
+    uint32_t addr = 0, len = 0;
+    extern fdb_bf_t   app_get_bf(void);
+    fdb_bf_get_addr(app_get_bf(), "bf_0", &addr, &len);   // 拿映射地址+长度
+    gui_log("send addr 0x%x len %d\n", addr, len);
+
+    hmi_ble_central_send_file(HMI_L2_XFER_TYPE_IMAGE,
+                                (const uint8_t *)addr, len,
+                                "share_0", done_cb);      // on_done_cb(result, bytes) 报进度/结果
 #endif
     
 }
+
+extern bool hmi_ble_central_start_scan(void);                 // 停广播、开扫描
+extern uint8_t hmi_ble_central_get_dev_count(void);  // 刷新列表用
+extern bool hmi_ble_central_get_dev(uint8_t idx, uint8_t bd_addr[6], uint8_t *addr_type,
+                             int8_t *rssi, char *name, uint8_t name_len);  // 填列表项
+extern bool hmi_ble_central_connect(uint8_t idx);                   // 连选中项
+extern bool hmi_ble_central_disconnect(void);                 // 断开 → 自动回广播态
 
 void click_screen_light_icon(void *obj, gui_event_t *e)
 {
@@ -710,6 +749,7 @@ void click_screen_light_icon(void *obj, gui_event_t *e)
     screen_light_idx++;
     screen_light_idx %= 6;
     void *img_src = NULL;
+
     switch (screen_light_idx)
     {
     case 0:
@@ -729,6 +769,7 @@ void click_screen_light_icon(void *obj, gui_event_t *e)
         break;
     case 5:
         img_src = "/image/screen_light_6_icon.bin";
+        
         break;
     default:
         break;
@@ -738,6 +779,52 @@ void click_screen_light_icon(void *obj, gui_event_t *e)
     // TODO
 #else
     // TODO
+    gui_log("click_screen_light_icon %d\n", screen_light_idx);
+    static uint8_t n = 0;
+    static bool connect = 0;
+    switch (screen_light_idx)
+    {
+    case 0:
+        break;
+    case 1:
+        hmi_ble_central_start_scan(); 
+        gui_log("hmi_ble_central_start_scan\n");
+        break;
+    case 2:
+        n = hmi_ble_central_get_dev_count();
+        gui_log("hmi_ble_central_get_dev_count %d\n", n);
+        for(uint8_t i=0; i<n; i++)
+        {
+            uint8_t idx; 
+            uint8_t bd_addr[6]; 
+            uint8_t addr_type;
+            int8_t rssi;
+            char name[32];
+            uint8_t name_len;
+            hmi_ble_central_get_dev(i, bd_addr, &addr_type, &rssi, name, sizeof(name));
+            gui_log("%d name %s %x:%x:%x:%x:%x:%x\n", i, name, bd_addr[5]&0xff, bd_addr[4]&0xff, bd_addr[3]&0xff,bd_addr[2]&0xff, bd_addr[1]&0xff, bd_addr[0]&0xff);
+        }
+        break;
+    case 3:
+        if(n && !connect)
+        {
+            connect = hmi_ble_central_connect(0);
+            gui_log("hmi_ble_central_connect %d\n", connect);
+        }
+        break;
+    case 4:
+        if(connect)
+        {
+            connect = hmi_ble_central_disconnect() ? 0:1;
+            gui_log("hmi_ble_central_disconnect %d\n", connect);
+        }
+        break;
+    case 5:
+        break;
+    default:
+        break;
+    }
+
 #endif
 }
 
@@ -883,18 +970,19 @@ static void mainface_list_add(void *data)
         gui_log("New passed resource  is NULL!!!!!!!!!!!!!!!!!\n");
         return ;
     }
+    PACKET_HEADER_T *header = (PACKET_HEADER_T *)info[0]; 
 
     
-    mainface_list[mainface_num].data = (void *)info[0];
-    mainface_list[mainface_num].type = (*(uint8_t *)(info[0]) == 0x52)? SRC_VIDEO: SRC_IMG;
-    if(mainface_list[mainface_num].type == SRC_IMG)
-    {
-        uint8_t *pdata = (uint8_t *)(info[0] + info[1] - 1);
-        if(*pdata)      
-        {
-            mainface_list[mainface_num].type = SRC_DANMU;
-        }  
-    }
+    mainface_list[mainface_num].raw = (void *)header;
+    mainface_list[mainface_num].type = RES_TYPE(header);
+    mainface_list[mainface_num].data = RES_DATA_X(header, 0);
+    mainface_list[mainface_num].img_preview = RES_DATA_X(header, 1);
+    mainface_list[mainface_num].color = RES_COLOR_BG(header);
+
+    gui_log("raw 0x%x type %d, data 0x%x, img 0x%x, color 0x%x of0 %d of1 %d\n", mainface_list[mainface_num].raw,\
+    mainface_list[mainface_num].type, mainface_list[mainface_num].data,mainface_list[mainface_num].img_preview, mainface_list[mainface_num].color,\
+    RES_OFFSET_X(header, 0), RES_OFFSET_X(header, 1));
+
     mainface_num++;
 
     void *view = NULL;
@@ -999,6 +1087,8 @@ uint8_t mainface_list_init(void **data_list, uint32_t n)
     uint8_t reserved = 3;
     if (data_list == NULL || !n) return idx;
     
+
+
     while (data_list[idx] != NULL && ((idx < MAINFACE_NUM_MAX) && (idx < n)))
     {
         void *addr = data_list[2*idx];
@@ -1007,17 +1097,30 @@ uint8_t mainface_list_init(void **data_list, uint32_t n)
 
         mainface_list[list_idx].data = addr;
         mainface_list[list_idx].type = SRC_IMG;
-        if (*(uint8_t *)addr == 0x52)
-        {
-            mainface_list[list_idx].type = SRC_VIDEO;
-        }
+        
 #ifdef _HONEYGUI_SIMULATOR_
 #else
-        uint32_t size = (uint32_t)data_list[2*idx + 1];
-        if (mainface_list[list_idx].type == SRC_IMG && ((uint32_t)addr >= USER_RESOURCE_ADDR ) && (*((uint8_t *)addr + size - 1) == 0x01))
+        // uint32_t size = (uint32_t)data_list[2*idx + 1];
+        if((uint32_t)addr >= USER_RESOURCE_ADDR )
         {
-            mainface_list[list_idx].type = SRC_DANMU;
+            PACKET_HEADER_T *header = (PACKET_HEADER_T *)addr; 
+
+            mainface_list[list_idx].raw = (void *)header;
+            mainface_list[list_idx].type = RES_TYPE(header);
+            mainface_list[list_idx].data = RES_DATA_X(header, 0);
+            mainface_list[list_idx].img_preview = RES_DATA_X(header, 1);
+            mainface_list[list_idx].color = RES_COLOR_BG(header);
         }
+        else
+        {
+            if (*(uint8_t *)addr == 0x52)
+            {
+                mainface_list[list_idx].type = SRC_VIDEO;
+            }
+        }
+
+
+
 #endif
         gui_log("list init %d, 0x%x %d", idx, mainface_list[list_idx].data, mainface_list[list_idx].type);
         idx++;

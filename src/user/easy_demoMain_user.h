@@ -24,11 +24,32 @@ typedef enum
     SRC_DANMU,
 } MAINFACE_SRC_TYPE;
 
+#pragma pack(push, 1)  
+typedef struct 
+{
+    uint8_t type;
+    uint8_t num;
+    uint16_t color;
+    uint32_t size;
+    uint32_t offset[];
+}PACKET_HEADER_T;
+#pragma pack(pop)
+
 typedef struct mainface_src
 {
     void *data;
     MAINFACE_SRC_TYPE type;
+    void *raw;
+    void *img_preview;
+    uint16_t color;
 } mainface_src_t;
+
+#define RES_TYPE(raw) (((PACKET_HEADER_T *)raw)->type)
+#define RES_COLOR_BG(raw) (((PACKET_HEADER_T *)raw)->color)
+#define RES_NUM(raw) (((PACKET_HEADER_T *)raw)->num)
+#define RES_SIZE(raw) (((PACKET_HEADER_T *)raw)->size)
+#define RES_OFFSET_X(raw, n) (uint32_t)(((PACKET_HEADER_T *)raw)->offset[n])
+#define RES_DATA_X(raw, n) (void*)((uint8_t*)raw + RES_OFFSET_X(raw, n))
 
 typedef enum
 {
