@@ -488,7 +488,7 @@ void switch_mainface(gui_obj_t *parent, uint8_t idx)
             img = gui_img_create_from_mem((void *)win, 0, mainface_list[idx].data, 0, 0, SCREEN_SIZE, SCREEN_SIZE);
             // img = gui_img_create_from_mem((void *)win, 0, mainface_list[idx].img_preview, SCREEN_SIZE/2-80, SCREEN_SIZE/2-80, SCREEN_SIZE, SCREEN_SIZE);
 
-            // gui_color_t color = gui_rgb((mainface_list[idx].color >> 11) << 3, ((mainface_list[idx].color >> 5) & 0x3f) << 2, (mainface_list[idx].color & 0x1f) << 3);
+            // gui_color_t color = gui_rgb((mainface_list[idx].color >> 16) & 0xff, ((mainface_list[idx].color >> 8) & 0xff), (mainface_list[idx].color & 0xff));
             // gui_view_set_bg_color((gui_view_t *)parent, color);
             // gui_fb_change();
             // gui_log("color 0x%x\n", color);

@@ -29,7 +29,7 @@ typedef struct
 {
     uint8_t type;
     uint8_t num;
-    uint16_t color;
+    uint32_t color;
     uint32_t size;
     uint32_t offset[];
 }PACKET_HEADER_T;
@@ -41,7 +41,7 @@ typedef struct mainface_src
     MAINFACE_SRC_TYPE type;
     void *raw;
     void *img_preview;
-    uint16_t color;
+    uint32_t color;
 } mainface_src_t;
 
 #define RES_TYPE(raw) (((PACKET_HEADER_T *)raw)->type)
