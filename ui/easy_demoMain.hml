@@ -171,6 +171,7 @@
             </events>
             <hg_streaming id="streaming_1" x="0" y="0" width="368" height="368" codec="h264" updateInterval="10" dropMode="none" transporter="gui_stream_transport_get()" zIndex="1" />
         </hg_view>
+        <hg_view id="view_mainface_list" x="11" y="481" width="360" height="360" backgroundColor="#000000" borderRadius="20" padding="12" overflow="auto" entry="false" switchInFunctionName="switch_in_mainface_list" animateStep="360" zIndex="1" />
         <hg_view id="view_fl" x="-487" y="-416" width="360" height="360" backgroundColor="#000000" borderRadius="20" padding="12" overflow="auto" entry="false" animateStep="360" timers="[{&quot;id&quot;:&quot;timer_0&quot;,&quot;name&quot;:&quot;动画 1&quot;,&quot;enabled&quot;:true,&quot;interval&quot;:10,&quot;reload&quot;:true,&quot;mode&quot;:&quot;custom&quot;,&quot;callback&quot;:&quot;view_fl_timer_0_cb&quot;,&quot;duration&quot;:1000,&quot;stopOnComplete&quot;:true,&quot;delayStart&quot;:0,&quot;actions&quot;:[],&quot;segments&quot;:[],&quot;runImmediately&quot;:true}]" zIndex="2">
             <events>
                 <event type="onKeyShortPress" keyName="Menu">

@@ -4,9 +4,11 @@
 #include "gui_lite3d.h"
 #include "gui_vfs.h"
 #include "gui_lite_video.h"
+#include "gui_list.h"
 #include <stdint.h>
 #include <stddef.h>
 #include <string.h>
+#include <math.h>
 
 #include "stream_transport.h"   /* stp_config_t / stp_instance_create / ... */
 
@@ -26,14 +28,15 @@ uint8_t mainface_idx = 0;
 uint8_t mainface_num = 5;
 mainface_src_t mainface_list[MAINFACE_NUM_MAX] =
 {
-    {"/image/565/wallpaper_danmu.bin",      SRC_DANMU,          NULL, NULL, 0x00},
-    {"/user/gltf_desc_Fox.bin",             SRC_3D,             NULL, NULL, 0x00},
-    {"/foreground_360.bin",                 SRC_IMG_SPATIAL,    NULL, NULL, 0x00},
-    {"/wallpaper_video.avi",                SRC_VIDEO,          NULL, NULL, 0x00},
-    {"/image/565/wallpaper_static_img.bin", SRC_IMG,            NULL, NULL, 0x00},
+    {"/image/565/wallpaper_danmu.bin",      SRC_DANMU,          NULL, "/image/Thumbnail_0.bin", 0xffffc00e},
+    {"/user/gltf_desc_Fox.bin",             SRC_3D,             NULL, "/image/Thumbnail_1.bin", 0xfffff18c},
+    {"/foreground_360.bin",                 SRC_IMG_SPATIAL,    NULL, "/image/Thumbnail_2.bin", 0xfffdcbcc},
+    {"/wallpaper_video.avi",                SRC_VIDEO,          NULL, "/image/Thumbnail_3.bin", 0xfffa8fac},
+    {"/image/565/wallpaper_static_img.bin", SRC_IMG,            NULL, "/image/Thumbnail_4.bin", 0xffffd701},
     
 
 };
+uint8_t list_index = 0;
 bool is_auto_sleep_mode = false;
 bool is_bt_connect = false;
 bool is_displaying_mainface = false;
@@ -394,6 +397,48 @@ void win_timer_gsensor_cb(void *obj)
 #endif
 }
 
+static void *get_view_name_by_index(uint8_t idx)
+{
+    void *view_mainface = NULL;
+    switch (idx)
+    {
+    case 0:
+        view_mainface = "easy_demoMainView";
+        break;
+    case 1:
+        view_mainface = "mainface_view_1";
+        break;
+    case 2:
+        view_mainface = "mainface_view_2";
+        break;
+    case 3:
+        view_mainface = "mainface_view_3";
+        break;
+    case 4:
+        view_mainface = "mainface_view_4";
+        break;
+    case 5:
+        view_mainface = "mainface_view_5";
+        break;
+    case 6:
+        view_mainface = "mainface_view_6";
+        break;
+    case 7:
+        view_mainface = "mainface_view_7";
+        break;
+    case 8:
+        view_mainface = "mainface_view_8";
+        break;
+    case 9:
+        view_mainface = "mainface_view_9";
+        break;
+
+    default:
+        break;
+    }
+    return view_mainface;
+}
+
 void switch_mainface(gui_obj_t *parent, uint8_t idx)
 {
     gui_win_t *win = gui_win_create(parent, 0, 0, 0, SCREEN_SIZE, SCREEN_SIZE);
@@ -589,6 +634,7 @@ void switch_mainface(gui_obj_t *parent, uint8_t idx)
     else
     {
         gui_view_switch_on_event((void *)parent, "top_view", SWITCH_INIT_STATE, SWITCH_IN_FROM_TOP_USE_TRANSLATION, GUI_EVENT_TOUCH_MOVE_DOWN);
+        gui_view_switch_on_event((void *)parent, "view_mainface_list", SWITCH_INIT_STATE, SWITCH_IN_FROM_BOTTOM_USE_TRANSLATION, GUI_EVENT_TOUCH_MOVE_UP);
     }
 
     void *view_first = "easy_demoMainView";
@@ -835,40 +881,7 @@ void click_delete_icon(void *obj, gui_event_t *e)
     if (mainface_num == 0) return;
 
     dev_mode = MODE_DELETE;
-    void *view_mainface = "easy_demoMainView";
-    switch (mainface_idx)
-    {
-    case 1:
-        view_mainface = "mainface_view_1";
-        break;
-    case 2:
-        view_mainface = "mainface_view_2";
-        break;
-    case 3:
-        view_mainface = "mainface_view_3";
-        break;
-    case 4:
-        view_mainface = "mainface_view_4";
-        break;
-    case 5:
-        view_mainface = "mainface_view_5";
-        break;
-    case 6:
-        view_mainface = "mainface_view_6";
-        break;
-    case 7:
-        view_mainface = "mainface_view_7";
-        break;
-    case 8:
-        view_mainface = "mainface_view_8";
-        break;
-    case 9:
-        view_mainface = "mainface_view_9";
-        break;
-
-    default:
-        break;
-    }
+    void *view_mainface = get_view_name_by_index(mainface_idx);
     gui_view_switch_direct(gui_view_get_current(), view_mainface, SWITCH_OUT_NONE_ANIMATION, SWITCH_IN_NONE_ANIMATION);
 #ifdef _HONEYGUI_SIMULATOR_
     // TODO
@@ -985,45 +998,8 @@ static void mainface_list_add(void *data)
 
     mainface_num++;
 
-    void *view = NULL;
     mainface_idx = mainface_num - 1;
-    switch (mainface_idx)
-    {
-    case 0:
-        view = "easy_demoMainView";
-        break;
-    case 1:
-        view = "mainface_view_1";
-        break;
-    case 2:
-        view = "mainface_view_2";
-        break;  
-    case 3:
-        view = "mainface_view_3";
-        break;
-    case 4:
-        view = "mainface_view_4";
-        break;
-    case 5:
-        view = "mainface_view_5";
-        break;
-    case 6:
-        view = "mainface_view_6";
-        break;
-    case 7:
-        view = "mainface_view_7";
-        break;
-    case 8:
-        view = "mainface_view_8";
-        break;
-    case 9:
-        view = "mainface_view_9";
-        break;
-
-    default:
-        gui_log("Please add view!\n");
-        break;
-    }
+    void *view = get_view_name_by_index(mainface_idx);
 
     gui_obj_child_free(GUI_BASE(win_view));
     gui_view_create(GUI_BASE(win_view), view, 0, 0, 0, 0);
@@ -1286,6 +1262,407 @@ void switch_in_mainface_9(gui_view_t *view)
     switch_mainface(GUI_BASE(view), 9);
 }
 
+typedef struct
+{
+    float r;
+    float g;
+    float b;
+} color_rgb_f_t;
+
+static float color_mix(float a, float b, float t)
+{
+    return a + (b - a) * t;
+}
+
+static uint8_t color_clamp_byte(float value)
+{
+    if (value <= 0.0f)
+    {
+        return 0;
+    }
+    if (value >= 255.0f)
+    {
+        return 255;
+    }
+    return (uint8_t)(value + 0.5f);
+}
+
+#if COLOR_TRANSITION_METHOD == COLOR_TRANSITION_GAMMA_LINEAR || \
+    COLOR_TRANSITION_METHOD == COLOR_TRANSITION_CIELAB || \
+    COLOR_TRANSITION_METHOD == COLOR_TRANSITION_OKLAB
+static float color_srgb_to_linear(float value)
+{
+    value /= 255.0f;
+    return value <= 0.04045f ? value / 12.92f : powf((value + 0.055f) / 1.055f, 2.4f);
+}
+
+static float color_linear_to_srgb(float value)
+{
+    value = value <= 0.0031308f ? value * 12.92f : 1.055f * powf(value, 1.0f / 2.4f) - 0.055f;
+    return color_clamp_byte(value * 255.0f);
+}
+#endif
+
+#if COLOR_TRANSITION_METHOD == COLOR_TRANSITION_HSL
+typedef struct
+{
+    float h;
+    float s;
+    float l;
+} color_hsl_f_t;
+
+static color_hsl_f_t color_rgb_to_hsl(color_rgb_f_t rgb)
+{
+    float r = rgb.r / 255.0f;
+    float g = rgb.g / 255.0f;
+    float b = rgb.b / 255.0f;
+    float max = fmaxf(r, fmaxf(g, b));
+    float min = fminf(r, fminf(g, b));
+    float delta = max - min;
+    color_hsl_f_t hsl = {0.0f, 0.0f, (max + min) / 2.0f};
+
+    if (delta != 0.0f)
+    {
+        if (max == r)
+        {
+            hsl.h = fmodf((g - b) / delta, 6.0f);
+        }
+        else if (max == g)
+        {
+            hsl.h = (b - r) / delta + 2.0f;
+        }
+        else
+        {
+            hsl.h = (r - g) / delta + 4.0f;
+        }
+        hsl.h *= 60.0f;
+        if (hsl.h < 0.0f)
+        {
+            hsl.h += 360.0f;
+        }
+        hsl.s = delta / (1.0f - fabsf(2.0f * hsl.l - 1.0f));
+    }
+    return hsl;
+}
+
+static color_rgb_f_t color_hsl_to_rgb(color_hsl_f_t hsl)
+{
+    float c = (1.0f - fabsf(2.0f * hsl.l - 1.0f)) * hsl.s;
+    float x = c * (1.0f - fabsf(fmodf(hsl.h / 60.0f, 2.0f) - 1.0f));
+    float m = hsl.l - c / 2.0f;
+    color_rgb_f_t rgb = {0.0f, 0.0f, 0.0f};
+
+    if (hsl.h < 60.0f)
+    {
+        rgb.r = c; rgb.g = x;
+    }
+    else if (hsl.h < 120.0f)
+    {
+        rgb.r = x; rgb.g = c;
+    }
+    else if (hsl.h < 180.0f)
+    {
+        rgb.g = c; rgb.b = x;
+    }
+    else if (hsl.h < 240.0f)
+    {
+        rgb.g = x; rgb.b = c;
+    }
+    else if (hsl.h < 300.0f)
+    {
+        rgb.r = x; rgb.b = c;
+    }
+    else
+    {
+        rgb.r = c; rgb.b = x;
+    }
+    rgb.r = (rgb.r + m) * 255.0f;
+    rgb.g = (rgb.g + m) * 255.0f;
+    rgb.b = (rgb.b + m) * 255.0f;
+    return rgb;
+}
+#endif
+
+#if COLOR_TRANSITION_METHOD == COLOR_TRANSITION_CIELAB || \
+    COLOR_TRANSITION_METHOD == COLOR_TRANSITION_OKLAB
+typedef struct
+{
+    float l;
+    float a;
+    float b;
+} color_lab_f_t;
+#endif
+
+#if COLOR_TRANSITION_METHOD == COLOR_TRANSITION_CIELAB
+static float color_lab_f(float value)
+{
+    return value > 0.008856f ? cbrtf(value) : 7.787f * value + 16.0f / 116.0f;
+}
+
+static color_lab_f_t color_rgb_to_lab(color_rgb_f_t rgb)
+{
+    float r = color_srgb_to_linear(rgb.r);
+    float g = color_srgb_to_linear(rgb.g);
+    float b = color_srgb_to_linear(rgb.b);
+    float fx = color_lab_f((r * 0.4124564f + g * 0.3575761f + b * 0.1804375f) / 0.95047f);
+    float fy = color_lab_f(r * 0.2126729f + g * 0.7151522f + b * 0.0721750f);
+    float fz = color_lab_f((r * 0.0193339f + g * 0.1191920f + b * 0.9503041f) / 1.08883f);
+    color_lab_f_t lab = {116.0f * fy - 16.0f, 500.0f * (fx - fy), 200.0f * (fy - fz)};
+    return lab;
+}
+
+static float color_lab_inverse_f(float value)
+{
+    float cube = value * value * value;
+    return cube > 0.008856f ? cube : (value - 16.0f / 116.0f) / 7.787f;
+}
+
+static color_rgb_f_t color_lab_to_rgb(color_lab_f_t lab)
+{
+    float fy = (lab.l + 16.0f) / 116.0f;
+    float x = color_lab_inverse_f(fy + lab.a / 500.0f) * 0.95047f;
+    float y = color_lab_inverse_f(fy);
+    float z = color_lab_inverse_f(fy - lab.b / 200.0f) * 1.08883f;
+    color_rgb_f_t rgb = {
+        color_linear_to_srgb(x * 3.2404542f - y * 1.5371385f - z * 0.4985314f),
+        color_linear_to_srgb(-x * 0.9692660f + y * 1.8760108f + z * 0.0415560f),
+        color_linear_to_srgb(x * 0.0556434f - y * 0.2040259f + z * 1.0572252f)
+    };
+    return rgb;
+}
+#endif
+
+#if COLOR_TRANSITION_METHOD == COLOR_TRANSITION_OKLAB
+static color_lab_f_t color_rgb_to_oklab(color_rgb_f_t rgb)
+{
+    float r = color_srgb_to_linear(rgb.r);
+    float g = color_srgb_to_linear(rgb.g);
+    float b = color_srgb_to_linear(rgb.b);
+    float l = cbrtf(0.4122214708f * r + 0.5363325363f * g + 0.0514459929f * b);
+    float m = cbrtf(0.2119034982f * r + 0.6806995451f * g + 0.1073969566f * b);
+    float s = cbrtf(0.0883024619f * r + 0.2817188376f * g + 0.6299787005f * b);
+    color_lab_f_t lab = {
+        0.2104542553f * l + 0.7936177850f * m - 0.0040720468f * s,
+        1.9779984951f * l - 2.4285922050f * m + 0.4505937099f * s,
+        0.0259040371f * l + 0.7827717662f * m - 0.8086757660f * s
+    };
+    return lab;
+}
+
+static color_rgb_f_t color_oklab_to_rgb(color_lab_f_t lab)
+{
+    float l = lab.l + 0.3963377774f * lab.a + 0.2158037573f * lab.b;
+    float m = lab.l - 0.1055613458f * lab.a - 0.0638541728f * lab.b;
+    float s = lab.l - 0.0894841775f * lab.a - 1.2914855480f * lab.b;
+    l = l * l * l;
+    m = m * m * m;
+    s = s * s * s;
+    color_rgb_f_t rgb = {
+        color_linear_to_srgb(4.0767416621f * l - 3.3077115913f * m + 0.2309699292f * s),
+        color_linear_to_srgb(-1.2684380046f * l + 2.6097574011f * m - 0.3413193965f * s),
+        color_linear_to_srgb(-0.0041960863f * l - 0.7034186147f * m + 1.7076147010f * s)
+    };
+    return rgb;
+}
+#endif
+
+static float color_apply_easing(float t)
+{
+#if COLOR_TRANSITION_EASING == COLOR_EASING_LINEAR
+    return t;
+#elif COLOR_TRANSITION_EASING == COLOR_EASING_SMOOTHSTEP
+    return t * t * (3.0f - 2.0f * t);
+#elif COLOR_TRANSITION_EASING == COLOR_EASING_EASE_IN_OUT_CUBIC
+    if (t < 0.5f)
+    {
+        return 4.0f * t * t * t;
+    }
+    t = -2.0f * t + 2.0f;
+    return 1.0f - t * t * t / 2.0f;
+#elif COLOR_TRANSITION_EASING == COLOR_EASING_EASE_OUT_CUBIC
+    t = 1.0f - t;
+    return 1.0f - t * t * t;
+#else
+#error "Unsupported COLOR_TRANSITION_EASING"
+#endif
+}
+
+static gui_color_t color_interpolate(gui_color_t origin, gui_color_t target, float t)
+{
+    color_rgb_f_t a = {origin.color.rgba.r, origin.color.rgba.g, origin.color.rgba.b};
+    color_rgb_f_t b = {target.color.rgba.r, target.color.rgba.g, target.color.rgba.b};
+    color_rgb_f_t result;
+
+#if COLOR_TRANSITION_METHOD == COLOR_TRANSITION_SRGB
+    result.r = color_mix(a.r, b.r, t);
+    result.g = color_mix(a.g, b.g, t);
+    result.b = color_mix(a.b, b.b, t);
+#elif COLOR_TRANSITION_METHOD == COLOR_TRANSITION_GAMMA_LINEAR
+    result.r = color_linear_to_srgb(color_mix(color_srgb_to_linear(a.r), color_srgb_to_linear(b.r), t));
+    result.g = color_linear_to_srgb(color_mix(color_srgb_to_linear(a.g), color_srgb_to_linear(b.g), t));
+    result.b = color_linear_to_srgb(color_mix(color_srgb_to_linear(a.b), color_srgb_to_linear(b.b), t));
+#elif COLOR_TRANSITION_METHOD == COLOR_TRANSITION_HSL
+    color_hsl_f_t hsl_a = color_rgb_to_hsl(a);
+    color_hsl_f_t hsl_b = color_rgb_to_hsl(b);
+    float delta_h = hsl_b.h - hsl_a.h;
+    if (delta_h > 180.0f) delta_h -= 360.0f;
+    if (delta_h < -180.0f) delta_h += 360.0f;
+    color_hsl_f_t hsl = {
+        fmodf(hsl_a.h + delta_h * t + 360.0f, 360.0f),
+        color_mix(hsl_a.s, hsl_b.s, t),
+        color_mix(hsl_a.l, hsl_b.l, t)
+    };
+    result = color_hsl_to_rgb(hsl);
+#elif COLOR_TRANSITION_METHOD == COLOR_TRANSITION_CIELAB
+    color_lab_f_t lab_a = color_rgb_to_lab(a);
+    color_lab_f_t lab_b = color_rgb_to_lab(b);
+    color_lab_f_t lab = {
+        color_mix(lab_a.l, lab_b.l, t),
+        color_mix(lab_a.a, lab_b.a, t),
+        color_mix(lab_a.b, lab_b.b, t)
+    };
+    result = color_lab_to_rgb(lab);
+#elif COLOR_TRANSITION_METHOD == COLOR_TRANSITION_OKLAB
+    color_lab_f_t lab_a = color_rgb_to_oklab(a);
+    color_lab_f_t lab_b = color_rgb_to_oklab(b);
+    color_lab_f_t lab = {
+        color_mix(lab_a.l, lab_b.l, t),
+        color_mix(lab_a.a, lab_b.a, t),
+        color_mix(lab_a.b, lab_b.b, t)
+    };
+    result = color_oklab_to_rgb(lab);
+#else
+#error "Unsupported COLOR_TRANSITION_METHOD"
+#endif
+
+    gui_color_t color;
+    color.color.rgba.a = color_clamp_byte(color_mix(origin.color.rgba.a, target.color.rgba.a, t));
+    color.color.rgba.r = color_clamp_byte(result.r);
+    color.color.rgba.g = color_clamp_byte(result.g);
+    color.color.rgba.b = color_clamp_byte(result.b);
+    return color;
+}
+
+static void lst_mainface_note_design(gui_obj_t *obj, void *param)
+{
+    GUI_UNUSED(param);
+    
+    // Cast obj to gui_list_note_t * type
+    gui_list_note_t *note = (gui_list_note_t *)obj;
+    uint16_t index = note->index % mainface_num;
+    index += mainface_num;
+    index %= mainface_num;
+    // gui_log("note->index = %d, index = %d\n", note->index, index);
+
+#ifdef _HONEYGUI_SIMULATOR_
+    gui_img_t *img = gui_img_create_from_fs(obj, 0, mainface_list[index].img_preview, 0, 75, 0, 0);
+#else
+    gui_img_t *img = NULL;
+    if (((uint32_t)mainface_list[idx].data) >= USER_RESOURCE_ADDR && ((uint32_t)mainface_list[idx].data) < (USER_RESOURCE_ADDR_END))
+    {
+        img = gui_img_create_from_mem(obj, 0, mainface_list[index].img_preview, 0, 75, 0, 0);
+    }
+    else
+    {
+        img = gui_img_create_from_fs(obj, 0, mainface_list[index].img_preview, 0, 75, 0, 0);
+    }
+#endif
+    gui_img_set_mode(img, IMG_SRC_OVER_MODE);
+    img->need_clip = false;
+}
+
+static void note_timer_cb(void *obj)
+{
+    static uint8_t cnt = 0;
+    const uint8_t cnt_max = 20;
+    gui_list_note_t *note = (gui_list_note_t *)obj;
+    gui_list_t *list = (gui_list_t *)note->base.parent;
+
+    cnt++;
+    static gui_color_t color_origin;
+    gui_color_t color_target;
+    gui_color_t color_bg;
+    color_target.color.argb_full = mainface_list[list_index].color;
+    if (cnt == 1)
+    {
+        color_origin = gui_view_get_current()->bg_color;
+    }
+
+    float progress = color_apply_easing((float)cnt / (float)cnt_max);
+    color_bg = color_interpolate(color_origin, color_target, progress);
+
+    gui_view_set_bg_color(gui_view_get_current(), color_bg);
+
+
+    gui_fb_change();
+
+    if (cnt >= cnt_max)
+    {
+        cnt = 0;
+        gui_obj_stop_timer((void *)note);
+        gui_list_enable_scroll(list, true);
+    }
+    
+}
+
+static void list_timer_cb(void *obj)
+{
+    gui_list_t *list = (gui_list_t *)obj;
+    int16_t offset = list->offset;
+    static bool moved = false;
+    touch_info_t *tp = tp_get_info();
+
+    if (offset % 180 == 0)
+    {
+        if (moved)
+        {
+            moved = false;
+            gui_list_note_t *note_right = (void *)gui_list_entry(list->base.child_list.next, gui_obj_t, brother_list);
+            gui_list_note_t *note_center = (void *)gui_list_entry(note_right->base.brother_list.next, gui_obj_t, brother_list);
+            uint16_t index = note_center->index % mainface_num;
+            index += mainface_num;
+            index %= mainface_num;
+            if (index != list_index)
+            {
+                list_index = index;
+                gui_obj_create_timer((void *)note_center, 10, true, note_timer_cb);
+                gui_obj_start_timer((void *)note_center);
+                gui_list_enable_scroll(list, false);
+            }
+        }
+        if (tp->type == TOUCH_SHORT)
+        {
+            mainface_idx = list_index;
+            gui_view_switch_direct(gui_view_get_current(), get_view_name_by_index(mainface_idx), SWITCH_OUT_NONE_ANIMATION, SWITCH_IN_NONE_ANIMATION);
+        }
+    }
+    else
+    {
+        moved = true;
+    }
+}
+
+void switch_in_mainface_list(gui_view_t *view)
+{
+    list_index = mainface_idx;
+    
+    gui_list_t *lst_mainface = gui_list_create((gui_obj_t *)view, "lst_mainface", -80, 0, 520, 360, 160, 20, HORIZONTAL, lst_mainface_note_design, NULL, false);
+    gui_list_set_style(lst_mainface, LIST_CLASSIC);
+    gui_list_set_note_num(lst_mainface, mainface_num);
+    gui_list_set_auto_align(lst_mainface, true);
+    gui_list_enable_loop(lst_mainface, true);
+    gui_list_set_inertia(lst_mainface, false);
+    gui_list_set_offset(lst_mainface, 180 * (list_index + 1));
+
+    gui_obj_create_timer((void *)lst_mainface, 10, true, list_timer_cb);
+    gui_obj_start_timer((void *)lst_mainface);
+
+    gui_color_t bg_color;
+    bg_color.color.argb_full = mainface_list[list_index].color;
+    gui_view_set_bg_color(view, bg_color);
+    
+    gui_view_switch_on_event(view, get_view_name_by_index(mainface_idx), SWITCH_OUT_TO_BOTTOM_USE_TRANSLATION, SWITCH_INIT_STATE, GUI_EVENT_TOUCH_MOVE_DOWN);    
+}
 
 /* ============================ Live-video stream ============================
  *

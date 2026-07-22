@@ -14,6 +14,25 @@
 #define  SCREEN_SIZE  360
 #define  MAINFACE_NUM_MAX  10
 
+#define COLOR_TRANSITION_SRGB          0
+#define COLOR_TRANSITION_GAMMA_LINEAR  1
+#define COLOR_TRANSITION_HSL           2
+#define COLOR_TRANSITION_CIELAB        3
+#define COLOR_TRANSITION_OKLAB         4
+
+#ifndef COLOR_TRANSITION_METHOD
+#define COLOR_TRANSITION_METHOD COLOR_TRANSITION_GAMMA_LINEAR
+#endif
+
+#define COLOR_EASING_LINEAR             0
+#define COLOR_EASING_SMOOTHSTEP         1
+#define COLOR_EASING_EASE_IN_OUT_CUBIC  2
+#define COLOR_EASING_EASE_OUT_CUBIC     3
+
+#ifndef COLOR_TRANSITION_EASING
+#define COLOR_TRANSITION_EASING COLOR_EASING_EASE_IN_OUT_CUBIC
+#endif
+
 
 typedef enum
 {
@@ -88,7 +107,6 @@ extern uint8_t screen_light_idx;
 extern int8_t fl_color_idx; //white, red, orange, yellow, green, blue, indigo, violet
 
 
-
 void switch_mainface(gui_obj_t *parent, uint8_t idx);
 void set_flashlight_color(void *obj);
 
@@ -111,6 +129,7 @@ void switch_in_mainface_6(gui_view_t *view);
 void switch_in_mainface_7(gui_view_t *view);
 void switch_in_mainface_8(gui_view_t *view);
 void switch_in_mainface_9(gui_view_t *view);
+void switch_in_mainface_list(gui_view_t *view);
 
 /* Interact api */ 
 uint8_t mainface_list_init(void **data_list, uint32_t n); //ret: user's mainface num
