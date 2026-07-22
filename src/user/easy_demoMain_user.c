@@ -169,7 +169,7 @@ static void msg_2_regenerate_view(void *msg)
     gui_view_create(GUI_BASE(win_view), view_rec, 0, 0, 0, 0);
 }
 
-void set_flashlight_color(void)
+void set_flashlight_color(void *obj)
 {
     gui_color_t color = {0};
     switch (fl_color_idx)
@@ -202,7 +202,7 @@ void set_flashlight_color(void)
     default:
         break;
     }
-    gui_set_bg_color(color);
+    gui_view_set_bg_color(obj, color);
     gui_fb_change();
 
     // TO DO: adjust screen light
