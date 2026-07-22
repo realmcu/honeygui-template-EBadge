@@ -36,7 +36,7 @@ static int app_init(void)
     extern gui_win_t *win_view;
     if (win_view == NULL)
     {
-        win_view = gui_win_create(gui_obj_get_root(), "win_view", 0, 0, 360, 360);
+        win_view = gui_win_create(gui_obj_get_root(), "win_view", 0, 0, 0, 0);
         // extern void win_timer_gsensor_cb(void *obj);
         // gui_obj_create_timer((void *)win_view, 200, true, win_timer_gsensor_cb);
     }

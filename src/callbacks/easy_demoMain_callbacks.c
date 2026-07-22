@@ -361,19 +361,19 @@ void view_fl_timer_1_cb(void *obj)
     {
     case TOUCH_UP_SLIDE:
         fl_color_idx = (fl_color_idx + 1) % 8;
-        set_flashlight_color();
+        set_flashlight_color(obj);
         break;
     case TOUCH_DOWN_SLIDE:
         fl_color_idx = (fl_color_idx - 1 + 8) % 8;
-        set_flashlight_color();
+        set_flashlight_color(obj);
         break;
     case TOUCH_UP_SLIDE_QUICK:
         fl_color_idx = (fl_color_idx + 1) % 8;
-        set_flashlight_color();
+        set_flashlight_color(obj);
         break;
     case TOUCH_DOWN_SLIDE_QUICK:
         fl_color_idx = (fl_color_idx - 1 + 8) % 8;
-        set_flashlight_color();
+        set_flashlight_color(obj);
         break;
     case TOUCH_LEFT_SLIDE_QUICK:
         gui_view_switch_direct(gui_view_get_current(), "top_view", SWITCH_OUT_NONE_ANIMATION, SWITCH_IN_NONE_ANIMATION);
@@ -395,7 +395,7 @@ void view_fl_timer_1_cb(void *obj)
 void view_fl_timer_0_cb(void *obj)
 {
     GUI_UNUSED(obj);
-    set_flashlight_color();
+    set_flashlight_color(obj);
     gui_obj_create_timer(obj, 1, true, view_fl_timer_1_cb);
     gui_obj_start_timer(obj);
 }

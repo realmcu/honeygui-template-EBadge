@@ -69,7 +69,7 @@ extern int8_t fl_color_idx; //white, red, orange, yellow, green, blue, indigo, v
 
 
 void switch_mainface(gui_obj_t *parent, uint8_t idx);
-void set_flashlight_color(void);
+void set_flashlight_color(void *obj);
 
 void win_timer_0_cb(void *obj); // move long image
 void click_auto_sleep_icon(void *obj, gui_event_t *e);
