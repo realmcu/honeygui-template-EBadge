@@ -28,11 +28,11 @@ uint8_t mainface_idx = 0;
 uint8_t mainface_num = 5;
 mainface_src_t mainface_list[MAINFACE_NUM_MAX] =
 {
-    {"/image/565/wallpaper_danmu.bin",      SRC_DANMU,          NULL, "/image/Thumbnail_0.bin", 0xffffc00e},
-    {"/user/gltf_desc_Fox.bin",             SRC_3D,             NULL, "/image/Thumbnail_1.bin", 0xfffff18c},
-    {"/foreground_360.bin",                 SRC_IMG_SPATIAL,    NULL, "/image/Thumbnail_2.bin", 0xfffdcbcc},
-    {"/wallpaper_video.avi",                SRC_VIDEO,          NULL, "/image/Thumbnail_3.bin", 0xfffa8fac},
-    {"/image/565/wallpaper_static_img.bin", SRC_IMG,            NULL, "/image/Thumbnail_4.bin", 0xffffd701},
+    {"/image/565/wallpaper_danmu.bin",      SRC_DANMU,          NULL, "/user/hello_40A840.bin", 0xff40A840},
+    {"/user/gltf_desc_Fox.bin",             SRC_3D,             NULL, "/user/fox_0040F8.bin", 0xff0040F8},
+    {"/foreground_360.bin",                 SRC_IMG_SPATIAL,    NULL, "/user/eva_D0C9B9.bin", 0xffD0C9B9},
+    {"/wallpaper_video.avi",                SRC_VIDEO,          NULL, "/user/wsq_F4EFD9.bin", 0xffF4EFD9},
+    {"/image/565/wallpaper_static_img.bin", SRC_IMG,            NULL, "/user/pig_F8C8C8.bin", 0xffF8C8C8},
     
 
 };
@@ -1558,7 +1558,7 @@ static void lst_mainface_note_design(gui_obj_t *obj, void *param)
     gui_img_t *img = gui_img_create_from_fs(obj, 0, mainface_list[index].img_preview, 0, 75, 0, 0);
 #else
     gui_img_t *img = NULL;
-    if (((uint32_t)mainface_list[idx].data) >= USER_RESOURCE_ADDR && ((uint32_t)mainface_list[idx].data) < (USER_RESOURCE_ADDR_END))
+    if (((uint32_t)mainface_list[index].data) >= USER_RESOURCE_ADDR && ((uint32_t)mainface_list[index].data) < (USER_RESOURCE_ADDR_END))
     {
         img = gui_img_create_from_mem(obj, 0, mainface_list[index].img_preview, 0, 75, 0, 0);
     }
