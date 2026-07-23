@@ -344,12 +344,39 @@ void win_timer_gsensor_cb(void *obj)
 #ifndef _HONEYGUI_SIMULATOR_
     extern bool gsensor_sc7a20_read_xyz(int16_t *x, int16_t *y, int16_t *z);
     static bool sample_valid = false;
+    static bool wait_for_horizontal = false;
+    static uint8_t horizontal_sample_count = 0;
     static int16_t gx_rec = 0, gy_rec = 0, gz_rec = 0;
     int16_t gx = 0, gy = 0, gz = 0;
 
     if (gsensor_sc7a20_read_xyz(&gx, &gy, &gz))
     {
-        if (sample_valid && gui_view_get_next() == NULL)
+        int32_t abs_gx = gx < 0 ? -(int32_t)gx : gx;
+        int32_t abs_gy = gy < 0 ? -(int32_t)gy : gy;
+        int32_t abs_gz = gz < 0 ? -(int32_t)gz : gz;
+
+        if (wait_for_horizontal)
+        {
+            /* Returning to the horizontal position only rearms the gesture;
+             * it must not trigger another view switch. Require several stable
+             * samples to prevent sensor noise from rearming too early. */
+            const int32_t horizontal_margin = 100;
+            if (abs_gz >= abs_gx + horizontal_margin &&
+                abs_gz >= abs_gy + horizontal_margin)
+            {
+                horizontal_sample_count++;
+                if (horizontal_sample_count >= 3)
+                {
+                    wait_for_horizontal = false;
+                    horizontal_sample_count = 0;
+                }
+            }
+            else
+            {
+                horizontal_sample_count = 0;
+            }
+        }
+        else if (sample_valid && gui_view_get_next() == NULL && enable_switch_mainface)
         {
             int32_t dx = (int32_t)gx - gx_rec;
             int32_t dy = (int32_t)gy - gy_rec;
@@ -360,28 +387,22 @@ void win_timer_gsensor_cb(void *obj)
 
             /* Sensor +y points left and +x points down on the screen. Ignore
              * small changes and a shake whose dominant component is on z. */
-            const int32_t shake_threshold = 200;
+            const int32_t shake_threshold = 500;
             if ((abs_dx >= shake_threshold || abs_dy >= shake_threshold) &&
-                (abs_dx >= abs_dz || abs_dy >= abs_dz))
+                (abs_dx >= abs_dz || abs_dy >= abs_dz) && abs_dy > abs_dx)
             {
-                if (abs_dy > abs_dx)
+                gui_view_t *view_current = gui_view_get_current();
+                const char *view_l = view_current->on_event[2]->descriptor->name;
+                const char *view_r = view_current->on_event[1]->descriptor->name;
+                gui_view_set_animate_step(view_current, 20);
+                wait_for_horizontal = true;
+                if (dy > 0)
                 {
-                    if (dy > 0)
-                    {
-                        gui_log("shake left\n");
-                    }
-                    else
-                    {
-                        gui_log("shake right\n");
-                    }
-                }
-                else if (dx > 0)
-                {
-                    gui_log("shake down\n");
+                    gui_view_switch_direct(view_current, view_l, SWITCH_INIT_STATE, SWITCH_IN_ANIMATION_RASTER_HORIZONTAL);
                 }
                 else
                 {
-                    gui_log("shake up\n");
+                    gui_view_switch_direct(view_current, view_r, SWITCH_INIT_STATE, SWITCH_IN_ANIMATION_RASTER_HORIZONTAL_REVERSE);
                 }
             }
         }
@@ -1552,7 +1573,7 @@ static void lst_mainface_note_design(gui_obj_t *obj, void *param)
     uint16_t index = note->index % mainface_num;
     index += mainface_num;
     index %= mainface_num;
-    // gui_log("note->index = %d, index = %d\n", note->index, index);
+    gui_log("note->index = %d, index = %d\n", note->index, index);
 
 #ifdef _HONEYGUI_SIMULATOR_
     gui_img_t *img = gui_img_create_from_fs(obj, 0, mainface_list[index].img_preview, 0, 75, 0, 0);
@@ -1616,10 +1637,11 @@ static void list_timer_cb(void *obj)
     {
         if (moved)
         {
+            gui_log("last_index = %d, offset = %d\n", list->last_created_note_index, offset);
             moved = false;
             gui_list_note_t *note_right = (void *)gui_list_entry(list->base.child_list.next, gui_obj_t, brother_list);
             gui_list_note_t *note_center = (void *)gui_list_entry(note_right->base.brother_list.next, gui_obj_t, brother_list);
-            uint16_t index = note_center->index % mainface_num;
+            int16_t index = note_center->index % mainface_num;
             index += mainface_num;
             index %= mainface_num;
             if (index != list_index)
@@ -1645,6 +1667,7 @@ static void list_timer_cb(void *obj)
 void switch_in_mainface_list(gui_view_t *view)
 {
     list_index = mainface_idx;
+    gui_log("list_index = %d, offset = %d\n", list_index, 180 * (list_index + 1));
     
     gui_list_t *lst_mainface = gui_list_create((gui_obj_t *)view, "lst_mainface", -80, 0, 520, 360, 160, 20, HORIZONTAL, lst_mainface_note_design, NULL, false);
     gui_list_set_style(lst_mainface, LIST_CLASSIC);
@@ -1652,7 +1675,7 @@ void switch_in_mainface_list(gui_view_t *view)
     gui_list_set_auto_align(lst_mainface, true);
     gui_list_enable_loop(lst_mainface, true);
     gui_list_set_inertia(lst_mainface, false);
-    gui_list_set_offset(lst_mainface, 180 * (list_index + 1));
+    gui_list_set_offset(lst_mainface, 180 * (1 - list_index));
 
     gui_obj_create_timer((void *)lst_mainface, 10, true, list_timer_cb);
     gui_obj_start_timer((void *)lst_mainface);
