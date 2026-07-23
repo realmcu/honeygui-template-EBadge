@@ -377,6 +377,28 @@ static void view_cam_ctl_switch_in(gui_view_t *view)
 }
 GUI_VIEW_INSTANCE("view_cam_ctl", false, view_cam_ctl_switch_in, view_cam_ctl_switch_out, false);
 
+// Create view_mainface_list (hg_view)
+static void view_mainface_list_switch_out(gui_view_t *view)
+{
+    GUI_UNUSED(view);
+}
+
+static void view_mainface_list_switch_in(gui_view_t *view)
+{
+    // Set animation step
+    gui_view_set_animate_step(view, 466);
+
+    // Set opacity
+    gui_view_set_opacity(view, 255);
+
+    // Set background color
+    gui_view_set_bg_color(view, gui_rgb(0, 0, 0));
+
+
+    switch_in_mainface_list(view);
+}
+GUI_VIEW_INSTANCE("view_mainface_list", false, view_mainface_list_switch_in, view_mainface_list_switch_out, false);
+
 // Create view_fl (hg_view)
 static void view_fl_switch_out(gui_view_t *view)
 {

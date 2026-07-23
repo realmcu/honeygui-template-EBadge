@@ -14,6 +14,25 @@
 #define  SCREEN_SIZE  466
 #define  MAINFACE_NUM_MAX  10
 
+#define COLOR_TRANSITION_SRGB          0
+#define COLOR_TRANSITION_GAMMA_LINEAR  1
+#define COLOR_TRANSITION_HSL           2
+#define COLOR_TRANSITION_CIELAB        3
+#define COLOR_TRANSITION_OKLAB         4
+
+#ifndef COLOR_TRANSITION_METHOD
+#define COLOR_TRANSITION_METHOD COLOR_TRANSITION_GAMMA_LINEAR
+#endif
+
+#define COLOR_EASING_LINEAR             0
+#define COLOR_EASING_SMOOTHSTEP         1
+#define COLOR_EASING_EASE_IN_OUT_CUBIC  2
+#define COLOR_EASING_EASE_OUT_CUBIC     3
+
+#ifndef COLOR_TRANSITION_EASING
+#define COLOR_TRANSITION_EASING COLOR_EASING_EASE_IN_OUT_CUBIC
+#endif
+
 
 typedef enum
 {
@@ -24,11 +43,32 @@ typedef enum
     SRC_DANMU,
 } MAINFACE_SRC_TYPE;
 
+#pragma pack(push, 1)  
+typedef struct 
+{
+    uint8_t type;
+    uint8_t num;
+    uint32_t color;
+    uint32_t size;
+    uint32_t offset[];
+}PACKET_HEADER_T;
+#pragma pack(pop)
+
 typedef struct mainface_src
 {
     void *data;
     MAINFACE_SRC_TYPE type;
+    void *raw;
+    void *img_preview;
+    uint32_t color;
 } mainface_src_t;
+
+#define RES_TYPE(raw) (((PACKET_HEADER_T *)raw)->type)
+#define RES_COLOR_BG(raw) (((PACKET_HEADER_T *)raw)->color)
+#define RES_NUM(raw) (((PACKET_HEADER_T *)raw)->num)
+#define RES_SIZE(raw) (((PACKET_HEADER_T *)raw)->size)
+#define RES_OFFSET_X(raw, n) (uint32_t)(((PACKET_HEADER_T *)raw)->offset[n])
+#define RES_DATA_X(raw, n) (void*)((uint8_t*)raw + RES_OFFSET_X(raw, n))
 
 typedef enum
 {
@@ -67,7 +107,6 @@ extern uint8_t screen_light_idx;
 extern int8_t fl_color_idx; //white, red, orange, yellow, green, blue, indigo, violet
 
 
-
 void switch_mainface(gui_obj_t *parent, uint8_t idx);
 void set_flashlight_color(void *obj);
 
@@ -90,6 +129,7 @@ void switch_in_mainface_6(gui_view_t *view);
 void switch_in_mainface_7(gui_view_t *view);
 void switch_in_mainface_8(gui_view_t *view);
 void switch_in_mainface_9(gui_view_t *view);
+void switch_in_mainface_list(gui_view_t *view);
 
 /* Interact api */ 
 uint8_t mainface_list_init(void **data_list, uint32_t n); //ret: user's mainface num
