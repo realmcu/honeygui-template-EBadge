@@ -96,6 +96,7 @@ void switch_in_share_view(gui_view_t *view)
     GUI_UNUSED(view);
     if (dev_mode == MODE_SHARE)
     {
+        gui_obj_create_timer((gui_obj_t *)win_share, 10, true, win_share_timer_0_cb);
 #ifndef _HONEYGUI_SIMULATOR_
         extern bool hmi_ble_central_start_scan(void);
         hmi_ble_central_start_scan(); 

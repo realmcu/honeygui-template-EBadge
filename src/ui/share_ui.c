@@ -14,7 +14,7 @@ gui_text_t *lbl_3 = NULL;
 gui_img_t *img_6 = NULL;
 gui_img_t *circle_anime = NULL;
 gui_text_t *lbl_share = NULL;
-gui_win_t *win_share_3 = NULL;
+gui_win_t *win_share = NULL;
 gui_img_t *img_8 = NULL;
 gui_img_t *img_9 = NULL;
 gui_text_t *bd_addr_self = NULL;
@@ -115,19 +115,14 @@ static void ShareConnView_switch_in(gui_view_t *view)
     gui_text_set((gui_text_t *)bd_addr_self, "11:11:11:11:11:11", GUI_FONT_SRC_BMP, gui_rgb(255, 255, 255), 17, 16);
     gui_text_type_set((gui_text_t *)bd_addr_self, "/font/Inter_24pt_Regular_size16_bits4_bitmap.bin", FONT_SRC_FILESYS);
     gui_text_mode_set((gui_text_t *)bd_addr_self, MID_CENTER);
-    // Bind timer: 动画 1
-    gui_obj_create_timer((gui_obj_t *)bd_addr_self, 1000, true, lbl_share_timer_0_cb);
 
-    // Create win_share_3 (hg_window)
-    win_share_3 = gui_win_create((gui_obj_t *)view, "win_share_3", 0, 0, 360, 360);
-    gui_obj_hidden((gui_obj_t *)win_share_3, true);
-    // Bind timer: 动画 1
-    gui_obj_create_timer((gui_obj_t *)win_share_3, 10, true, win_share_3_timer_0_cb);
-    gui_obj_start_timer((gui_obj_t *)win_share_3);
+    // Create win_share (hg_window)
+    win_share = gui_win_create((gui_obj_t *)view, "win_share", 0, 0, 360, 360);
+    gui_obj_hidden((gui_obj_t *)win_share, true);
 
 
     // Create img_8 (hg_image)
-    img_8 = gui_img_create_from_fs(win_share_3, "img_8", "/image/A8/circle_360_bg.bin", 0, 0, 360, 360);
+    img_8 = gui_img_create_from_fs(win_share, "img_8", "/image/A8/circle_360_bg.bin", 0, 0, 360, 360);
     gui_img_set_mode((gui_img_t *)img_8, IMG_SRC_OVER_MODE);
     gui_img_translate((gui_img_t *)img_8, 180.0f, 180.0f);
     gui_img_set_focus((gui_img_t *)img_8, 180.0f, 180.0f);
@@ -137,7 +132,7 @@ static void ShareConnView_switch_in(gui_view_t *view)
     gui_obj_create_timer((gui_obj_t *)img_8, 1000, true, img_8_timer_0_cb);
 
     // Create img_9 (hg_image)
-    img_9 = gui_img_create_from_fs(win_share_3, "img_9", "/image/A8/connect_state_icon.bin", 142, 132, 76, 76);
+    img_9 = gui_img_create_from_fs(win_share, "img_9", "/image/A8/connect_state_icon.bin", 142, 132, 76, 76);
 
     gui_obj_add_event_cb((gui_obj_t *)view, (gui_event_cb_t)ShareConnView_key_0_cb, GUI_EVENT_KB_SHORT_PRESSED, NULL);
     gui_obj_focus_set((gui_obj_t *)view);

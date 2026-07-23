@@ -8,9 +8,7 @@
 // Timer animation counters
 uint16_t circle_anime_timer_cnt = 0;
 uint16_t lbl_share_timer_cnt = 0;
-uint16_t win_share_3_timer_cnt = 0;
 uint16_t img_8_timer_cnt = 0;
-uint16_t bd_addr_self_timer_cnt = 0;
 
 // Event callback function implementations
 
@@ -174,22 +172,22 @@ void lbl_share_timer_0_cb(void *obj)
     gui_obj_stop_timer(obj);
 }
 
-void win_share_3_timer_0_cb(void *obj)
+void win_share_timer_0_cb(void *obj)
 {
     GUI_UNUSED(obj);
+    static uint8_t win_share_timer_cnt = 0;
+    win_share_timer_cnt++;
 #ifdef _HONEYGUI_SIMULATOR_
-    win_share_3_timer_cnt++;
-    if (win_share_3_timer_cnt >= 100)
+    if (win_share_timer_cnt >= 100)
     {
-        win_share_3_timer_cnt = 0;
+        win_share_timer_cnt = 0;
         dev_mode = MODE_SHARE;
         gui_view_switch_direct(gui_view_get_current(), "SelectDevView", SWITCH_OUT_NONE_ANIMATION, SWITCH_IN_NONE_ANIMATION);
     }
 #else
-    win_share_3_timer_cnt++;
-    if (win_share_3_timer_cnt >= 100)
+    if (win_share_timer_cnt >= 100)
     {
-        win_share_3_timer_cnt = 0;
+        win_share_timer_cnt = 0;
         extern uint8_t hmi_ble_central_get_dev_count(void);
         uint8_t dev_num = hmi_ble_central_get_dev_count();
         gui_log("hmi_ble_central_get_dev_count %d\n", dev_num);
