@@ -81,6 +81,16 @@ void click_receive_image_button(void *obj, gui_event_t *e)
 #endif
 }
 
+static void re_scan_dev(void *obj, gui_event_t *e)
+{
+    GUI_UNUSED(obj);
+    GUI_UNUSED(e);
+    if (dev_mode == MODE_DEFAULT) return;
+    gui_obj_t *parent = ((gui_obj_t *)obj)->parent;
+    gui_obj_child_free(parent);
+    gui_view_create(parent, "ShareConnView", 0, 0, 0, 0);
+}
+
 void switch_in_share_view(gui_view_t *view)
 {
     GUI_UNUSED(view);
@@ -92,6 +102,8 @@ void switch_in_share_view(gui_view_t *view)
         gui_log("hmi_ble_central_start_scan\n");
 #endif
     }
+
+    gui_obj_add_event_cb(view, (gui_event_cb_t)re_scan_dev, GUI_EVENT_TOUCH_CLICKED, NULL);
 }
 
 void switch_out_share_view(gui_view_t *view)

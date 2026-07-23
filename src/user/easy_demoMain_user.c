@@ -1721,7 +1721,7 @@ static void click_button_2_disconnect(void *obj, gui_event_t *e)
         uint16_t screen_size = dc->screen_width;
         uint16_t pic_size = 100;
         gui_obj_move(dev_disconn, (screen_size - pic_size) / 2, screen_size * 2/3);
-        gui_img_set_src((void *)dev_disconn, "/image/dev_conn_icon.bin", IMG_SRC_FILESYS);
+        gui_img_set_src((void *)dev_disconn, "/image/dev_send_icon.bin", IMG_SRC_FILESYS);
         dev_disconn->event_dsc[0].event_cb = click_button_2_connect;
         gui_obj_add_event_cb(view_current, (gui_event_cb_t)click_2_mainface_view, GUI_EVENT_TOUCH_CLICKED, NULL);
         gui_view_switch_on_event(view_current, get_view_name_by_index(mainface_idx), SWITCH_OUT_TO_BOTTOM_USE_TRANSLATION, SWITCH_INIT_STATE, GUI_EVENT_TOUCH_MOVE_DOWN);

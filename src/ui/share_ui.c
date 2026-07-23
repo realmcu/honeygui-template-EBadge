@@ -111,10 +111,10 @@ static void ShareConnView_switch_in(gui_view_t *view)
     gui_obj_create_timer((gui_obj_t *)lbl_share, 1000, true, lbl_share_timer_0_cb);
 
     // Create bd_addr_self (hg_label)
-    bd_addr_self = gui_text_create((gui_obj_t *)view, "bd_addr_self", 0, 244, 360, 24);
+    bd_addr_self = gui_text_create((gui_obj_t *)view, "bd_addr_self", 0, 241, 360, 29);
     gui_text_set((gui_text_t *)bd_addr_self, "11:11:11:11:11:11", GUI_FONT_SRC_BMP, gui_rgb(255, 255, 255), 17, 16);
     gui_text_type_set((gui_text_t *)bd_addr_self, "/font/Inter_24pt_Regular_size16_bits4_bitmap.bin", FONT_SRC_FILESYS);
-    gui_text_mode_set((gui_text_t *)bd_addr_self, CENTER);
+    gui_text_mode_set((gui_text_t *)bd_addr_self, MID_CENTER);
     // Bind timer: 动画 1
     gui_obj_create_timer((gui_obj_t *)bd_addr_self, 1000, true, lbl_share_timer_0_cb);
 
