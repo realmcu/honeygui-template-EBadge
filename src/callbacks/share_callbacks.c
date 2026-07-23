@@ -33,7 +33,7 @@ void img_4_clicked_cb(void *obj, gui_event_t *e)
     GUI_UNUSED(obj);
     GUI_UNUSED(e);
     click_share_image_button(obj, e);
-    gui_view_switch_direct(gui_view_get_current(), "shareSecondView", SWITCH_INIT_STATE, SWITCH_IN_NONE_ANIMATION);
+    gui_view_switch_direct(gui_view_get_current(), "ShareConnView", SWITCH_INIT_STATE, SWITCH_IN_NONE_ANIMATION);
 }
 
 void img_5_clicked_cb(void *obj, gui_event_t *e)
@@ -41,10 +41,10 @@ void img_5_clicked_cb(void *obj, gui_event_t *e)
     GUI_UNUSED(obj);
     GUI_UNUSED(e);
     click_receive_image_button(obj, e);
-    gui_view_switch_direct(gui_view_get_current(), "shareSecondView", SWITCH_INIT_STATE, SWITCH_IN_NONE_ANIMATION);
+    gui_view_switch_direct(gui_view_get_current(), "ShareConnView", SWITCH_INIT_STATE, SWITCH_IN_NONE_ANIMATION);
 }
 
-void shareSecondView_key_0_cb(void *obj, gui_event_t *e)
+void ShareConnView_key_0_cb(void *obj, gui_event_t *e)
 {
     GUI_UNUSED(obj);
     GUI_UNUSED(e);

@@ -67,13 +67,13 @@ static void shareMainView_switch_in(gui_view_t *view)
 }
 GUI_VIEW_INSTANCE("shareMainView", false, shareMainView_switch_in, shareMainView_switch_out, false);
 
-// Create shareSecondView (hg_view)
-static void shareSecondView_switch_out(gui_view_t *view)
+// Create ShareConnView (hg_view)
+static void ShareConnView_switch_out(gui_view_t *view)
 {
     GUI_UNUSED(view);
 }
 
-static void shareSecondView_switch_in(gui_view_t *view)
+static void ShareConnView_switch_in(gui_view_t *view)
 {
     // Set animation step
     gui_view_set_animate_step(view, 360);
@@ -130,7 +130,7 @@ static void shareSecondView_switch_in(gui_view_t *view)
     // Create img_9 (hg_image)
     img_9 = gui_img_create_from_fs(win_share_3, "img_9", "/image/A8/connect_state_icon.bin", 142, 132, 76, 76);
 
-    gui_obj_add_event_cb((gui_obj_t *)view, (gui_event_cb_t)shareSecondView_key_0_cb, GUI_EVENT_KB_SHORT_PRESSED, NULL);
+    gui_obj_add_event_cb((gui_obj_t *)view, (gui_event_cb_t)ShareConnView_key_0_cb, GUI_EVENT_KB_SHORT_PRESSED, NULL);
     gui_obj_focus_set((gui_obj_t *)view);
 }
-GUI_VIEW_INSTANCE("shareSecondView", false, shareSecondView_switch_in, shareSecondView_switch_out, false);
+GUI_VIEW_INSTANCE("ShareConnView", false, ShareConnView_switch_in, ShareConnView_switch_out, false);

@@ -24,7 +24,7 @@
                 <events>
                     <event type="onClick">
                         <action type="callFunction" functionName="click_share_image_button" />
-                        <action type="switchView" target="shareSecondView" switchOutStyle="SWITCH_INIT_STATE" switchInStyle="SWITCH_IN_NONE_ANIMATION" />
+                        <action type="switchView" target="ShareConnView" switchOutStyle="SWITCH_INIT_STATE" switchInStyle="SWITCH_IN_NONE_ANIMATION" />
                     </event>
                 </events>
             </hg_image>
@@ -32,14 +32,14 @@
                 <events>
                     <event type="onClick">
                         <action type="callFunction" functionName="click_receive_image_button" />
-                        <action type="switchView" target="shareSecondView" switchOutStyle="SWITCH_INIT_STATE" switchInStyle="SWITCH_IN_NONE_ANIMATION" />
+                        <action type="switchView" target="ShareConnView" switchOutStyle="SWITCH_INIT_STATE" switchInStyle="SWITCH_IN_NONE_ANIMATION" />
                     </event>
                 </events>
             </hg_image>
             <hg_label id="lbl_2" x="107" y="129" width="146" height="34" hAlign="CENTER" vAlign="TOP" color="#000000" letterSpacing="0" lineSpacing="0" wordWrap="false" wordBreak="false" text="Share image" fontFile="/font/Inter_24pt_SemiBold.ttf" fontSize="24" zIndex="2" />
             <hg_label id="lbl_3" x="88" y="230" width="185" height="34" hAlign="CENTER" vAlign="TOP" color="#000000" letterSpacing="0" lineSpacing="0" wordWrap="false" wordBreak="false" text="Receive image" fontFile="/font/Inter_24pt_SemiBold.ttf" fontSize="24" characterSets="[{&quot;type&quot;:&quot;range&quot;,&quot;value&quot;:&quot;0x20-0x7E&quot;}]" zIndex="3" />
         </hg_view>
-        <hg_view id="shareSecondView" x="462" y="0" width="360" height="360" backgroundColor="#000000" borderRadius="20" padding="12" overflow="auto" entry="false" animateStep="360" zIndex="1">
+        <hg_view id="ShareConnView" x="462" y="0" width="360" height="360" backgroundColor="#000000" borderRadius="20" padding="12" overflow="auto" entry="false" animateStep="360" zIndex="1">
             <events>
                 <event type="onSwipeLeftQuick">
                     <action type="switchView" target="shareMainView" switchOutStyle="SWITCH_INIT_STATE" switchInStyle="SWITCH_IN_NONE_ANIMATION" />

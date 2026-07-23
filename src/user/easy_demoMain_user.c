@@ -216,16 +216,18 @@ void create_win_del(void)
 {
     if (has_created_win_del) return;
     has_created_win_del = true;
-    gui_win_t *win_del = gui_win_create(gui_obj_get_root(), "win_del", 0, 0, SCREEN_SIZE, SCREEN_SIZE);
+    gui_dispdev_t *dc = gui_get_dc();
+    uint16_t screen_size = dc->screen_width;
+    gui_win_t *win_del = gui_win_create(gui_obj_get_root(), "win_del", 0, 0, screen_size, screen_size);
 
-    gui_img_t *img = gui_img_create_from_fs(win_del, 0, "/image/A8/circle_360_bg.bin", 0, 180, SCREEN_SIZE, SCREEN_SIZE);
+    gui_img_t *img = gui_img_create_from_fs(win_del, 0, "/image/A8/circle_360_bg.bin", 0, screen_size / 2, screen_size, screen_size);
     gui_img_set_mode(img, IMG_SRC_OVER_MODE);
     gui_img_set_opacity(img, 122);
 
-    img = gui_img_create_from_fs(win_del, 0, "/image/A8/delete_icon.bin", 63, 231, 100, 100);
+    img = gui_img_create_from_fs(win_del, 0, "/image/A8/delete_icon.bin", screen_size / 6, screen_size * 2/3, 0, 0);
     gui_obj_add_event_cb(img, (gui_event_cb_t)click_delete_icon_detail, GUI_EVENT_TOUCH_CLICKED, NULL);
 
-    img = gui_img_create_from_fs(win_del, 0, "/image/A8/back_icon.bin", 198, 231, 100, 100);
+    img = gui_img_create_from_fs(win_del, 0, "/image/A8/back_icon.bin", screen_size * 5 /6  - img->base.w, screen_size * 2/3, 0, 0);
     gui_obj_add_event_cb(img, (gui_event_cb_t)click_back_icon, GUI_EVENT_TOUCH_CLICKED, NULL);
 
     gui_obj_focus_set(GUI_BASE(win_del));
@@ -288,6 +290,8 @@ void win_timer_0_cb(void *obj)
 
     if (mainface_num == 0) return;
     touch_info_t *tp = tp_get_info();
+    gui_dispdev_t *dc = gui_get_dc();
+    uint16_t screen_size = dc->screen_width;
     gui_obj_t *o = obj;
     gui_obj_t *child = gui_list_entry(o->child_list.next, gui_obj_t, brother_list);
     gui_obj_t *lock = gui_list_entry(child->brother_list.next, gui_obj_t, brother_list);
@@ -299,7 +303,7 @@ void win_timer_0_cb(void *obj)
         img_x -= 5;
         if (img_x + img_w <= 0)
         {
-            child->x = SCREEN_SIZE;
+            child->x = screen_size;
         }
         else
         {
@@ -462,7 +466,7 @@ static void *get_view_name_by_index(uint8_t idx)
 
 void switch_mainface(gui_obj_t *parent, uint8_t idx)
 {
-    gui_win_t *win = gui_win_create(parent, 0, 0, 0, SCREEN_SIZE, SCREEN_SIZE);
+    gui_win_t *win = gui_win_create(parent, 0, 0, 0, 0, 0);
     win->base.user_data = &mainface_list[idx];
     mainface_idx = idx;
     void (*timer_cb)(void *) = NULL;
@@ -506,7 +510,7 @@ void switch_mainface(gui_obj_t *parent, uint8_t idx)
 
     if (mainface_num == 0)
     {
-        gui_text_t *text = gui_text_create((gui_obj_t *)win, 0, 0, 0, SCREEN_SIZE, SCREEN_SIZE);
+        gui_text_t *text = gui_text_create((gui_obj_t *)win, 0, 0, 0, 0, 0);
         gui_text_set((gui_text_t *)text, "Please add a mainface", GUI_FONT_SRC_BMP, gui_rgb(255, 255, 255), 21, 20);
         gui_text_type_set((gui_text_t *)text, "/font/Inter_24pt_SemiBold_size20_bits4_bitmap.bin", FONT_SRC_FILESYS);
         gui_text_mode_set((gui_text_t *)text, MID_CENTER);
@@ -518,21 +522,23 @@ void switch_mainface(gui_obj_t *parent, uint8_t idx)
 
     gui_event_code_t event_code_l = GUI_EVENT_TOUCH_MOVE_LEFT;
     gui_event_code_t event_code_r = GUI_EVENT_TOUCH_MOVE_RIGHT;
+    gui_dispdev_t *dc = gui_get_dc();
+    uint16_t screen_size = dc->screen_width;
     switch (mainface_list[idx].type)
     {
     case SRC_VIDEO:
     {
         gui_lite_video_t *vid = NULL;
 #ifdef _HONEYGUI_SIMULATOR_
-        vid = gui_lite_video_create_from_fs((void *)win, 0, mainface_list[idx].data, 0, 0, SCREEN_SIZE, SCREEN_SIZE);
+        vid = gui_lite_video_create_from_fs((void *)win, 0, mainface_list[idx].data, 0, 0, 0, 0);
 #else
         if (((uint32_t)mainface_list[idx].data) >= USER_RESOURCE_ADDR && ((uint32_t)mainface_list[idx].data) < (USER_RESOURCE_ADDR_END))
         {
-            vid = gui_lite_video_create_from_mem((void *)win, 0, mainface_list[idx].data, 0, 0, SCREEN_SIZE, SCREEN_SIZE);
+            vid = gui_lite_video_create_from_mem((void *)win, 0, mainface_list[idx].data, 0, 0, 0, 0);
         }
         else
         {
-            vid = gui_lite_video_create_from_fs((void *)win, 0, mainface_list[idx].data, 0, 0, SCREEN_SIZE, SCREEN_SIZE);
+            vid = gui_lite_video_create_from_fs((void *)win, 0, mainface_list[idx].data, 0, 0, 0, 0);
         }
 #endif
         // gui_lite_video_set_frame_rate((gui_lite_video_t *)vid, 30.f);
@@ -551,17 +557,11 @@ void switch_mainface(gui_obj_t *parent, uint8_t idx)
         if ((((uint32_t)mainface_list[idx].data) >= USER_RESOURCE_ADDR) && ((uint32_t)mainface_list[idx].data) < (USER_RESOURCE_ADDR_END))
         {
             gui_log("%s %d 0x%x\n", __FUNCTION__, __LINE__, mainface_list[idx].data);
-            img = gui_img_create_from_mem((void *)win, 0, mainface_list[idx].data, 0, 0, SCREEN_SIZE, SCREEN_SIZE);
-            // img = gui_img_create_from_mem((void *)win, 0, mainface_list[idx].img_preview, SCREEN_SIZE/2-80, SCREEN_SIZE/2-80, SCREEN_SIZE, SCREEN_SIZE);
-
-            // gui_color_t color = gui_rgb((mainface_list[idx].color >> 16) & 0xff, ((mainface_list[idx].color >> 8) & 0xff), (mainface_list[idx].color & 0xff));
-            // gui_view_set_bg_color((gui_view_t *)parent, color);
-            // gui_fb_change();
-            // gui_log("color 0x%x\n", color);
+            img = gui_img_create_from_mem((void *)win, 0, mainface_list[idx].data, 0, 0, 0, 0);
         }
         else
         {
-            img = gui_img_create_from_fs((void *)win, 0, mainface_list[idx].data, 0, 0, SCREEN_SIZE, SCREEN_SIZE);
+            img = gui_img_create_from_fs((void *)win, 0, mainface_list[idx].data, 0, 0, 0, 0);
         }
 #endif        
         gui_img_set_mode(img, IMG_BYPASS_MODE);
@@ -573,7 +573,7 @@ void switch_mainface(gui_obj_t *parent, uint8_t idx)
         event_code_l = GUI_EVENT_TOUCH_LEFT_SLIDE_QUICK;
         event_code_r = GUI_EVENT_TOUCH_RIGHT_SLIDE_QUICK;
         gui_view_set_bg_color((gui_view_t *)parent, gui_rgb(0x41, 0xAD, 0x41));
-        fox_3d = l3_create_model_fs((void *)mainface_list[idx].data, L3_DRAW_FRONT_AND_SORT, 0, 0, SCREEN_SIZE, SCREEN_SIZE);
+        fox_3d = l3_create_model_fs((void *)mainface_list[idx].data, L3_DRAW_FRONT_AND_SORT, 0, 0, screen_size, screen_size);
 
         l3_set_global_transform(fox_3d, (l3_global_transform_cb)fox_global_cb);
         l3_gltf_set_active_animation(fox_3d, cur_anim);
@@ -604,16 +604,16 @@ void switch_mainface(gui_obj_t *parent, uint8_t idx)
         if (((uint32_t)mainface_list[idx].data) >= USER_RESOURCE_ADDR && ((uint32_t)mainface_list[idx].data) < (USER_RESOURCE_ADDR_END))
         {
             gui_log("%s %d 0x%x\n", __FUNCTION__, __LINE__, mainface_list[idx].data);
-            img_0 = gui_img_create_from_mem((void *)win, 0, mainface_list[idx].data, 0, 0, SCREEN_SIZE, SCREEN_SIZE);
+            img_0 = gui_img_create_from_mem((void *)win, 0, mainface_list[idx].data, 0, 0, 0, 0);
         }
         else
         {
-            img_0 = gui_img_create_from_fs((void *)win, 0, mainface_list[idx].data, 0, 0, SCREEN_SIZE, SCREEN_SIZE);
+            img_0 = gui_img_create_from_fs((void *)win, 0, mainface_list[idx].data, 0, 0, 0, 0);
         }
 #endif
         gui_img_set_mode(img_0, IMG_BYPASS_MODE);
-        int16_t img_y = (SCREEN_SIZE - img_0->base.h) / 2;
-        gui_obj_move((void *)img_0, SCREEN_SIZE, img_y);
+        int16_t img_y = (screen_size - img_0->base.h) / 2;
+        gui_obj_move((void *)img_0, screen_size, img_y);
         {
             const void *src_data = gui_img_get_image_data(img_0);
             uint32_t src_color = get_img_color((uint8_t *)src_data);
@@ -1061,6 +1061,7 @@ void click_back_icon(void *obj, gui_event_t *e)
     gui_obj_tree_free(GUI_BASE(obj)->parent);
     gui_obj_focus_set(GUI_BASE(gui_view_get_current()));
     gui_view_switch_on_event(gui_view_get_current(), "top_view", SWITCH_INIT_STATE, SWITCH_IN_FROM_TOP_USE_TRANSLATION, GUI_EVENT_TOUCH_MOVE_DOWN);
+    gui_view_switch_on_event(gui_view_get_current(), "view_mainface_list", SWITCH_INIT_STATE, SWITCH_IN_FROM_BOTTOM_USE_TRANSLATION, GUI_EVENT_TOUCH_MOVE_UP);
 #ifdef _HONEYGUI_SIMULATOR_
     // TODO
 #else
@@ -1573,19 +1574,22 @@ static void lst_mainface_note_design(gui_obj_t *obj, void *param)
     uint16_t index = note->index % mainface_num;
     index += mainface_num;
     index %= mainface_num;
-    gui_log("note->index = %d, index = %d\n", note->index, index);
+    gui_dispdev_t *dc = gui_get_dc();
+    uint16_t screen_size = dc->screen_width;
+    uint16_t pic_size = 160;
+    uint16_t img_y = (screen_size - pic_size) / 2 * 3/4;
 
 #ifdef _HONEYGUI_SIMULATOR_
-    gui_img_t *img = gui_img_create_from_fs(obj, 0, mainface_list[index].img_preview, 0, 75, 0, 0);
+    gui_img_t *img = gui_img_create_from_fs(obj, 0, mainface_list[index].img_preview, 0, img_y, 0, 0);
 #else
     gui_img_t *img = NULL;
     if (((uint32_t)mainface_list[index].data) >= USER_RESOURCE_ADDR && ((uint32_t)mainface_list[index].data) < (USER_RESOURCE_ADDR_END))
     {
-        img = gui_img_create_from_mem(obj, 0, mainface_list[index].img_preview, 0, 75, 0, 0);
+        img = gui_img_create_from_mem(obj, 0, mainface_list[index].img_preview, 0, img_y, 0, 0);
     }
     else
     {
-        img = gui_img_create_from_fs(obj, 0, mainface_list[index].img_preview, 0, 75, 0, 0);
+        img = gui_img_create_from_fs(obj, 0, mainface_list[index].img_preview, 0, img_y, 0, 0);
     }
 #endif
     gui_img_set_mode(img, IMG_SRC_OVER_MODE);
@@ -1631,13 +1635,13 @@ static void list_timer_cb(void *obj)
     gui_list_t *list = (gui_list_t *)obj;
     int16_t offset = list->offset;
     static bool moved = false;
-    touch_info_t *tp = tp_get_info();
+    gui_dispdev_t *dc = gui_get_dc();
+    uint16_t screen_size = dc->screen_width;
 
-    if (offset % 180 == 0)
+    if (offset % (screen_size / 2) == 0)
     {
         if (moved)
         {
-            gui_log("last_index = %d, offset = %d\n", list->last_created_note_index, offset);
             moved = false;
             gui_list_note_t *note_right = (void *)gui_list_entry(list->base.child_list.next, gui_obj_t, brother_list);
             gui_list_note_t *note_center = (void *)gui_list_entry(note_right->base.brother_list.next, gui_obj_t, brother_list);
@@ -1652,11 +1656,6 @@ static void list_timer_cb(void *obj)
                 gui_list_enable_scroll(list, false);
             }
         }
-        if (tp->type == TOUCH_SHORT)
-        {
-            mainface_idx = list_index;
-            gui_view_switch_direct(gui_view_get_current(), get_view_name_by_index(mainface_idx), SWITCH_OUT_NONE_ANIMATION, SWITCH_IN_NONE_ANIMATION);
-        }
     }
     else
     {
@@ -1664,27 +1663,98 @@ static void list_timer_cb(void *obj)
     }
 }
 
+static void click_2_mainface_view(void *obj, gui_event_t *e)
+{
+    GUI_UNUSED(obj);
+    GUI_UNUSED(e);
+
+    mainface_idx = list_index;
+    gui_view_switch_direct(gui_view_get_current(), get_view_name_by_index(mainface_idx), SWITCH_OUT_NONE_ANIMATION, SWITCH_IN_NONE_ANIMATION);
+}
+
+static void click_button_2_share(void *obj, gui_event_t *e)
+{
+    GUI_UNUSED(obj);
+    GUI_UNUSED(e);
+
+    //TODO: share file
+}
+
+static void click_button_2_connect(void *obj, gui_event_t *e)
+{
+    GUI_UNUSED(obj);
+    GUI_UNUSED(e);
+    dev_mode = MODE_SHARE;
+    gui_view_switch_direct(gui_view_get_current(), "ShareConnView", SWITCH_OUT_NONE_ANIMATION, SWITCH_IN_NONE_ANIMATION);
+}
+
+static void click_button_2_disconnect(void *obj, gui_event_t *e)
+{
+    GUI_UNUSED(obj);
+    GUI_UNUSED(e);
+    
+    //TODO:
+    if (gui_view_get_next() == NULL)
+    {
+        dev_mode = MODE_DEFAULT;
+        gui_view_t *view_current = gui_view_get_current();
+        gui_obj_t *dev_send = gui_list_entry(view_current->base.child_list.prev, gui_obj_t, brother_list);
+        gui_obj_t *dev_disconn = gui_list_entry(dev_send->brother_list.prev, gui_obj_t, brother_list);
+
+        gui_obj_tree_free(dev_send);
+        gui_dispdev_t *dc = gui_get_dc();
+        uint16_t screen_size = dc->screen_width;
+        uint16_t pic_size = 100;
+        gui_obj_move(dev_disconn, (screen_size - pic_size) / 2, screen_size * 2/3);
+        gui_img_set_src((void *)dev_disconn, "/image/dev_conn_icon.bin", IMG_SRC_FILESYS);
+        dev_disconn->event_dsc[0].event_cb = click_button_2_connect;
+        gui_obj_add_event_cb(view_current, (gui_event_cb_t)click_2_mainface_view, GUI_EVENT_TOUCH_CLICKED, NULL);
+        gui_view_switch_on_event(view_current, get_view_name_by_index(mainface_idx), SWITCH_OUT_TO_BOTTOM_USE_TRANSLATION, SWITCH_INIT_STATE, GUI_EVENT_TOUCH_MOVE_DOWN);
+    }
+}
+
 void switch_in_mainface_list(gui_view_t *view)
 {
     list_index = mainface_idx;
-    gui_log("list_index = %d, offset = %d\n", list_index, 180 * (list_index + 1));
-    
-    gui_list_t *lst_mainface = gui_list_create((gui_obj_t *)view, "lst_mainface", -80, 0, 520, 360, 160, 20, HORIZONTAL, lst_mainface_note_design, NULL, false);
+    gui_dispdev_t *dc = gui_get_dc();
+    uint16_t screen_size = dc->screen_width;
+    uint16_t pic_size = 160;
+    gui_list_t *lst_mainface = gui_list_create((gui_obj_t *)view, "lst_mainface", -pic_size / 2, 0, screen_size + pic_size, screen_size, 
+                                pic_size, screen_size / 2 - pic_size, HORIZONTAL, lst_mainface_note_design, NULL, false);
     gui_list_set_style(lst_mainface, LIST_CLASSIC);
     gui_list_set_note_num(lst_mainface, mainface_num);
     gui_list_set_auto_align(lst_mainface, true);
     gui_list_enable_loop(lst_mainface, true);
     gui_list_set_inertia(lst_mainface, false);
-    gui_list_set_offset(lst_mainface, 180 * (1 - list_index));
+    gui_list_set_offset(lst_mainface, (screen_size / 2) * (1 - list_index));
 
     gui_obj_create_timer((void *)lst_mainface, 10, true, list_timer_cb);
     gui_obj_start_timer((void *)lst_mainface);
 
+    /* Device key */
+    pic_size = 100;
+    if (dev_mode == MODE_SHARE)
+    {
+        gui_img_t *dev_disconn = gui_img_create_from_fs(view, 0, "/image/dev_disconn_icon.bin", screen_size / 6, screen_size * 2/3, 0, 0);
+        gui_img_set_mode(dev_disconn, IMG_SRC_OVER_MODE);
+        gui_img_t *dev_send = gui_img_create_from_fs(view, 0, "/image/dev_send_icon.bin", screen_size * 5 /6  - pic_size, screen_size * 2/3, 0, 0);
+        gui_img_set_mode(dev_send, IMG_SRC_OVER_MODE);
+        gui_obj_add_event_cb(dev_disconn, (gui_event_cb_t)click_button_2_disconnect, GUI_EVENT_TOUCH_CLICKED, NULL);
+        gui_obj_add_event_cb(dev_send, (gui_event_cb_t)click_button_2_share, GUI_EVENT_TOUCH_CLICKED, NULL);
+    }
+    else
+    {
+        gui_img_t *dev_conn = gui_img_create_from_fs(view, 0, "/image/dev_conn_icon.bin", (screen_size - pic_size) / 2, screen_size * 2/3, 0, 0);
+        gui_img_set_mode(dev_conn, IMG_SRC_OVER_MODE);
+        gui_obj_add_event_cb(dev_conn, (gui_event_cb_t)click_button_2_connect, GUI_EVENT_TOUCH_CLICKED, NULL);
+
+        gui_obj_add_event_cb(view, (gui_event_cb_t)click_2_mainface_view, GUI_EVENT_TOUCH_CLICKED, NULL);
+        gui_view_switch_on_event(view, get_view_name_by_index(mainface_idx), SWITCH_OUT_TO_BOTTOM_USE_TRANSLATION, SWITCH_INIT_STATE, GUI_EVENT_TOUCH_MOVE_DOWN);
+    }
+
     gui_color_t bg_color;
     bg_color.color.argb_full = mainface_list[list_index].color;
     gui_view_set_bg_color(view, bg_color);
-    
-    gui_view_switch_on_event(view, get_view_name_by_index(mainface_idx), SWITCH_OUT_TO_BOTTOM_USE_TRANSLATION, SWITCH_INIT_STATE, GUI_EVENT_TOUCH_MOVE_DOWN);    
 }
 
 /* ============================ Live-video stream ============================
