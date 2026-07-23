@@ -11,7 +11,6 @@
 
 
 // Add custom declarations here
-#define  SCREEN_SIZE  466
 #define  MAINFACE_NUM_MAX  10
 
 #define COLOR_TRANSITION_SRGB          0
