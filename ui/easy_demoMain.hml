@@ -5,7 +5,7 @@
         <author name="Anonymous" />
     </meta>
     <view>
-        <hg_view id="easy_demoMainView" x="11" y="0" width="466" height="466" backgroundColor="#000000" entry="true" animateStep="500" switchInFunctionName="switch_in_mainface_0" snapShot="true" zIndex="0">
+        <hg_view id="easy_demoMainView" x="11" y="0" width="466" height="466" backgroundColor="#000000" entry="false" animateStep="500" switchInFunctionName="switch_in_mainface_0" snapShot="true" zIndex="0">
             <events>
                 <event type="onKeyShortPress" keyName="Menu">
                     <action type="switchView" target="bt_View" switchOutStyle="SWITCH_OUT_NONE_ANIMATION" switchInStyle="SWITCH_IN_NONE_ANIMATION" />

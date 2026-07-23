@@ -512,7 +512,7 @@ void switch_mainface(gui_obj_t *parent, uint8_t idx)
     {
         gui_text_t *text = gui_text_create((gui_obj_t *)win, 0, 0, 0, 0, 0);
         gui_text_set((gui_text_t *)text, "Please add a mainface", GUI_FONT_SRC_BMP, gui_rgb(255, 255, 255), 21, 20);
-        gui_text_type_set((gui_text_t *)text, "/font/Inter_24pt_SemiBold_size20_bits4_bitmap.bin", FONT_SRC_FILESYS);
+        gui_text_type_set((gui_text_t *)text, "/font/Inter_28pt_SemiBold_size20_bits4_bitmap.bin", FONT_SRC_FILESYS);
         gui_text_mode_set((gui_text_t *)text, MID_CENTER);
 
         gui_view_switch_on_event((void *)parent, "top_view", SWITCH_INIT_STATE, SWITCH_IN_FROM_TOP_USE_TRANSLATION, GUI_EVENT_TOUCH_MOVE_DOWN);
@@ -1677,7 +1677,13 @@ static void click_button_2_share(void *obj, gui_event_t *e)
     GUI_UNUSED(obj);
     GUI_UNUSED(e);
 
-    //TODO: share file
+#ifndef _HONEYGUI_SIMULATOR_
+    uint32_t addr = mainface_list[mainface_idx].raw;
+    uint32_t len = RES_SIZE(addr);
+    hmi_ble_central_send_file(HMI_L2_XFER_TYPE_IMAGE,
+                                (const uint8_t *)addr, len,
+                                "share_0", done_cb);      // on_done_cb(result, bytes) 报进度/结果
+#endif
 }
 
 static void click_button_2_connect(void *obj, gui_event_t *e)
@@ -1692,8 +1698,17 @@ static void click_button_2_disconnect(void *obj, gui_event_t *e)
 {
     GUI_UNUSED(obj);
     GUI_UNUSED(e);
-    
-    //TODO:
+
+#ifndef _HONEYGUI_SIMULATOR_
+    if (hmi_ble_central_disconnect())
+    {
+        gui_log("disconnect bd_dev success!");
+    }
+    else
+    {
+        gui_log("disconnect bd_dev failed!");
+    }
+#endif
     if (gui_view_get_next() == NULL)
     {
         dev_mode = MODE_DEFAULT;
@@ -1706,7 +1721,7 @@ static void click_button_2_disconnect(void *obj, gui_event_t *e)
         uint16_t screen_size = dc->screen_width;
         uint16_t pic_size = 100;
         gui_obj_move(dev_disconn, (screen_size - pic_size) / 2, screen_size * 2/3);
-        gui_img_set_src((void *)dev_disconn, "/image/dev_conn_icon.bin", IMG_SRC_FILESYS);
+        gui_img_set_src((void *)dev_disconn, "/image/dev_send_icon.bin", IMG_SRC_FILESYS);
         dev_disconn->event_dsc[0].event_cb = click_button_2_connect;
         gui_obj_add_event_cb(view_current, (gui_event_cb_t)click_2_mainface_view, GUI_EVENT_TOUCH_CLICKED, NULL);
         gui_view_switch_on_event(view_current, get_view_name_by_index(mainface_idx), SWITCH_OUT_TO_BOTTOM_USE_TRANSLATION, SWITCH_INIT_STATE, GUI_EVENT_TOUCH_MOVE_DOWN);
@@ -1744,7 +1759,7 @@ void switch_in_mainface_list(gui_view_t *view)
     }
     else
     {
-        gui_img_t *dev_conn = gui_img_create_from_fs(view, 0, "/image/dev_conn_icon.bin", (screen_size - pic_size) / 2, screen_size * 2/3, 0, 0);
+        gui_img_t *dev_conn = gui_img_create_from_fs(view, 0, "/image/dev_send_icon.bin", (screen_size - pic_size) / 2, screen_size * 2/3, 0, 0);
         gui_img_set_mode(dev_conn, IMG_SRC_OVER_MODE);
         gui_obj_add_event_cb(dev_conn, (gui_event_cb_t)click_button_2_connect, GUI_EVENT_TOUCH_CLICKED, NULL);
 

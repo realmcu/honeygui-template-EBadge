@@ -12,6 +12,7 @@
 
 // Add custom declarations here
 #define  MAINFACE_NUM_MAX  10
+#define  BD_NUM_MAX        10
 
 #define COLOR_TRANSITION_SRGB          0
 #define COLOR_TRANSITION_GAMMA_LINEAR  1
@@ -105,6 +106,9 @@ extern uint8_t soc_val;
 extern uint8_t screen_light_idx;
 extern int8_t fl_color_idx; //white, red, orange, yellow, green, blue, indigo, violet
 
+extern char bd_addr_array[BD_NUM_MAX][20];
+extern uint8_t bd_idx_array[BD_NUM_MAX];
+extern uint8_t bd_dev_num;
 
 void switch_mainface(gui_obj_t *parent, uint8_t idx);
 void set_flashlight_color(void *obj);

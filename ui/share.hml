@@ -39,7 +39,7 @@
             <hg_label id="lbl_2" x="132" y="141" width="204" height="53" hAlign="CENTER" vAlign="MID" color="#000000" letterSpacing="0" lineSpacing="0" wordWrap="false" wordBreak="false" text="Share image" fontFile="/font/Inter_24pt_SemiBold.ttf" fontSize="32" zIndex="2" />
             <hg_label id="lbl_3" x="114" y="270" width="240" height="62" hAlign="CENTER" vAlign="MID" color="#000000" letterSpacing="0" lineSpacing="0" wordWrap="false" wordBreak="false" text="Receive image" fontFile="/font/Inter_24pt_SemiBold.ttf" fontSize="32" characterSets="[{&quot;type&quot;:&quot;range&quot;,&quot;value&quot;:&quot;0x20-0x7E&quot;}]" zIndex="3" />
         </hg_view>
-        <hg_view id="ShareConnView" x="679" y="0" width="466" height="466" backgroundColor="#000000" borderRadius="20" padding="12" overflow="auto" entry="false" animateStep="360" zIndex="1">
+        <hg_view id="ShareConnView" x="679" y="0" width="466" height="466" backgroundColor="#000000" borderRadius="20" padding="12" overflow="auto" entry="false" animateStep="360" switchInFunctionName="switch_in_share_view" switchOutFunctionName="switch_out_share_view" zIndex="1">
             <events>
                 <event type="onSwipeLeftQuick">
                     <action type="switchView" target="shareMainView" switchOutStyle="SWITCH_INIT_STATE" switchInStyle="SWITCH_IN_NONE_ANIMATION" />
@@ -56,11 +56,28 @@
             </events>
             <hg_image id="circle_anime" x="73" y="73" width="320" height="320" transform="{&quot;focusX&quot;:160,&quot;focusY&quot;:160,&quot;rotation&quot;:-45}" src="assets/image/circle_anime.png" timers="[{&quot;id&quot;:&quot;timer_0&quot;,&quot;name&quot;:&quot;动画 1&quot;,&quot;enabled&quot;:true,&quot;interval&quot;:10,&quot;reload&quot;:true,&quot;mode&quot;:&quot;preset&quot;,&quot;callback&quot;:&quot;img_7_timer_0_cb&quot;,&quot;duration&quot;:1000,&quot;stopOnComplete&quot;:false,&quot;delayStart&quot;:0,&quot;actions&quot;:[],&quot;segments&quot;:[{&quot;duration&quot;:200,&quot;actions&quot;:[{&quot;type&quot;:&quot;rotation&quot;,&quot;from&quot;:255,&quot;to&quot;:128,&quot;angleOrigin&quot;:-45,&quot;angleTarget&quot;:45}]},{&quot;duration&quot;:200,&quot;actions&quot;:[{&quot;type&quot;:&quot;rotation&quot;,&quot;from&quot;:255,&quot;to&quot;:128,&quot;angleOrigin&quot;:45,&quot;angleTarget&quot;:-45}]}],&quot;runImmediately&quot;:true}]" highQuality="true" zIndex="0" />
             <hg_image id="img_6" x="181" y="157" width="108" height="108" src="assets/image/A8/share_icon.png" blendMode="IMG_BYPASS_MODE" fgColor="0xFF0077FF" zIndex="1" />
-            <hg_label id="lbl_share" x="0" y="280" width="466" height="55" hAlign="CENTER" vAlign="TOP" color="#ffffff" letterSpacing="0" lineSpacing="0" wordWrap="false" wordBreak="false" text="Share image" fontFile="/font/Inter_24pt_SemiBold.ttf" fontSize="28" characterSets="[{&quot;type&quot;:&quot;range&quot;,&quot;value&quot;:&quot;0x20-0x7E&quot;}]" timers="[{&quot;id&quot;:&quot;timer_0&quot;,&quot;name&quot;:&quot;动画 1&quot;,&quot;enabled&quot;:true,&quot;interval&quot;:1000,&quot;reload&quot;:true,&quot;mode&quot;:&quot;custom&quot;,&quot;callback&quot;:&quot;lbl_share_timer_0_cb&quot;,&quot;duration&quot;:1000,&quot;stopOnComplete&quot;:true,&quot;delayStart&quot;:0,&quot;actions&quot;:[],&quot;segments&quot;:[],&quot;runImmediately&quot;:true}]" zIndex="2" />
-            <hg_window id="win_share_3" x="0" y="0" width="466" height="466" showBackground="false" backgroundColor="#808080" enableBlur="false" blurDegree="225" timers="[{&quot;id&quot;:&quot;timer_0&quot;,&quot;name&quot;:&quot;动画 1&quot;,&quot;enabled&quot;:true,&quot;interval&quot;:10,&quot;reload&quot;:true,&quot;mode&quot;:&quot;custom&quot;,&quot;callback&quot;:&quot;win_share_3_timer_0_cb&quot;,&quot;duration&quot;:1000,&quot;stopOnComplete&quot;:true,&quot;delayStart&quot;:0,&quot;actions&quot;:[],&quot;segments&quot;:[]}]" visible="false" zIndex="3">
+            <hg_label id="lbl_share" x="0" y="276" width="466" height="55" hAlign="CENTER" vAlign="TOP" color="#ffffff" letterSpacing="0" lineSpacing="0" wordWrap="false" wordBreak="false" text="Share image" fontFile="/font/Inter_24pt_SemiBold.ttf" fontSize="28" characterSets="[{&quot;type&quot;:&quot;range&quot;,&quot;value&quot;:&quot;0x20-0x7E&quot;}]" timers="[{&quot;id&quot;:&quot;timer_0&quot;,&quot;name&quot;:&quot;动画 1&quot;,&quot;enabled&quot;:true,&quot;interval&quot;:1000,&quot;reload&quot;:true,&quot;mode&quot;:&quot;custom&quot;,&quot;callback&quot;:&quot;lbl_share_timer_0_cb&quot;,&quot;duration&quot;:1000,&quot;stopOnComplete&quot;:true,&quot;delayStart&quot;:0,&quot;actions&quot;:[],&quot;segments&quot;:[],&quot;runImmediately&quot;:true}]" zIndex="2" />
+            <hg_window id="win_share" x="0" y="0" width="466" height="466" showBackground="false" backgroundColor="#808080" enableBlur="false" blurDegree="225" visible="false" zIndex="3">
                 <hg_image id="img_8" x="22" y="25" width="466" height="466" transform="{&quot;opacity&quot;:122,&quot;focusX&quot;:180,&quot;focusY&quot;:180,&quot;scaleX&quot;:0.58,&quot;scaleY&quot;:0.58}" src="assets/image/A8/circle_360_bg.png" blendMode="IMG_SRC_OVER_MODE" fgColor="0xFF000000" timers="[{&quot;id&quot;:&quot;timer_0&quot;,&quot;name&quot;:&quot;动画 1&quot;,&quot;enabled&quot;:true,&quot;interval&quot;:1000,&quot;reload&quot;:true,&quot;mode&quot;:&quot;preset&quot;,&quot;callback&quot;:&quot;img_8_timer_0_cb&quot;,&quot;duration&quot;:1000,&quot;stopOnComplete&quot;:true,&quot;delayStart&quot;:0,&quot;actions&quot;:[],&quot;segments&quot;:[{&quot;duration&quot;:1000,&quot;actions&quot;:[{&quot;type&quot;:&quot;scale&quot;,&quot;from&quot;:255,&quot;to&quot;:128,&quot;zoomXOrigin&quot;:1,&quot;zoomXTarget&quot;:0.62,&quot;zoomYOrigin&quot;:1,&quot;zoomYTarget&quot;:0.62}]}],&quot;runImmediately&quot;:true}]" zIndex="1" />
                 <hg_image id="img_9" x="188" y="172" width="92" height="92" src="assets/image/A8/connect_state_icon.png" blendMode="IMG_FILTER_BLACK" zIndex="2" />
             </hg_window>
+            <hg_label id="bd_addr_self" x="0" y="312" width="466" height="30" hAlign="CENTER" vAlign="MID" color="#ffffff" letterSpacing="0" lineSpacing="0" wordWrap="false" wordBreak="false" text="11:11:11:11:11:11" fontFile="/font/Inter_24pt_Regular.ttf" fontSize="20" zIndex="1" />
+        </hg_view>
+        <hg_view id="SelectDevView" x="694" y="612" width="466" height="466" backgroundColor="#000000" borderRadius="20" padding="12" overflow="auto" entry="true" animateStep="466" switchInFunctionName="switch_in_select_dev_view" switchOutFunctionName="switch_out_select_dev_view" zIndex="1">
+            <events>
+                <event type="onSwipeLeftQuick">
+                    <action type="switchView" target="shareMainView" switchOutStyle="SWITCH_OUT_NONE_ANIMATION" switchInStyle="SWITCH_IN_NONE_ANIMATION" />
+                </event>
+                <event type="onSwipeRightQuick">
+                    <action type="switchView" target="shareMainView" switchOutStyle="SWITCH_OUT_NONE_ANIMATION" switchInStyle="SWITCH_IN_NONE_ANIMATION" />
+                </event>
+                <event type="onKeyShortPress" keyName="Menu">
+                    <action type="switchView" target="top_view" switchOutStyle="SWITCH_OUT_NONE_ANIMATION" switchInStyle="SWITCH_IN_NONE_ANIMATION" />
+                </event>
+                <event type="onKeyShortPress" keyName="Home">
+                    <action type="switchView" target="easy_demoMainView" switchOutStyle="SWITCH_OUT_NONE_ANIMATION" switchInStyle="SWITCH_IN_NONE_ANIMATION" />
+                </event>
+            </events>
         </hg_view>
     </view>
 </hml>

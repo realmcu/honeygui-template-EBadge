@@ -43,7 +43,7 @@ static int app_init(void)
     gui_view_enable_precache_snapshot(false);
     /* @protected end app_init_pre */
 
-    gui_view_create(gui_obj_get_root(), "easy_demoMainView", 0, 0, 0, 0);
+    gui_view_create(gui_obj_get_root(), "SelectDevView", 0, 0, 0, 0);
 
     /* @protected start app_init_post */
     // Add user initialization code here (runs after the main view is created)
