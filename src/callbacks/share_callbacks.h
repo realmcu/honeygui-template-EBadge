@@ -10,8 +10,10 @@ extern uint16_t circle_anime_timer_cnt;
 extern uint16_t lbl_share_timer_cnt;
 extern uint16_t win_share_3_timer_cnt;
 extern uint16_t img_8_timer_cnt;
+extern uint16_t bd_addr_self_timer_cnt;
 
 // Event callback function declarations
+void SelectDevView_key_0_cb(void *obj, gui_event_t *e);
 void ShareConnView_key_0_cb(void *obj, gui_event_t *e);
 void img_4_clicked_cb(void *obj, gui_event_t *e);
 void img_5_clicked_cb(void *obj, gui_event_t *e);
@@ -26,5 +28,6 @@ void img_8_timer_0_cb(void *obj);
 // Custom function declarations (auto-extracted from callbacks.c protected area)
 void lbl_share_timer_0_cb(void *obj);
 void win_share_3_timer_0_cb(void *obj);
+uint8_t hmi_ble_central_get_dev_count(void);
 
 #endif // SHARE_CALLBACKS_H

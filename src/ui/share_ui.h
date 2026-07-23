@@ -26,5 +26,6 @@ extern gui_text_t *lbl_share;
 extern gui_win_t *win_share_3;
 extern gui_img_t *img_8;
 extern gui_img_t *img_9;
+extern gui_text_t *bd_addr_self;
 
 #endif // SHARE_UI_H

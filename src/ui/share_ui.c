@@ -17,6 +17,7 @@ gui_text_t *lbl_share = NULL;
 gui_win_t *win_share_3 = NULL;
 gui_img_t *img_8 = NULL;
 gui_img_t *img_9 = NULL;
+gui_text_t *bd_addr_self = NULL;
 
 
 // Create shareMainView (hg_view)
@@ -70,7 +71,7 @@ GUI_VIEW_INSTANCE("shareMainView", false, shareMainView_switch_in, shareMainView
 // Create ShareConnView (hg_view)
 static void ShareConnView_switch_out(gui_view_t *view)
 {
-    GUI_UNUSED(view);
+    switch_out_share_view(view);
 }
 
 static void ShareConnView_switch_in(gui_view_t *view)
@@ -89,7 +90,7 @@ static void ShareConnView_switch_in(gui_view_t *view)
 
 
     // Create img_6 (hg_image)
-    img_6 = gui_img_create_from_fs((gui_obj_t *)view, "img_6", "/image/A8/share_icon.bin", 135, 115, 90, 90);
+    img_6 = gui_img_create_from_fs((gui_obj_t *)view, "img_6", "/image/A8/share_icon.bin", 135, 109, 90, 90);
     gui_img_set_mode((gui_img_t *)img_6, IMG_BYPASS_MODE);
 
     // Create circle_anime (hg_image)
@@ -102,12 +103,20 @@ static void ShareConnView_switch_in(gui_view_t *view)
     gui_obj_create_timer((gui_obj_t *)circle_anime, 10, true, circle_anime_timer_0_cb);
 
     // Create lbl_share (hg_label)
-    lbl_share = gui_text_create((gui_obj_t *)view, "lbl_share", 109, 222, 142, 24);
+    lbl_share = gui_text_create((gui_obj_t *)view, "lbl_share", 109, 213, 142, 24);
     gui_text_set((gui_text_t *)lbl_share, "Share image", GUI_FONT_SRC_BMP, gui_rgb(255, 255, 255), 11, 18);
     gui_text_type_set((gui_text_t *)lbl_share, "/font/Inter_24pt_SemiBold_size18_bits4_bitmap.bin", FONT_SRC_FILESYS);
     gui_text_mode_set((gui_text_t *)lbl_share, CENTER);
     // Bind timer: 动画 1
     gui_obj_create_timer((gui_obj_t *)lbl_share, 1000, true, lbl_share_timer_0_cb);
+
+    // Create bd_addr_self (hg_label)
+    bd_addr_self = gui_text_create((gui_obj_t *)view, "bd_addr_self", 0, 244, 360, 24);
+    gui_text_set((gui_text_t *)bd_addr_self, "11:11:11:11:11:11", GUI_FONT_SRC_BMP, gui_rgb(255, 255, 255), 17, 16);
+    gui_text_type_set((gui_text_t *)bd_addr_self, "/font/Inter_24pt_Regular_size16_bits4_bitmap.bin", FONT_SRC_FILESYS);
+    gui_text_mode_set((gui_text_t *)bd_addr_self, CENTER);
+    // Bind timer: 动画 1
+    gui_obj_create_timer((gui_obj_t *)bd_addr_self, 1000, true, lbl_share_timer_0_cb);
 
     // Create win_share_3 (hg_window)
     win_share_3 = gui_win_create((gui_obj_t *)view, "win_share_3", 0, 0, 360, 360);
@@ -132,5 +141,34 @@ static void ShareConnView_switch_in(gui_view_t *view)
 
     gui_obj_add_event_cb((gui_obj_t *)view, (gui_event_cb_t)ShareConnView_key_0_cb, GUI_EVENT_KB_SHORT_PRESSED, NULL);
     gui_obj_focus_set((gui_obj_t *)view);
+
+    switch_in_share_view(view);
 }
 GUI_VIEW_INSTANCE("ShareConnView", false, ShareConnView_switch_in, ShareConnView_switch_out, false);
+
+// Create SelectDevView (hg_view)
+static void SelectDevView_switch_out(gui_view_t *view)
+{
+    switch_out_select_dev_view(view);
+}
+
+static void SelectDevView_switch_in(gui_view_t *view)
+{
+    // Set animation step
+    gui_view_set_animate_step(view, 360);
+
+    // Set opacity
+    gui_view_set_opacity(view, 255);
+
+    // Set background color
+    gui_view_set_bg_color(view, gui_rgb(0, 0, 0));
+
+    gui_view_switch_on_event(view, "shareMainView", SWITCH_OUT_NONE_ANIMATION, SWITCH_IN_NONE_ANIMATION, GUI_EVENT_TOUCH_LEFT_SLIDE_QUICK);
+    gui_view_switch_on_event(view, "shareMainView", SWITCH_OUT_NONE_ANIMATION, SWITCH_IN_NONE_ANIMATION, GUI_EVENT_TOUCH_RIGHT_SLIDE_QUICK);
+
+    gui_obj_add_event_cb((gui_obj_t *)view, (gui_event_cb_t)SelectDevView_key_0_cb, GUI_EVENT_KB_SHORT_PRESSED, NULL);
+    gui_obj_focus_set((gui_obj_t *)view);
+
+    switch_in_select_dev_view(view);
+}
+GUI_VIEW_INSTANCE("SelectDevView", false, SelectDevView_switch_in, SelectDevView_switch_out, false);
