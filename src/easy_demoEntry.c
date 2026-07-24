@@ -37,8 +37,8 @@ static int app_init(void)
     if (win_view == NULL)
     {
         win_view = gui_win_create(gui_obj_get_root(), "win_view", 0, 0, 0, 0);
-        // extern void win_timer_gsensor_cb(void *obj);
-        // gui_obj_create_timer((void *)win_view, 200, true, win_timer_gsensor_cb);
+        extern void win_timer_gsensor_cb(void *obj);
+        gui_obj_create_timer((void *)win_view, 200, true, win_timer_gsensor_cb);
     }
     gui_view_enable_precache_snapshot(false);
     /* @protected end app_init_pre */

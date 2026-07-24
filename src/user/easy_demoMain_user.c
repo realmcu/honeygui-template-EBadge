@@ -347,77 +347,126 @@ void win_timer_gsensor_cb(void *obj)
 
 #ifndef _HONEYGUI_SIMULATOR_
     extern bool gsensor_sc7a20_read_xyz(int16_t *x, int16_t *y, int16_t *z);
-    static bool sample_valid = false;
-    static bool wait_for_horizontal = false;
-    static uint8_t horizontal_sample_count = 0;
-    static int16_t gx_rec = 0, gy_rec = 0, gz_rec = 0;
+    static bool filter_valid = false;
+    static bool shake_locked = false;
+    static uint8_t filter_warmup_count = 0;
+    static uint8_t shake_sample_count = 0;
+    static uint8_t quiet_sample_count = 0;
+    static int8_t shake_direction = 0;
+    static int32_t gravity_x = 0, gravity_y = 0, gravity_z = 0;
     int16_t gx = 0, gy = 0, gz = 0;
+
+    if (gui_view_get_next() != NULL || !enable_switch_mainface ||
+            !is_displaying_mainface)
+    {
+        shake_sample_count = 0;
+        shake_direction = 0;
+        return;
+    }
 
     if (gsensor_sc7a20_read_xyz(&gx, &gy, &gz))
     {
-        int32_t abs_gx = gx < 0 ? -(int32_t)gx : gx;
-        int32_t abs_gy = gy < 0 ? -(int32_t)gy : gy;
-        int32_t abs_gz = gz < 0 ? -(int32_t)gz : gz;
-
-        if (wait_for_horizontal)
+        if (!filter_valid)
         {
-            /* Returning to the horizontal position only rearms the gesture;
-             * it must not trigger another view switch. Require several stable
-             * samples to prevent sensor noise from rearming too early. */
-            const int32_t horizontal_margin = 100;
-            if (abs_gz >= abs_gx + horizontal_margin &&
-                abs_gz >= abs_gy + horizontal_margin)
+            gravity_x = gx;
+            gravity_y = gy;
+            gravity_z = gz;
+            filter_valid = true;
+            return;
+        }
+
+        /* Phone-style shake detection: low-pass estimates gravity and the
+         * remaining high-pass component is the user's linear acceleration.
+         * It therefore also works while the device is held vertically. */
+        gravity_x += ((int32_t)gx - gravity_x) / 8;
+        gravity_y += ((int32_t)gy - gravity_y) / 8;
+        gravity_z += ((int32_t)gz - gravity_z) / 8;
+
+        int32_t linear_x = (int32_t)gx - gravity_x;
+        int32_t linear_y = (int32_t)gy - gravity_y;
+        int32_t linear_z = (int32_t)gz - gravity_z;
+        int32_t abs_x = linear_x < 0 ? -linear_x : linear_x;
+        int32_t abs_y = linear_y < 0 ? -linear_y : linear_y;
+        int32_t abs_z = linear_z < 0 ? -linear_z : linear_z;
+
+        const int32_t shake_threshold = 300;
+        const int32_t strong_shake_threshold = 400;
+        const int32_t quiet_threshold = 80;
+        const uint8_t shake_confirm_score = 3;
+        const uint8_t quiet_confirm_samples = 1;
+
+        /* Let the gravity filter settle for about 240 ms after startup. */
+        if (filter_warmup_count < 8)
+        {
+            filter_warmup_count++;
+            return;
+        }
+
+        if (shake_locked)
+        {
+            if (abs_x < quiet_threshold && abs_y < quiet_threshold &&
+                abs_z < quiet_threshold)
             {
-                horizontal_sample_count++;
-                if (horizontal_sample_count >= 3)
+                if (++quiet_sample_count >= quiet_confirm_samples)
                 {
-                    wait_for_horizontal = false;
-                    horizontal_sample_count = 0;
+                    shake_locked = false;
+                    quiet_sample_count = 0;
                 }
             }
             else
             {
-                horizontal_sample_count = 0;
+                quiet_sample_count = 0;
             }
+            return;
         }
-        else if (sample_valid && gui_view_get_next() == NULL && enable_switch_mainface)
-        {
-            int32_t dx = (int32_t)gx - gx_rec;
-            int32_t dy = (int32_t)gy - gy_rec;
-            int32_t dz = (int32_t)gz - gz_rec;
-            int32_t abs_dx = dx < 0 ? -dx : dx;
-            int32_t abs_dy = dy < 0 ? -dy : dy;
-            int32_t abs_dz = dz < 0 ? -dz : dz;
 
-            /* Sensor +y points left and +x points down on the screen. Ignore
-             * small changes and a shake whose dominant component is on z. */
-            const int32_t shake_threshold = 500;
-            if ((abs_dx >= shake_threshold || abs_dy >= shake_threshold) &&
-                (abs_dx >= abs_dz || abs_dy >= abs_dz) && abs_dy > abs_dx)
+        /* +y is screen-left. Y only needs to be the largest linear component;
+         * a real hand shake often contains some x/z motion as well. Accumulate
+         * medium peaks in a short leaky window, or accept one strong peak. */
+        bool is_horizontal_shake = abs_y >= shake_threshold &&
+                                   abs_y >= abs_x && abs_y >= abs_z;
+        int8_t direction = linear_y > 0 ? 1 : -1;
+        if (is_horizontal_shake)
+        {
+            if (direction != shake_direction)
             {
-                gui_view_t *view_current = gui_view_get_current();
-                const char *view_l = view_current->on_event[2]->descriptor->name;
-                const char *view_r = view_current->on_event[1]->descriptor->name;
-                gui_view_set_animate_step(view_current, 20);
-                wait_for_horizontal = true;
-                if (dy > 0)
-                {
-                    gui_view_switch_direct(view_current, view_l, SWITCH_INIT_STATE, SWITCH_IN_ANIMATION_RASTER_HORIZONTAL);
-                }
-                else
-                {
-                    gui_view_switch_direct(view_current, view_r, SWITCH_INIT_STATE, SWITCH_IN_ANIMATION_RASTER_HORIZONTAL_REVERSE);
-                }
+                shake_direction = direction;
+                shake_sample_count = 0;
             }
+
+            shake_sample_count += abs_y >= strong_shake_threshold ? 2 : 1;
+        }
+        else if (shake_sample_count > 0)
+        {
+            /* Do not discard a valid short peak immediately. */
+            shake_sample_count--;
         }
         else
         {
-            sample_valid = true;
+            shake_direction = 0;
         }
 
-        gx_rec = gx;
-        gy_rec = gy;
-        gz_rec = gz;
+        if (shake_sample_count >= shake_confirm_score)
+        {
+            gui_view_t *view_current = gui_view_get_current();
+            const char *view_l = view_current->on_event[3]->descriptor->name;
+            const char *view_r = view_current->on_event[2]->descriptor->name;
+            gui_view_set_animate_step(view_current, 20);
+            shake_locked = true;
+            shake_sample_count = 0;
+            quiet_sample_count = 0;
+
+            if (direction > 0)
+            {
+                gui_view_switch_direct(view_current, view_r, SWITCH_INIT_STATE,
+                                       SWITCH_IN_ANIMATION_RASTER_HORIZONTAL);
+            }
+            else
+            {
+                gui_view_switch_direct(view_current, view_l, SWITCH_INIT_STATE,
+                                       SWITCH_IN_ANIMATION_RASTER_HORIZONTAL_REVERSE);
+            }
+        }
     }
 #endif
 }
@@ -1176,14 +1225,14 @@ void ui_process_msg(void *arg)
     }
     case SWITCH_LEFT_MAINFACE:
     {
-        if (is_displaying_mainface || mainface_num <= 1) return;
+        if (!is_displaying_mainface || mainface_num <= 1) return;
         mainface_idx = (mainface_idx - 1 + mainface_num) % mainface_num;
         msg_2_regenerate_view(NULL);
         break;
     }
     case SWITCH_RIGHT_MAINFACE:
     {
-        if (is_displaying_mainface || mainface_num <= 1) return;
+        if (!is_displaying_mainface || mainface_num <= 1) return;
         mainface_idx = (mainface_idx + 1) % mainface_num;
         msg_2_regenerate_view(NULL);
         break;
@@ -1593,6 +1642,7 @@ static void lst_mainface_note_design(gui_obj_t *obj, void *param)
     }
 #endif
     gui_img_set_mode(img, IMG_SRC_OVER_MODE);
+    gui_img_set_quality(img, true);
     img->need_clip = false;
 }
 
@@ -1678,7 +1728,7 @@ static void click_button_2_share(void *obj, gui_event_t *e)
     GUI_UNUSED(e);
 
 #ifndef _HONEYGUI_SIMULATOR_
-    uint32_t addr = mainface_list[mainface_idx].raw;
+    uint32_t addr = (uint32_t)mainface_list[mainface_idx].raw;
     uint32_t len = RES_SIZE(addr);
     hmi_ble_central_send_file(HMI_L2_XFER_TYPE_IMAGE,
                                 (const uint8_t *)addr, len,
@@ -1736,7 +1786,7 @@ void switch_in_mainface_list(gui_view_t *view)
     uint16_t pic_size = 160;
     gui_list_t *lst_mainface = gui_list_create((gui_obj_t *)view, "lst_mainface", -pic_size / 2, 0, screen_size + pic_size, screen_size, 
                                 pic_size, screen_size / 2 - pic_size, HORIZONTAL, lst_mainface_note_design, NULL, false);
-    gui_list_set_style(lst_mainface, LIST_CLASSIC);
+    gui_list_set_style(lst_mainface, LIST_ZOOM);
     gui_list_set_note_num(lst_mainface, mainface_num);
     gui_list_set_auto_align(lst_mainface, true);
     gui_list_enable_loop(lst_mainface, true);
