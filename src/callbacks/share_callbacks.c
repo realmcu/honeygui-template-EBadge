@@ -195,7 +195,6 @@ void win_share_timer_0_cb(void *obj)
         {
             for(uint8_t i = 0; i < dev_num; i++)
             {
-                uint8_t idx; 
                 uint8_t bd_addr[6]; 
                 uint8_t addr_type;
                 int8_t rssi;
@@ -203,7 +202,6 @@ void win_share_timer_0_cb(void *obj)
                 uint8_t name_len;
                 hmi_ble_central_get_dev(i, bd_addr, &addr_type, &rssi, name, sizeof(name));
                 sprintf(bd_addr_array[i], "%02x:%02x:%02x:%02x:%02x:%02x", bd_addr[5]&0xff, bd_addr[4]&0xff, bd_addr[3]&0xff,bd_addr[2]&0xff, bd_addr[1]&0xff, bd_addr[0]&0xff);
-                bd_idx_array[i] = idx;
                 gui_log("%d name %s %x:%x:%x:%x:%x:%x\n", i, name, bd_addr[5]&0xff, bd_addr[4]&0xff, bd_addr[3]&0xff,bd_addr[2]&0xff, bd_addr[1]&0xff, bd_addr[0]&0xff);
             }
             bd_dev_num = dev_num;
