@@ -81,7 +81,8 @@ typedef enum
     SWITCH_RIGHT_MAINFACE,
     CAST_START,
     CAST_STOP,
-
+    CONNECT_DEV,
+    DISCONNECT_DEV,
 
 } UI_SUBEVENT_TYPE;
 
@@ -99,6 +100,7 @@ extern mainface_src_t mainface_list[MAINFACE_NUM_MAX];
 
 extern bool is_auto_sleep_mode;
 extern bool is_bt_connect;
+extern bool is_dev_connect;
 extern bool is_displaying_mainface;
 extern MODE_TYPE dev_mode;
 
@@ -107,7 +109,6 @@ extern uint8_t screen_light_idx;
 extern int8_t fl_color_idx; //white, red, orange, yellow, green, blue, indigo, violet
 
 extern char bd_addr_array[BD_NUM_MAX][20];
-extern uint8_t bd_idx_array[BD_NUM_MAX];
 extern uint8_t bd_dev_num;
 
 void switch_mainface(gui_obj_t *parent, uint8_t idx);

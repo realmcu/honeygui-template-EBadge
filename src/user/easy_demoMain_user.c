@@ -39,6 +39,7 @@ mainface_src_t mainface_list[MAINFACE_NUM_MAX] =
 uint8_t list_index = 0;
 bool is_auto_sleep_mode = false;
 bool is_bt_connect = false;
+bool is_dev_connect = false;
 bool is_displaying_mainface = false;
 bool enable_switch_mainface = true;
 MODE_TYPE dev_mode = MODE_DEFAULT;
@@ -139,30 +140,30 @@ static void fox_global_cb(l3_model_base_t *this)
 }
 
 
-uint32_t get_img_color(uint8_t *img_data)
-{
-    uint32_t color = 0;
-    if (img_data[0] & 0x10) // Compressed (RLE)
-    {
-        /* Layout: gui_rgb_data_head_t(8B) + imdc_file_header_t(12B)
-         *         + row offset table((height+1)*4B) + RLE data.
-         * Row offsets are relative to the imdc header start (file offset 8).
-         * Each RLE node = [run length (1B)] [pixel (bpp)].
-         * Use byte reads: the first pixel sits at an odd (unaligned) offset. */
-        const uint8_t *row_table = img_data + 8 + 12;      /* row offset table  */
-        uint32_t row0_off = (uint32_t)row_table[0]
-                          | ((uint32_t)row_table[1] << 8)
-                          | ((uint32_t)row_table[2] << 16)
-                          | ((uint32_t)row_table[3] << 24);
-        const uint8_t *pixel = img_data + 8 + row0_off + 1; /* skip run length   */
-        color = (uint16_t)(pixel[0] | (pixel[1] << 8));     /* RGB565, little-end */
-    }
-    else
-    {
-        color = ((uint16_t *)img_data)[4]; //RGB565
-    }
-    return color;
-}
+// uint32_t get_img_color(uint8_t *img_data)
+// {
+//     uint32_t color = 0;
+//     if (img_data[0] & 0x10) // Compressed (RLE)
+//     {
+//         /* Layout: gui_rgb_data_head_t(8B) + imdc_file_header_t(12B)
+//          *         + row offset table((height+1)*4B) + RLE data.
+//          * Row offsets are relative to the imdc header start (file offset 8).
+//          * Each RLE node = [run length (1B)] [pixel (bpp)].
+//          * Use byte reads: the first pixel sits at an odd (unaligned) offset. */
+//         const uint8_t *row_table = img_data + 8 + 12;      /* row offset table  */
+//         uint32_t row0_off = (uint32_t)row_table[0]
+//                           | ((uint32_t)row_table[1] << 8)
+//                           | ((uint32_t)row_table[2] << 16)
+//                           | ((uint32_t)row_table[3] << 24);
+//         const uint8_t *pixel = img_data + 8 + row0_off + 1; /* skip run length   */
+//         color = (uint16_t)(pixel[0] | (pixel[1] << 8));     /* RGB565, little-end */
+//     }
+//     else
+//     {
+//         color = ((uint16_t *)img_data)[4]; //RGB565
+//     }
+//     return color;
+// }
 
 static void msg_2_regenerate_view(void *msg)
 {
@@ -347,77 +348,126 @@ void win_timer_gsensor_cb(void *obj)
 
 #ifndef _HONEYGUI_SIMULATOR_
     extern bool gsensor_sc7a20_read_xyz(int16_t *x, int16_t *y, int16_t *z);
-    static bool sample_valid = false;
-    static bool wait_for_horizontal = false;
-    static uint8_t horizontal_sample_count = 0;
-    static int16_t gx_rec = 0, gy_rec = 0, gz_rec = 0;
+    static bool filter_valid = false;
+    static bool shake_locked = false;
+    static uint8_t filter_warmup_count = 0;
+    static uint8_t shake_sample_count = 0;
+    static uint8_t quiet_sample_count = 0;
+    static int8_t shake_direction = 0;
+    static int32_t gravity_x = 0, gravity_y = 0, gravity_z = 0;
     int16_t gx = 0, gy = 0, gz = 0;
+
+    if (gui_view_get_next() != NULL || !enable_switch_mainface ||
+            !is_displaying_mainface)
+    {
+        shake_sample_count = 0;
+        shake_direction = 0;
+        return;
+    }
 
     if (gsensor_sc7a20_read_xyz(&gx, &gy, &gz))
     {
-        int32_t abs_gx = gx < 0 ? -(int32_t)gx : gx;
-        int32_t abs_gy = gy < 0 ? -(int32_t)gy : gy;
-        int32_t abs_gz = gz < 0 ? -(int32_t)gz : gz;
-
-        if (wait_for_horizontal)
+        if (!filter_valid)
         {
-            /* Returning to the horizontal position only rearms the gesture;
-             * it must not trigger another view switch. Require several stable
-             * samples to prevent sensor noise from rearming too early. */
-            const int32_t horizontal_margin = 100;
-            if (abs_gz >= abs_gx + horizontal_margin &&
-                abs_gz >= abs_gy + horizontal_margin)
+            gravity_x = gx;
+            gravity_y = gy;
+            gravity_z = gz;
+            filter_valid = true;
+            return;
+        }
+
+        /* Phone-style shake detection: low-pass estimates gravity and the
+         * remaining high-pass component is the user's linear acceleration.
+         * It therefore also works while the device is held vertically. */
+        gravity_x += ((int32_t)gx - gravity_x) / 8;
+        gravity_y += ((int32_t)gy - gravity_y) / 8;
+        gravity_z += ((int32_t)gz - gravity_z) / 8;
+
+        int32_t linear_x = (int32_t)gx - gravity_x;
+        int32_t linear_y = (int32_t)gy - gravity_y;
+        int32_t linear_z = (int32_t)gz - gravity_z;
+        int32_t abs_x = linear_x < 0 ? -linear_x : linear_x;
+        int32_t abs_y = linear_y < 0 ? -linear_y : linear_y;
+        int32_t abs_z = linear_z < 0 ? -linear_z : linear_z;
+
+        const int32_t shake_threshold = 300;
+        const int32_t strong_shake_threshold = 400;
+        const int32_t quiet_threshold = 80;
+        const uint8_t shake_confirm_score = 3;
+        const uint8_t quiet_confirm_samples = 1;
+
+        /* Let the gravity filter settle for about 240 ms after startup. */
+        if (filter_warmup_count < 8)
+        {
+            filter_warmup_count++;
+            return;
+        }
+
+        if (shake_locked)
+        {
+            if (abs_x < quiet_threshold && abs_y < quiet_threshold &&
+                abs_z < quiet_threshold)
             {
-                horizontal_sample_count++;
-                if (horizontal_sample_count >= 3)
+                if (++quiet_sample_count >= quiet_confirm_samples)
                 {
-                    wait_for_horizontal = false;
-                    horizontal_sample_count = 0;
+                    shake_locked = false;
+                    quiet_sample_count = 0;
                 }
             }
             else
             {
-                horizontal_sample_count = 0;
+                quiet_sample_count = 0;
             }
+            return;
         }
-        else if (sample_valid && gui_view_get_next() == NULL && enable_switch_mainface)
-        {
-            int32_t dx = (int32_t)gx - gx_rec;
-            int32_t dy = (int32_t)gy - gy_rec;
-            int32_t dz = (int32_t)gz - gz_rec;
-            int32_t abs_dx = dx < 0 ? -dx : dx;
-            int32_t abs_dy = dy < 0 ? -dy : dy;
-            int32_t abs_dz = dz < 0 ? -dz : dz;
 
-            /* Sensor +y points left and +x points down on the screen. Ignore
-             * small changes and a shake whose dominant component is on z. */
-            const int32_t shake_threshold = 500;
-            if ((abs_dx >= shake_threshold || abs_dy >= shake_threshold) &&
-                (abs_dx >= abs_dz || abs_dy >= abs_dz) && abs_dy > abs_dx)
+        /* +y is screen-left. Y only needs to be the largest linear component;
+         * a real hand shake often contains some x/z motion as well. Accumulate
+         * medium peaks in a short leaky window, or accept one strong peak. */
+        bool is_horizontal_shake = abs_y >= shake_threshold &&
+                                   abs_y >= abs_x && abs_y >= abs_z;
+        int8_t direction = linear_y > 0 ? 1 : -1;
+        if (is_horizontal_shake)
+        {
+            if (direction != shake_direction)
             {
-                gui_view_t *view_current = gui_view_get_current();
-                const char *view_l = view_current->on_event[2]->descriptor->name;
-                const char *view_r = view_current->on_event[1]->descriptor->name;
-                gui_view_set_animate_step(view_current, 20);
-                wait_for_horizontal = true;
-                if (dy > 0)
-                {
-                    gui_view_switch_direct(view_current, view_l, SWITCH_INIT_STATE, SWITCH_IN_ANIMATION_RASTER_HORIZONTAL);
-                }
-                else
-                {
-                    gui_view_switch_direct(view_current, view_r, SWITCH_INIT_STATE, SWITCH_IN_ANIMATION_RASTER_HORIZONTAL_REVERSE);
-                }
+                shake_direction = direction;
+                shake_sample_count = 0;
             }
+
+            shake_sample_count += abs_y >= strong_shake_threshold ? 2 : 1;
+        }
+        else if (shake_sample_count > 0)
+        {
+            /* Do not discard a valid short peak immediately. */
+            shake_sample_count--;
         }
         else
         {
-            sample_valid = true;
+            shake_direction = 0;
         }
 
-        gx_rec = gx;
-        gy_rec = gy;
-        gz_rec = gz;
+        if (shake_sample_count >= shake_confirm_score)
+        {
+            gui_view_t *view_current = gui_view_get_current();
+            const char *view_l = view_current->on_event[3]->descriptor->name;
+            const char *view_r = view_current->on_event[2]->descriptor->name;
+            gui_view_set_animate_step(view_current, 20);
+            shake_locked = true;
+            shake_sample_count = 0;
+            quiet_sample_count = 0;
+
+            if (direction > 0)
+            {
+                gui_view_switch_direct(view_current, view_r, SWITCH_INIT_STATE,
+                                       SWITCH_IN_ANIMATION_RASTER_HORIZONTAL);
+            }
+            else
+            {
+                gui_view_switch_direct(view_current, view_l, SWITCH_INIT_STATE,
+                                       SWITCH_IN_ANIMATION_RASTER_HORIZONTAL_REVERSE);
+            }
+        }
     }
 #endif
 }
@@ -572,7 +622,7 @@ void switch_mainface(gui_obj_t *parent, uint8_t idx)
         /* code */
         event_code_l = GUI_EVENT_TOUCH_LEFT_SLIDE_QUICK;
         event_code_r = GUI_EVENT_TOUCH_RIGHT_SLIDE_QUICK;
-        gui_view_set_bg_color((gui_view_t *)parent, gui_rgb(0x41, 0xAD, 0x41));
+        // gui_view_set_bg_color((gui_view_t *)parent, gui_rgb(0x41, 0xAD, 0x41));
         fox_3d = l3_create_model_fs((void *)mainface_list[idx].data, L3_DRAW_FRONT_AND_SORT, 0, 0, screen_size, screen_size);
 
         l3_set_global_transform(fox_3d, (l3_global_transform_cb)fox_global_cb);
@@ -614,32 +664,35 @@ void switch_mainface(gui_obj_t *parent, uint8_t idx)
         gui_img_set_mode(img_0, IMG_BYPASS_MODE);
         int16_t img_y = (screen_size - img_0->base.h) / 2;
         gui_obj_move((void *)img_0, screen_size, img_y);
-        {
-            const void *src_data = gui_img_get_image_data(img_0);
-            uint32_t src_color = get_img_color((uint8_t *)src_data);
-            gui_log("bg color = 0x%x\n", src_color);
-            gui_color_t bg_color;
-            bg_color.color.rgba.a = UINT8_MAX;
-            if (((gui_rgb_data_head_t *)src_data)->type == RGB565)
-            {
-                bg_color.color.rgba.r = src_color >> 8 & 0xFF;
-                bg_color.color.rgba.g = src_color >> 3 & 0xFF;
-                bg_color.color.rgba.b = src_color << 3 & 0xFF;
-            }
-            else
-            {
-                bg_color.color.rgba.r = src_color >> 16 & 0xFF;
-                bg_color.color.rgba.g = src_color >> 8 & 0xFF;
-                bg_color.color.rgba.b = src_color & 0xFF;
-            }
-            gui_view_set_bg_color((gui_view_t *)parent, bg_color);
-        }
+        // {
+        //     const void *src_data = gui_img_get_image_data(img_0);
+        //     uint32_t src_color = get_img_color((uint8_t *)src_data);
+        //     gui_log("bg color = 0x%x\n", src_color);
+        //     gui_color_t bg_color;
+        //     bg_color.color.rgba.a = UINT8_MAX;
+        //     if (((gui_rgb_data_head_t *)src_data)->type == RGB565)
+        //     {
+        //         bg_color.color.rgba.r = src_color >> 8 & 0xFF;
+        //         bg_color.color.rgba.g = src_color >> 3 & 0xFF;
+        //         bg_color.color.rgba.b = src_color << 3 & 0xFF;
+        //     }
+        //     else
+        //     {
+        //         bg_color.color.rgba.r = src_color >> 16 & 0xFF;
+        //         bg_color.color.rgba.g = src_color >> 8 & 0xFF;
+        //         bg_color.color.rgba.b = src_color & 0xFF;
+        //     }
+        //     gui_view_set_bg_color((gui_view_t *)parent, bg_color);
+        // }
         break;
     }
         
     default:
         break;
     }
+    gui_color_t bg_color;
+    bg_color.color.argb_full = mainface_list[mainface_idx].color;
+    gui_view_set_bg_color((gui_view_t *)parent, bg_color);
     
     gui_img_t *img = gui_img_create_from_fs(win, 0, "/image/lock_icon.bin", 90, 90, 0, 0);
     gui_obj_hidden((gui_obj_t *)img, true);
@@ -1147,6 +1200,16 @@ void ui_process_msg(void *arg)
     case BT_OFF:
         is_bt_connect = false;
         break;
+    case CONNECT_DEV:
+        is_dev_connect = true;
+        break;
+    case DISCONNECT_DEV:
+    {
+        is_dev_connect = false;
+        dev_mode = MODE_DEFAULT;
+        msg_2_regenerate_view(NULL);
+        break;
+    }
     case TRANSMIT_START:
     {
         if (get_transmit_start) // state abnormal
@@ -1176,14 +1239,14 @@ void ui_process_msg(void *arg)
     }
     case SWITCH_LEFT_MAINFACE:
     {
-        if (is_displaying_mainface || mainface_num <= 1) return;
+        if (!is_displaying_mainface || mainface_num <= 1) return;
         mainface_idx = (mainface_idx - 1 + mainface_num) % mainface_num;
         msg_2_regenerate_view(NULL);
         break;
     }
     case SWITCH_RIGHT_MAINFACE:
     {
-        if (is_displaying_mainface || mainface_num <= 1) return;
+        if (!is_displaying_mainface || mainface_num <= 1) return;
         mainface_idx = (mainface_idx + 1) % mainface_num;
         msg_2_regenerate_view(NULL);
         break;
@@ -1593,6 +1656,7 @@ static void lst_mainface_note_design(gui_obj_t *obj, void *param)
     }
 #endif
     gui_img_set_mode(img, IMG_SRC_OVER_MODE);
+    gui_img_set_quality(img, true);
     img->need_clip = false;
 }
 
@@ -1627,22 +1691,21 @@ static void note_timer_cb(void *obj)
         gui_obj_stop_timer((void *)note);
         gui_list_enable_scroll(list, true);
     }
-    
 }
+static bool list_moved = false;
 
 static void list_timer_cb(void *obj)
 {
     gui_list_t *list = (gui_list_t *)obj;
     int16_t offset = list->offset;
-    static bool moved = false;
     gui_dispdev_t *dc = gui_get_dc();
     uint16_t screen_size = dc->screen_width;
 
     if (offset % (screen_size / 2) == 0)
     {
-        if (moved)
+        if (list_moved)
         {
-            moved = false;
+            list_moved = false;
             gui_list_note_t *note_right = (void *)gui_list_entry(list->base.child_list.next, gui_obj_t, brother_list);
             gui_list_note_t *note_center = (void *)gui_list_entry(note_right->base.brother_list.next, gui_obj_t, brother_list);
             int16_t index = note_center->index % mainface_num;
@@ -1659,7 +1722,30 @@ static void list_timer_cb(void *obj)
     }
     else
     {
-        moved = true;
+        list_moved = true;
+    }
+}
+
+void img_zoom_timer_cb(void *param)
+{
+    gui_obj_t *obj = (gui_obj_t *)param;
+    static uint8_t cnt = 0;
+    const uint8_t cnt_max = 15;
+
+    gui_dispdev_t *dc = gui_get_dc();
+    uint16_t screen_size = dc->screen_width;
+    uint16_t pic_size = 100;
+
+    cnt++;
+    uint16_t y_delt = (screen_size - pic_size) / 8 / cnt_max;
+    float zoom = (float)screen_size / (float)pic_size * cnt / (cnt_max + 2);
+    gui_obj_move(obj, obj->x, obj->y + y_delt);
+    gui_img_scale((void *)obj, zoom, zoom);
+    if (cnt >= cnt_max)
+    {
+        cnt = 0;
+        gui_obj_stop_timer(obj);
+        gui_view_switch_direct(gui_view_get_current(), get_view_name_by_index(mainface_idx), SWITCH_INIT_STATE, SWITCH_IN_NONE_ANIMATION);
     }
 }
 
@@ -1668,8 +1754,23 @@ static void click_2_mainface_view(void *obj, gui_event_t *e)
     GUI_UNUSED(obj);
     GUI_UNUSED(e);
 
+    if (list_moved) return;
+    gui_obj_t *parent = obj;
+    gui_obj_t *list = gui_list_entry(parent->child_list.prev, gui_obj_t, brother_list);
+    gui_obj_t *send_icon = gui_list_entry(parent->child_list.next, gui_obj_t, brother_list);
+    gui_obj_t *note_firt = gui_list_entry(list->child_list.next, gui_obj_t, brother_list);
+    gui_obj_t *note_center = gui_list_entry(note_firt->brother_list.next, gui_obj_t, brother_list);
+    gui_obj_t *note_last = gui_list_entry(list->child_list.prev, gui_obj_t, brother_list);
+    gui_obj_t *img = gui_list_entry(note_center->child_list.next, gui_obj_t, brother_list);
+    gui_img_set_focus((void *)img, img->w / 2, img->h / 2);
+    gui_img_translate((void *)img, img->w / 2, img->h / 2);
+    gui_obj_create_timer(img, 10, true, img_zoom_timer_cb);
+    gui_obj_hidden(send_icon, true);
+    gui_list_enable_scroll((void *)list, false);
+    gui_obj_hidden(note_firt, true);
+    gui_obj_hidden(note_last, true);
+    
     mainface_idx = list_index;
-    gui_view_switch_direct(gui_view_get_current(), get_view_name_by_index(mainface_idx), SWITCH_OUT_NONE_ANIMATION, SWITCH_IN_NONE_ANIMATION);
 }
 
 static void click_button_2_share(void *obj, gui_event_t *e)
@@ -1678,7 +1779,7 @@ static void click_button_2_share(void *obj, gui_event_t *e)
     GUI_UNUSED(e);
 
 #ifndef _HONEYGUI_SIMULATOR_
-    uint32_t addr = mainface_list[mainface_idx].raw;
+    uint32_t addr = (uint32_t)mainface_list[list_index].raw;
     uint32_t len = RES_SIZE(addr);
     hmi_ble_central_send_file(HMI_L2_XFER_TYPE_IMAGE,
                                 (const uint8_t *)addr, len,
@@ -1713,8 +1814,8 @@ static void click_button_2_disconnect(void *obj, gui_event_t *e)
     {
         dev_mode = MODE_DEFAULT;
         gui_view_t *view_current = gui_view_get_current();
-        gui_obj_t *dev_send = gui_list_entry(view_current->base.child_list.prev, gui_obj_t, brother_list);
-        gui_obj_t *dev_disconn = gui_list_entry(dev_send->brother_list.prev, gui_obj_t, brother_list);
+        gui_obj_t *dev_send = gui_list_entry(view_current->base.child_list.next, gui_obj_t, brother_list);
+        gui_obj_t *dev_disconn = gui_list_entry(dev_send->brother_list.next, gui_obj_t, brother_list);
 
         gui_obj_tree_free(dev_send);
         gui_dispdev_t *dc = gui_get_dc();
@@ -1733,21 +1834,8 @@ void switch_in_mainface_list(gui_view_t *view)
     list_index = mainface_idx;
     gui_dispdev_t *dc = gui_get_dc();
     uint16_t screen_size = dc->screen_width;
-    uint16_t pic_size = 160;
-    gui_list_t *lst_mainface = gui_list_create((gui_obj_t *)view, "lst_mainface", -pic_size / 2, 0, screen_size + pic_size, screen_size, 
-                                pic_size, screen_size / 2 - pic_size, HORIZONTAL, lst_mainface_note_design, NULL, false);
-    gui_list_set_style(lst_mainface, LIST_CLASSIC);
-    gui_list_set_note_num(lst_mainface, mainface_num);
-    gui_list_set_auto_align(lst_mainface, true);
-    gui_list_enable_loop(lst_mainface, true);
-    gui_list_set_inertia(lst_mainface, false);
-    gui_list_set_offset(lst_mainface, (screen_size / 2) * (1 - list_index));
-
-    gui_obj_create_timer((void *)lst_mainface, 10, true, list_timer_cb);
-    gui_obj_start_timer((void *)lst_mainface);
-
+    uint16_t pic_size = 100;
     /* Device key */
-    pic_size = 100;
     if (dev_mode == MODE_SHARE)
     {
         gui_img_t *dev_disconn = gui_img_create_from_fs(view, 0, "/image/dev_disconn_icon.bin", screen_size / 6, screen_size * 2/3, 0, 0);
@@ -1766,6 +1854,19 @@ void switch_in_mainface_list(gui_view_t *view)
         gui_obj_add_event_cb(view, (gui_event_cb_t)click_2_mainface_view, GUI_EVENT_TOUCH_CLICKED, NULL);
         gui_view_switch_on_event(view, get_view_name_by_index(mainface_idx), SWITCH_OUT_TO_BOTTOM_USE_TRANSLATION, SWITCH_INIT_STATE, GUI_EVENT_TOUCH_MOVE_DOWN);
     }
+
+    pic_size = 160;
+    gui_list_t *lst_mainface = gui_list_create((gui_obj_t *)view, "lst_mainface", -pic_size / 2, 0, screen_size + pic_size, screen_size, 
+                                pic_size, screen_size / 2 - pic_size, HORIZONTAL, lst_mainface_note_design, NULL, false);
+    gui_list_set_style(lst_mainface, LIST_ZOOM);
+    gui_list_set_note_num(lst_mainface, mainface_num);
+    gui_list_set_auto_align(lst_mainface, true);
+    gui_list_enable_loop(lst_mainface, true);
+    gui_list_set_inertia(lst_mainface, false);
+    gui_list_set_offset(lst_mainface, (screen_size / 2) * (1 - list_index));
+
+    gui_obj_create_timer((void *)lst_mainface, 10, true, list_timer_cb);
+    gui_obj_start_timer((void *)lst_mainface);
 
     gui_color_t bg_color;
     bg_color.color.argb_full = mainface_list[list_index].color;

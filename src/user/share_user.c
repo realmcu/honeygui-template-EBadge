@@ -54,7 +54,6 @@ char bd_addr_array[BD_NUM_MAX][20] =
     "00:10:20:30:40:51",
     "00:10:20:30:40:52",
 };
-uint8_t bd_idx_array[BD_NUM_MAX] = {0, 1, 2};
 uint8_t bd_dev_num = 3;
 
 void click_share_image_button(void *obj, gui_event_t *e)
@@ -120,20 +119,22 @@ void click_2_conn_dev_by_idx(void *obj, gui_event_t *e)
     
 #ifdef _HONEYGUI_SIMULATOR_
     dev_mode = MODE_SHARE;
+    is_dev_connect = true;
     gui_view_switch_direct(gui_view_get_current(), "view_mainface_list", SWITCH_OUT_NONE_ANIMATION, SWITCH_IN_NONE_ANIMATION);
 #else
     gui_list_note_t *note = (gui_list_note_t *)obj;
     uint16_t index = note->index;
     extern bool hmi_ble_central_connect(uint8_t idx);
-    bool res = hmi_ble_central_connect(bd_idx_array[index]);
+    bool res = hmi_ble_central_connect(index);
     if (res)
     {
         dev_mode = MODE_SHARE;
+        is_dev_connect = true;
         gui_view_switch_direct(gui_view_get_current(), "view_mainface_list", SWITCH_OUT_NONE_ANIMATION, SWITCH_IN_NONE_ANIMATION);
     }
     else
     {
-        gui_log("hmi_ble_central_connect %d failed\n", bd_idx_array[index]);
+        gui_log("hmi_ble_central_connect %d failed\n", index);
     }
 #endif
 }
