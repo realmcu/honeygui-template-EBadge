@@ -85,10 +85,13 @@ static void re_scan_dev(void *obj, gui_event_t *e)
 {
     GUI_UNUSED(obj);
     GUI_UNUSED(e);
-    if (dev_mode == MODE_DEFAULT) return;
-    gui_obj_t *parent = ((gui_obj_t *)obj)->parent;
-    gui_obj_child_free(parent);
-    gui_view_create(parent, "ShareConnView", 0, 0, 0, 0);
+    if (dev_mode == MODE_DEFAULT)
+    {
+        gui_obj_t *parent = ((gui_obj_t *)obj)->parent;
+        gui_obj_child_free(parent);
+        dev_mode = MODE_SHARE;
+        gui_view_create(parent, "ShareConnView", 0, 0, 0, 0);
+    }
 }
 
 void switch_in_share_view(gui_view_t *view)

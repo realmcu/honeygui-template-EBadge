@@ -1770,6 +1770,7 @@ static void prog_arc_timer(void *param)
     T_XFER_CLIENT_PHASE phase = 0;
     hmi_ble_central_get_send_progress(&bytes_sent, &total, &phase);
     angle = (float)bytes_sent / (float)total * 360.f;
+    gui_log("bytes_sent: %d, total: %d, angle: %f\n", bytes_sent, total, angle);
 #endif
     switch (share_file_status)
     {
