@@ -54,6 +54,7 @@ char bd_addr_array[BD_NUM_MAX][20] =
     "00:10:20:30:40:51",
     "00:10:20:30:40:52",
 };
+static char bd_addr_str[20] = "11:22:33:44:55:66";
 uint8_t bd_dev_num = 3;
 
 void click_share_image_button(void *obj, gui_event_t *e)
@@ -77,15 +78,6 @@ void click_receive_image_button(void *obj, gui_event_t *e)
     // TODO
 #else
     // TODO
-    extern bool hmi_ble_gap_get_local_name(char *buf, uint8_t buf_len);
-    char local_name[32];
-    extern bool hmi_ble_gap_get_local_addr(uint8_t bd_addr[6]);
-    uint8_t bd_local_addr[6];
-    hmi_ble_gap_get_local_addr(bd_local_addr);
-
-    hmi_ble_gap_get_local_name(local_name, sizeof(local_name));
-    gui_log("local name %s\n", local_name);
-    gui_log("local addr %02x:%02x:%02x:%02x:%02x:%02x\n", bd_local_addr[5]&0xff, bd_local_addr[4]&0xff, bd_local_addr[3]&0xff,bd_local_addr[2]&0xff, bd_local_addr[1]&0xff, bd_local_addr[0]&0xff);
 #endif
 }
 
@@ -111,6 +103,20 @@ void switch_in_share_view(gui_view_t *view)
         gui_log("hmi_ble_central_start_scan....\n");
 #endif
     }
+
+#ifndef _HONEYGUI_SIMULATOR_
+    extern bool hmi_ble_gap_get_local_addr(uint8_t bd_addr[6]);
+    uint8_t bd_local_addr[6];
+    hmi_ble_gap_get_local_addr(bd_local_addr);
+    sprintf(bd_addr_str, "%02x:%02x:%02x:%02x:%02x:%02x", bd_local_addr[5]&0xff, bd_local_addr[4]&0xff, bd_local_addr[3]&0xff,bd_local_addr[2]&0xff, bd_local_addr[1]&0xff, bd_local_addr[0]&0xff);
+
+    // extern bool hmi_ble_gap_get_local_name(char *buf, uint8_t buf_len);
+    // char local_name[32];
+    // hmi_ble_gap_get_local_name(local_name, sizeof(local_name));
+    // gui_log("local name %s\n", local_name);
+    // gui_log("local addr %02x:%02x:%02x:%02x:%02x:%02x\n", bd_local_addr[5]&0xff, bd_local_addr[4]&0xff, bd_local_addr[3]&0xff,bd_local_addr[2]&0xff, bd_local_addr[1]&0xff, bd_local_addr[0]&0xff);
+#endif
+    gui_text_content_set(bd_addr_self, bd_addr_str, strlen(bd_addr_str));
 
     gui_obj_add_event_cb(view, (gui_event_cb_t)re_scan_dev, GUI_EVENT_TOUCH_CLICKED, NULL);
 }

@@ -94,6 +94,14 @@ typedef enum
     MODE_RECEIVE,
 } MODE_TYPE;
 
+typedef enum
+{
+    SHARE_DEFAULT = 0,
+    SHARE_ING,
+    SHARE_DONE,
+    SHARE_FAIL,
+} SHARE_FILE_TYPE;
+
 extern uint8_t mainface_idx;
 extern uint8_t mainface_num;
 extern mainface_src_t mainface_list[MAINFACE_NUM_MAX];
