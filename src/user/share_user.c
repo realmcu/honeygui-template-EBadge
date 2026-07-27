@@ -77,6 +77,15 @@ void click_receive_image_button(void *obj, gui_event_t *e)
     // TODO
 #else
     // TODO
+    extern bool hmi_ble_gap_get_local_name(char *buf, uint8_t buf_len);
+    char local_name[32];
+    extern bool hmi_ble_gap_get_local_addr(uint8_t bd_addr[6]);
+    uint8_t bd_local_addr[6];
+    hmi_ble_gap_get_local_addr(bd_local_addr);
+
+    hmi_ble_gap_get_local_name(local_name, sizeof(local_name));
+    gui_log("local name %s\n", local_name);
+    gui_log("local addr %02x:%02x:%02x:%02x:%02x:%02x\n", bd_local_addr[5]&0xff, bd_local_addr[4]&0xff, bd_local_addr[3]&0xff,bd_local_addr[2]&0xff, bd_local_addr[1]&0xff, bd_local_addr[0]&0xff);
 #endif
 }
 

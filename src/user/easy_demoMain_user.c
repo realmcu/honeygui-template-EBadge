@@ -814,10 +814,17 @@ void switch_mainface(gui_obj_t *parent, uint8_t idx)
 #include "hmi_l2.h"
 extern bool hmi_ble_central_send_file(uint8_t type, const uint8_t *src, uint32_t total,
                                const char *fname, xfer_client_done_cb_t done_cb);
+extern bool hmi_ble_central_get_send_progress(uint32_t *bytes_sent, uint32_t *total,
+                                               T_XFER_CLIENT_PHASE *phase);
 
 void done_cb(T_XFER_CLIENT_RESULT result, uint32_t bytes_sent)
 {
     printf("done_cb %d, sent %d\n", result, bytes_sent);
+
+    uint32_t bytes_sent = 0, total = 0;
+    T_XFER_CLIENT_PHASE phase = 0;
+    hmi_ble_central_get_send_progress(&bytes_sent, &total, &phase);
+    printf("send progress: %d/%d, phase: %d\n", bytes_sent, total, phase);
 }
 
 #endif
@@ -838,20 +845,6 @@ void click_auto_sleep_icon(void *obj, gui_event_t *e)
         gui_img_set_src(icon_as, (const uint8_t *)"/image/auto_sleep_off_icon.bin", IMG_SRC_FILESYS);
         gui_obj_hidden(GUI_BASE(lbl_1), true);
     }
-
-
-#ifdef _HONEYGUI_SIMULATOR_
-    // TODO
-#else
-    uint32_t addr = 0, len = 0;
-    extern fdb_bf_t   app_get_bf(void);
-    fdb_bf_get_addr(app_get_bf(), "bf_0", &addr, &len);   // 拿映射地址+长度
-    gui_log("send addr 0x%x len %d\n", addr, len);
-
-    hmi_ble_central_send_file(HMI_L2_XFER_TYPE_IMAGE,
-                                (const uint8_t *)addr, len,
-                                "share_0", done_cb);      // on_done_cb(result, bytes) 报进度/结果
-#endif
     
 }
 
