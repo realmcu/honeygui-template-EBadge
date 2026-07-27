@@ -43,6 +43,7 @@ bool is_bt_connect = false;
 bool is_dev_connect = false;
 static SHARE_FILE_TYPE share_file_status = SHARE_DEFAULT;
 bool is_displaying_mainface = false;
+static bool is_link_error = false;
 bool enable_switch_mainface = true;
 MODE_TYPE dev_mode = MODE_DEFAULT;
 
@@ -825,6 +826,11 @@ void done_cb(T_XFER_CLIENT_RESULT result, uint32_t bytes_sent)
     if (result == XFER_CLIENT_OK)
     {
         share_file_status = SHARE_DONE;
+    }
+    else if (result == XFER_CLIENT_ERR_LINK)
+    {
+        dev_mode = SHARE_FAIL;
+        is_link_error = true;
     }
     else
     {
@@ -1770,6 +1776,7 @@ static void prog_arc_timer(void *param)
     T_XFER_CLIENT_PHASE phase = 0;
     hmi_ble_central_get_send_progress(&bytes_sent, &total, &phase);
     angle = (float)bytes_sent / (float)total * 360.f;
+    angle = angle > 1.0f ? angle : 1.0f;
     gui_log("bytes_sent: %d, total: %d, angle: %f\n", bytes_sent, total, angle);
 #endif
     switch (share_file_status)
@@ -1857,8 +1864,17 @@ static void click_button_2_share(void *obj, gui_event_t *e)
     case SHARE_FAIL:
     {
         share_file_status = SHARE_DEFAULT;
-        gui_img_set_src(obj, "/image/dev_send_icon.bin", IMG_SRC_FILESYS);
-        gui_fb_change();
+        if (is_link_error)
+        {
+            is_link_error = false;
+            dev_mode = MODE_DEFAULT;
+            msg_2_regenerate_view(NULL);
+        }
+        else
+        {
+            gui_img_set_src(obj, "/image/dev_send_icon.bin", IMG_SRC_FILESYS);
+            gui_fb_change();
+        }
         break;
     }
     
@@ -1895,6 +1911,7 @@ static void click_button_2_disconnect(void *obj, gui_event_t *e)
     if (gui_view_get_next() == NULL)
     {
         dev_mode = MODE_DEFAULT;
+        share_file_status = SHARE_DEFAULT;
         gui_view_t *view_current = gui_view_get_current();
         gui_obj_t *dev_send = gui_list_entry(view_current->base.child_list.next, gui_obj_t, brother_list);
         gui_obj_t *dev_disconn = gui_list_entry(dev_send->brother_list.next, gui_obj_t, brother_list);
