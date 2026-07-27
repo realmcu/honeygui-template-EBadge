@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <time.h>
+#include <stdbool.h>
 
 // Timer animation counters
 uint16_t circle_anime_timer_cnt = 0;
@@ -189,6 +190,8 @@ void win_share_timer_0_cb(void *obj)
     {
         win_share_timer_cnt = 0;
         extern uint8_t hmi_ble_central_get_dev_count(void);
+        extern bool hmi_ble_central_get_dev(uint8_t idx, uint8_t bd_addr[6], uint8_t *addr_type,
+                                             int8_t *rssi, char *name, uint8_t name_len);
         uint8_t dev_num = hmi_ble_central_get_dev_count();
         gui_log("hmi_ble_central_get_dev_count %d\n", dev_num);
         if (dev_num != 0)

@@ -1173,7 +1173,7 @@ uint8_t mainface_list_init(void **data_list, uint32_t n)
 
 
 #endif
-        gui_log("list init %d, 0x%x %d", idx, mainface_list[list_idx].data, mainface_list[list_idx].type);
+        gui_log("list init %d, 0x%x  type %d, raw 0x%x, color 0x%x", idx, mainface_list[list_idx].data, mainface_list[list_idx].type, mainface_list[list_idx].raw, mainface_list[list_idx].color);
         idx++;
     }
     mainface_num = idx + reserved;
@@ -1779,8 +1779,16 @@ static void click_button_2_share(void *obj, gui_event_t *e)
     GUI_UNUSED(e);
 
 #ifndef _HONEYGUI_SIMULATOR_
+    gui_log("\nResource %d 0x%x \n", list_index, (unsigned int)(uint32_t)mainface_list[list_index].raw);
+    if ((uint32_t)mainface_list[list_index].raw < USER_RESOURCE_ADDR || (uint32_t)mainface_list[list_index].raw >= USER_RESOURCE_ADDR_END)  
+    {
+        gui_log("\nResource is not in user resource area, cannot share!\n");
+        return;
+    }
+
     uint32_t addr = (uint32_t)mainface_list[list_index].raw;
     uint32_t len = RES_SIZE(addr);
+    gui_log("Sending file: %p, size: %d\n", (void *)addr, len);
     hmi_ble_central_send_file(HMI_L2_XFER_TYPE_IMAGE,
                                 (const uint8_t *)addr, len,
                                 "share_0", done_cb);      // on_done_cb(result, bytes) 报进度/结果

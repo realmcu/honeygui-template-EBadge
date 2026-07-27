@@ -99,7 +99,7 @@ void switch_in_share_view(gui_view_t *view)
 #ifndef _HONEYGUI_SIMULATOR_
         extern bool hmi_ble_central_start_scan(void);
         hmi_ble_central_start_scan(); 
-        gui_log("hmi_ble_central_start_scan\n");
+        gui_log("hmi_ble_central_start_scan....\n");
 #endif
     }
 
@@ -109,6 +109,12 @@ void switch_in_share_view(gui_view_t *view)
 void switch_out_share_view(gui_view_t *view)
 {
     GUI_UNUSED(view);
+
+// #ifndef _HONEYGUI_SIMULATOR_
+//     bool hmi_ble_central_stop_scan(void);
+//     hmi_ble_central_stop_scan();
+// #endif
+    // gui_log("hmi_ble_central_stop_scan....\n");
     dev_mode = MODE_DEFAULT;
 }
 
@@ -124,10 +130,12 @@ void click_2_conn_dev_by_idx(void *obj, gui_event_t *e)
 #else
     gui_list_note_t *note = (gui_list_note_t *)obj;
     uint16_t index = note->index;
+
     extern bool hmi_ble_central_connect(uint8_t idx);
     bool res = hmi_ble_central_connect(index);
     if (res)
     {
+        gui_log("hmi_ble_central_connect succeeded\n");
         dev_mode = MODE_SHARE;
         is_dev_connect = true;
         gui_view_switch_direct(gui_view_get_current(), "view_mainface_list", SWITCH_OUT_NONE_ANIMATION, SWITCH_IN_NONE_ANIMATION);
