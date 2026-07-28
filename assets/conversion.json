@@ -77,6 +77,67 @@
     "background_clean.jpg": {
       "format": "RGB565",
       "compression": "adaptive"
+    },
+    "image/shake_lot/lot_dj.png": {
+      "compression": "jpeg",
+      "jpegParams": {
+        "sampling": "YUV420",
+        "quality": 1,
+        "backgroundColor": "black"
+      }
+    },
+    "image/shake_lot/lot_dx.png": {
+      "compression": "jpeg",
+      "jpegParams": {
+        "sampling": "YUV420",
+        "quality": 1,
+        "backgroundColor": "black"
+      }
+    },
+    "image/shake_lot/lot_j.png": {
+      "compression": "jpeg",
+      "format": "RGB565",
+      "jpegParams": {
+        "sampling": "YUV420",
+        "quality": 1,
+        "backgroundColor": "black"
+      }
+    },
+    "image/shake_lot/lot_mj.png": {
+      "compression": "jpeg",
+      "jpegParams": {
+        "sampling": "YUV420",
+        "quality": 1,
+        "backgroundColor": "black"
+      }
+    },
+    "image/shake_lot/lot_x.png": {
+      "compression": "jpeg",
+      "jpegParams": {
+        "sampling": "YUV420",
+        "quality": 1,
+        "backgroundColor": "black"
+      }
+    },
+    "image/shake_lot/lot_xj.png": {
+      "compression": "jpeg",
+      "jpegParams": {
+        "sampling": "YUV420",
+        "quality": 1,
+        "backgroundColor": "black"
+      }
+    },
+    "image/shake_lot/lot_zj.png": {
+      "compression": "jpeg",
+      "jpegParams": {
+        "sampling": "YUV420",
+        "quality": 1,
+        "backgroundColor": "black"
+      }
+    },
+    "image/shake_lot/lot_start.png": {
+      "compression": "adaptive",
+      "format": "RGB565"
     }
   }
 }

@@ -57,6 +57,48 @@ char bd_addr_array[BD_NUM_MAX][20] =
 static char bd_addr_str[20] = "11:22:33:44:55:66";
 uint8_t bd_dev_num = 3;
 
+#ifndef _HONEYGUI_SIMULATOR_
+/* B: after tapping a device we only *initiate* the connection.  Wait until the
+ * central actually reaches READY (link up + HMI service discovered + notify
+ * enabled) before entering the file list, instead of jumping there the moment
+ * connect() is issued -- otherwise the UI let the user "send" over a not-ready
+ * link, the send got rejected, and the progress arc froze at 0. */
+#define CONN_READY_POLL_MS       100
+#define CONN_READY_TIMEOUT_TICKS 80    /* 80 * 100ms = 8s */
+static uint16_t s_conn_wait_ticks = 0;
+
+static void conn_ready_poll_cb(void *obj)
+{
+    extern bool hmi_ble_central_is_ready(void);
+    extern bool hmi_ble_central_is_active(void);
+
+    s_conn_wait_ticks++;
+
+    if (hmi_ble_central_is_ready())
+    {
+        gui_obj_stop_timer((gui_obj_t *)obj);
+        is_dev_connect = true;
+        gui_log("central READY -> enter file list\n");
+        gui_view_switch_direct(gui_view_get_current(), "view_mainface_list",
+                               SWITCH_OUT_NONE_ANIMATION, SWITCH_IN_NONE_ANIMATION);
+        return;
+    }
+
+    /* Link never came up / dropped back to IDLE (e.g. controller rejected with
+     * cause 0x109 = max connections), or discovery stalled past the timeout:
+     * give up and stay on the device list so the user can tap to retry. */
+    if (!hmi_ble_central_is_active() || s_conn_wait_ticks >= CONN_READY_TIMEOUT_TICKS)
+    {
+        gui_obj_stop_timer((gui_obj_t *)obj);
+        is_dev_connect = false;
+        gui_log("central connect failed/timeout (active=%d, ticks=%d), stay on dev list\n",
+                hmi_ble_central_is_active(), s_conn_wait_ticks);
+        /* Deliberately no view switch: SelectDevView stays up for a retry tap. */
+        return;
+    }
+}
+#endif
+
 void click_share_image_button(void *obj, gui_event_t *e)
 {
     GUI_UNUSED(obj);
@@ -153,10 +195,15 @@ void click_2_conn_dev_by_idx(void *obj, gui_event_t *e)
     bool res = hmi_ble_central_connect(index);
     if (res)
     {
-        gui_log("hmi_ble_central_connect succeeded\n");
+        gui_log("hmi_ble_central_connect initiated, wait for READY...\n");
         dev_mode = MODE_SHARE;
-        is_dev_connect = true;
-        gui_view_switch_direct(gui_view_get_current(), "view_mainface_list", SWITCH_OUT_NONE_ANIMATION, SWITCH_IN_NONE_ANIMATION);
+        /* B: connect() only *started* the link.  Do NOT enter the file list yet
+         * -- poll on this (SelectDev) view until CEN_READY, then advance.  On
+         * failure/timeout conn_ready_poll_cb stays here for a retry tap. */
+        s_conn_wait_ticks = 0;
+        gui_obj_create_timer((gui_obj_t *)gui_view_get_current(),
+                             CONN_READY_POLL_MS, true, conn_ready_poll_cb);
+        gui_obj_start_timer((gui_obj_t *)gui_view_get_current());
     }
     else
     {
