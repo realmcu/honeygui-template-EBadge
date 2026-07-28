@@ -711,7 +711,10 @@ void switch_mainface(gui_obj_t *parent, uint8_t idx)
     else
     {
         gui_view_switch_on_event((void *)parent, "top_view", SWITCH_INIT_STATE, SWITCH_IN_FROM_TOP_USE_TRANSLATION, GUI_EVENT_TOUCH_MOVE_DOWN);
-        gui_view_switch_on_event((void *)parent, "view_mainface_list", SWITCH_INIT_STATE, SWITCH_IN_FROM_BOTTOM_USE_TRANSLATION, GUI_EVENT_TOUCH_MOVE_UP);
+        if (mainface_num > 0)
+        {
+            gui_view_switch_on_event((void *)parent, "view_mainface_list", SWITCH_INIT_STATE, SWITCH_IN_FROM_BOTTOM_USE_TRANSLATION, GUI_EVENT_TOUCH_MOVE_UP);
+        }
     }
 
     void *view_first = "easy_demoMainView";
@@ -1665,7 +1668,6 @@ static void lst_mainface_note_design(gui_obj_t *obj, void *param)
     }
 #endif
     gui_img_set_mode(img, IMG_SRC_OVER_MODE);
-    gui_img_set_quality(img, true);
     img->need_clip = false;
 }
 
@@ -1812,19 +1814,23 @@ static void click_2_mainface_view(void *obj, gui_event_t *e)
 
     if (list_moved) return;
     gui_obj_t *parent = obj;
-    gui_obj_t *list = gui_list_entry(parent->child_list.prev, gui_obj_t, brother_list);
+    gui_obj_t *list= gui_list_entry(parent->child_list.prev, gui_obj_t, brother_list);
     gui_obj_t *send_icon = gui_list_entry(parent->child_list.next, gui_obj_t, brother_list);
-    gui_obj_t *note_first = gui_list_entry(list->child_list.next, gui_obj_t, brother_list);
-    gui_obj_t *note_center = gui_list_entry(note_first->brother_list.next, gui_obj_t, brother_list);
-    gui_obj_t *note_last = gui_list_entry(list->child_list.prev, gui_obj_t, brother_list);
-    gui_obj_t *img = gui_list_entry(note_center->child_list.next, gui_obj_t, brother_list);
+    gui_obj_t *img = list;
+    if (mainface_num > 1)
+    {
+        gui_obj_t *note_first = gui_list_entry(list->child_list.next, gui_obj_t, brother_list);
+        gui_obj_t *note_center = gui_list_entry(note_first->brother_list.next, gui_obj_t, brother_list);
+        gui_obj_t *note_last = gui_list_entry(list->child_list.prev, gui_obj_t, brother_list);
+        img = gui_list_entry(note_center->child_list.next, gui_obj_t, brother_list);
+        gui_list_enable_scroll((void *)list, false);
+        gui_obj_hidden(note_first, true);
+        gui_obj_hidden(note_last, true);
+    }
     gui_img_set_focus((void *)img, img->w / 2, img->h / 2);
     gui_img_translate((void *)img, img->w / 2, img->h / 2);
     gui_obj_create_timer(img, 10, true, img_zoom_timer_cb);
     gui_obj_hidden(send_icon, true);
-    gui_list_enable_scroll((void *)list, false);
-    gui_obj_hidden(note_first, true);
-    gui_obj_hidden(note_last, true);
     
     mainface_idx = list_index;
 }
@@ -1955,17 +1961,41 @@ void switch_in_mainface_list(gui_view_t *view)
     }
 
     pic_size = 160;
-    gui_list_t *lst_mainface = gui_list_create((gui_obj_t *)view, "lst_mainface", -pic_size / 2, 0, screen_size + pic_size, screen_size, 
-                                pic_size, screen_size / 2 - pic_size, HORIZONTAL, lst_mainface_note_design, NULL, false);
-    gui_list_set_style(lst_mainface, LIST_CIRCLE);
-    gui_list_set_note_num(lst_mainface, mainface_num);
-    gui_list_set_auto_align(lst_mainface, true);
-    gui_list_enable_loop(lst_mainface, true);
-    gui_list_set_inertia(lst_mainface, false);
-    gui_list_set_offset(lst_mainface, (screen_size / 2) * (1 - list_index));
+    if (mainface_num == 1)
+    {
+        uint16_t pic_size = 160;
+        uint16_t img_x = (screen_size - pic_size) / 2;
+        uint16_t img_y = (screen_size - pic_size) / 4;
 
-    gui_obj_create_timer((void *)lst_mainface, 10, true, list_timer_cb);
-    gui_obj_start_timer((void *)lst_mainface);
+    #ifdef _HONEYGUI_SIMULATOR_
+        gui_img_t *img = gui_img_create_from_fs(view, 0, mainface_list[mainface_idx].img_preview, img_x, img_y, 0, 0);
+    #else
+        gui_img_t *img = NULL;
+        if (((uint32_t)mainface_list[mainface_idx].data) >= USER_RESOURCE_ADDR && ((uint32_t)mainface_list[mainface_idx].data) < (USER_RESOURCE_ADDR_END))
+        {
+            img = gui_img_create_from_mem(view, 0, mainface_list[mainface_idx].img_preview, img_x, img_y, 0, 0);
+        }
+        else
+        {
+            img = gui_img_create_from_fs(view, 0, mainface_list[mainface_idx].img_preview, img_x, img_y, 0, 0);
+        }
+    #endif
+        gui_img_set_mode(img, IMG_SRC_OVER_MODE);
+    }
+    else
+    {
+        gui_list_t *lst_mainface = gui_list_create((gui_obj_t *)view, "lst_mainface", -pic_size / 2, 0, screen_size + pic_size, screen_size, 
+                                pic_size, screen_size / 2 - pic_size, HORIZONTAL, lst_mainface_note_design, NULL, false);
+        gui_list_set_style(lst_mainface, LIST_CIRCLE);
+        gui_list_set_note_num(lst_mainface, mainface_num * 2);
+        gui_list_set_auto_align(lst_mainface, true);
+        gui_list_enable_loop(lst_mainface, true);
+        gui_list_set_inertia(lst_mainface, false);
+        gui_list_set_offset(lst_mainface, (screen_size / 2) * (1 - list_index));
+
+        gui_obj_create_timer((void *)lst_mainface, 10, true, list_timer_cb);
+        gui_obj_start_timer((void *)lst_mainface);
+    }
 
     gui_color_t bg_color;
     bg_color.color.argb_full = mainface_list[list_index].color;
