@@ -26,18 +26,16 @@
 gui_win_t *win_view = NULL;
 
 uint8_t mainface_idx = 0;
-uint8_t mainface_num = 6;
+uint8_t mainface_num = 7;
 mainface_src_t mainface_list[MAINFACE_NUM_MAX] =
 {
     {"/image/565/wallpaper_danmu.bin",      SRC_DANMU,          NULL, "/user/hello_0040F8.bin", 0xff0040F8},
     {"/user/gltf_desc_Fox.bin",             SRC_3D,             NULL, "/user/fox_40A840.bin", 0xff40A840},
     {"/foreground_360.bin",                 SRC_IMG_SPATIAL,    NULL, "/user/eva_D0C9B9.bin", 0xffD0C9B9},
     {"/image/shake_lot/lot_start.bin",      SRC_SHAKE_LOT,      NULL, "/user/lot_BC0500.bin", 0xffBC0500},
+    {"/coin_flip_2_yes.avi",                SRC_FLIP_COIN,      NULL, "/user/coin_F8E446.bin", 0xffffffff},
     {"/wallpaper_video.avi",                SRC_VIDEO,          NULL, "/user/wsq_F4EFD9.bin", 0xffF4EFD9},
     {"/image/565/wallpaper_static_img.bin", SRC_IMG,            NULL, "/user/pig_F8C8C8.bin", 0xffF8C8C8},
-    
-    
-
 };
 uint8_t list_index = 0;
 bool is_auto_sleep_mode = false;
@@ -364,7 +362,8 @@ void win_timer_gsensor_cb(void *obj)
 
     if (gui_view_get_next() != NULL || !enable_switch_mainface ||
             !is_displaying_mainface ||
-            mainface_list[mainface_idx].type == SRC_SHAKE_LOT)
+            mainface_list[mainface_idx].type == SRC_SHAKE_LOT ||
+            mainface_list[mainface_idx].type == SRC_FLIP_COIN)
     {
         shake_sample_count = 0;
         shake_direction = 0;
@@ -700,7 +699,13 @@ void switch_mainface(gui_obj_t *parent, uint8_t idx)
         shake_lot(sl_root);
         break;
     }
-
+    case SRC_FLIP_COIN:
+    {
+        extern void flip_coin_init(gui_obj_t *parent);
+        flip_coin_init(parent);
+        break;
+    }
+        
     default:
         break;
     }
@@ -1158,7 +1163,7 @@ void click_camera_ctl_icon(void *obj, gui_event_t *e)
 uint8_t mainface_list_init(void **data_list, uint32_t n)
 {
     uint8_t idx = 0;
-    uint8_t reserved = 4;
+    uint8_t reserved = 5;
     if (data_list == NULL || !n) return idx;
     
 
@@ -1774,7 +1779,7 @@ void img_zoom_timer_cb(void *param)
 static void prog_arc_timer(void *param)
 {
     gui_obj_t *obj = (gui_obj_t *)param;
-    gui_arc_t *arc = (gui_arc_t *)gui_list_entry(obj->child_list.next, gui_obj_t, brother_list);;
+    gui_arc_t *arc = (gui_arc_t *)gui_list_entry(obj->child_list.next, gui_obj_t, brother_list);
 #ifdef _HONEYGUI_SIMULATOR_
     static float angle = 0.f;
     angle += 40.f;
@@ -1870,12 +1875,6 @@ static void click_button_2_share(void *obj, gui_event_t *e)
             gui_obj_start_timer(obj);
             break;
         }
-#endif
-        share_file_status = SHARE_ING;
-        gui_arc_create(obj, 0, 50, 50, 42, -90.f, -89.f, 6, gui_rgb(0xff, 0xff, 0xff));
-        gui_obj_create_timer(obj, 500, true, prog_arc_timer);
-        gui_obj_start_timer(obj);
-#ifndef _HONEYGUI_SIMULATOR_
         gui_log("\nResource %d 0x%x \n", list_index, (unsigned int)(uint32_t)mainface_list[list_index].raw);
         if ((uint32_t)mainface_list[list_index].raw < USER_RESOURCE_ADDR || (uint32_t)mainface_list[list_index].raw >= USER_RESOURCE_ADDR_END)  
         {
@@ -1898,8 +1897,11 @@ static void click_button_2_share(void *obj, gui_event_t *e)
             share_file_status = SHARE_FAIL;
             is_link_error = true;
         }
-
 #endif
+        share_file_status = SHARE_ING;
+        gui_arc_create(obj, 0, 50, 50, 42, -90.f, -89.f, 6, gui_rgb(0xff, 0xff, 0xff));
+        gui_obj_create_timer(obj, 500, true, prog_arc_timer);
+        gui_obj_start_timer(obj);
         break;
     }
     case SHARE_ING:
