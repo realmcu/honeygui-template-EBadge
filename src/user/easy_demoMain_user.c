@@ -5,6 +5,7 @@
 #include "gui_vfs.h"
 #include "gui_lite_video.h"
 #include "gui_list.h"
+#include "gui_arc.h"
 #include <stdint.h>
 #include <stddef.h>
 #include <string.h>
@@ -40,7 +41,9 @@ uint8_t list_index = 0;
 bool is_auto_sleep_mode = false;
 bool is_bt_connect = false;
 bool is_dev_connect = false;
+static SHARE_FILE_TYPE share_file_status = SHARE_DEFAULT;
 bool is_displaying_mainface = false;
+static bool is_link_error = false;
 bool enable_switch_mainface = true;
 MODE_TYPE dev_mode = MODE_DEFAULT;
 
@@ -708,7 +711,10 @@ void switch_mainface(gui_obj_t *parent, uint8_t idx)
     else
     {
         gui_view_switch_on_event((void *)parent, "top_view", SWITCH_INIT_STATE, SWITCH_IN_FROM_TOP_USE_TRANSLATION, GUI_EVENT_TOUCH_MOVE_DOWN);
-        gui_view_switch_on_event((void *)parent, "view_mainface_list", SWITCH_INIT_STATE, SWITCH_IN_FROM_BOTTOM_USE_TRANSLATION, GUI_EVENT_TOUCH_MOVE_UP);
+        if (mainface_num > 0)
+        {
+            gui_view_switch_on_event((void *)parent, "view_mainface_list", SWITCH_INIT_STATE, SWITCH_IN_FROM_BOTTOM_USE_TRANSLATION, GUI_EVENT_TOUCH_MOVE_UP);
+        }
     }
 
     void *view_first = "easy_demoMainView";
@@ -814,10 +820,30 @@ void switch_mainface(gui_obj_t *parent, uint8_t idx)
 #include "hmi_l2.h"
 extern bool hmi_ble_central_send_file(uint8_t type, const uint8_t *src, uint32_t total,
                                const char *fname, xfer_client_done_cb_t done_cb);
+extern bool hmi_ble_central_get_send_progress(uint32_t *bytes_sent, uint32_t *total,
+                                               T_XFER_CLIENT_PHASE *phase);
 
 void done_cb(T_XFER_CLIENT_RESULT result, uint32_t bytes_sent)
 {
     printf("done_cb %d, sent %d\n", result, bytes_sent);
+    if (result == XFER_CLIENT_OK)
+    {
+        share_file_status = SHARE_DONE;
+    }
+    else if (result == XFER_CLIENT_ERR_LINK)
+    {
+        dev_mode = SHARE_FAIL;
+        is_link_error = true;
+    }
+    else
+    {
+        share_file_status = SHARE_FAIL;
+    }
+
+    // uint32_t bytes_sent = 0, total = 0;
+    // T_XFER_CLIENT_PHASE phase = 0;
+    // hmi_ble_central_get_send_progress(&bytes_sent, &total, &phase);
+    // printf("send progress: %d/%d, phase: %d\n", bytes_sent, total, phase);
 }
 
 #endif
@@ -838,20 +864,6 @@ void click_auto_sleep_icon(void *obj, gui_event_t *e)
         gui_img_set_src(icon_as, (const uint8_t *)"/image/auto_sleep_off_icon.bin", IMG_SRC_FILESYS);
         gui_obj_hidden(GUI_BASE(lbl_1), true);
     }
-
-
-#ifdef _HONEYGUI_SIMULATOR_
-    // TODO
-#else
-    uint32_t addr = 0, len = 0;
-    extern fdb_bf_t   app_get_bf(void);
-    fdb_bf_get_addr(app_get_bf(), "bf_0", &addr, &len);   // 拿映射地址+长度
-    gui_log("send addr 0x%x len %d\n", addr, len);
-
-    hmi_ble_central_send_file(HMI_L2_XFER_TYPE_IMAGE,
-                                (const uint8_t *)addr, len,
-                                "share_0", done_cb);      // on_done_cb(result, bytes) 报进度/结果
-#endif
     
 }
 
@@ -1173,7 +1185,7 @@ uint8_t mainface_list_init(void **data_list, uint32_t n)
 
 
 #endif
-        gui_log("list init %d, 0x%x %d", idx, mainface_list[list_idx].data, mainface_list[list_idx].type);
+        gui_log("list init %d, 0x%x  type %d, raw 0x%x, color 0x%x", idx, mainface_list[list_idx].data, mainface_list[list_idx].type, mainface_list[list_idx].raw, mainface_list[list_idx].color);
         idx++;
     }
     mainface_num = idx + reserved;
@@ -1640,7 +1652,7 @@ static void lst_mainface_note_design(gui_obj_t *obj, void *param)
     gui_dispdev_t *dc = gui_get_dc();
     uint16_t screen_size = dc->screen_width;
     uint16_t pic_size = 160;
-    uint16_t img_y = (screen_size - pic_size) / 2 * 3/4;
+    uint16_t img_y = (screen_size - pic_size) / 4;
 
 #ifdef _HONEYGUI_SIMULATOR_
     gui_img_t *img = gui_img_create_from_fs(obj, 0, mainface_list[index].img_preview, 0, img_y, 0, 0);
@@ -1656,7 +1668,6 @@ static void lst_mainface_note_design(gui_obj_t *obj, void *param)
     }
 #endif
     gui_img_set_mode(img, IMG_SRC_OVER_MODE);
-    gui_img_set_quality(img, true);
     img->need_clip = false;
 }
 
@@ -1737,7 +1748,7 @@ void img_zoom_timer_cb(void *param)
     uint16_t pic_size = 100;
 
     cnt++;
-    uint16_t y_delt = (screen_size - pic_size) / 8 / cnt_max;
+    uint16_t y_delt = (screen_size - pic_size) / 4 / cnt_max;
     float zoom = (float)screen_size / (float)pic_size * cnt / (cnt_max + 2);
     gui_obj_move(obj, obj->x, obj->y + y_delt);
     gui_img_scale((void *)obj, zoom, zoom);
@@ -1749,6 +1760,53 @@ void img_zoom_timer_cb(void *param)
     }
 }
 
+static void prog_arc_timer(void *param)
+{
+    gui_obj_t *obj = (gui_obj_t *)param;
+    gui_arc_t *arc = (gui_arc_t *)gui_list_entry(obj->child_list.next, gui_obj_t, brother_list);;
+#ifdef _HONEYGUI_SIMULATOR_
+    static float angle = 0.f;
+    angle += 40.f;
+    if (angle >= 360.f)
+    {
+        angle = 0.f;
+        share_file_status = SHARE_DONE;
+    }
+#else
+    float angle = 0.f;
+    uint32_t bytes_sent = 0, total = 0;
+    T_XFER_CLIENT_PHASE phase = 0;
+    hmi_ble_central_get_send_progress(&bytes_sent, &total, &phase);
+    angle = (float)bytes_sent / (float)total * 360.f;
+    angle = angle > 1.0f ? angle : 1.0f;
+    gui_log("bytes_sent: %d, total: %d, angle: %f\n", bytes_sent, total, angle);
+#endif
+    switch (share_file_status)
+    {
+    case SHARE_ING:
+        gui_arc_set_end_angle(arc, angle - 90.f);
+        break;
+    case SHARE_DONE:
+    {
+        gui_img_set_src((void *)obj, "/image/send_done_icon.bin", IMG_SRC_FILESYS);
+        break;
+    }
+    case SHARE_FAIL:
+    {
+        gui_img_set_src((void *)obj, "/image/send_fail_icon.bin", IMG_SRC_FILESYS);
+        break;
+    }
+    default:
+        break;
+    }
+    if (share_file_status == SHARE_DONE || share_file_status == SHARE_FAIL)
+    {
+        gui_obj_stop_timer(obj);
+        gui_obj_child_free(obj);
+        gui_fb_change();
+    }
+}
+
 static void click_2_mainface_view(void *obj, gui_event_t *e)
 {
     GUI_UNUSED(obj);
@@ -1756,19 +1814,23 @@ static void click_2_mainface_view(void *obj, gui_event_t *e)
 
     if (list_moved) return;
     gui_obj_t *parent = obj;
-    gui_obj_t *list = gui_list_entry(parent->child_list.prev, gui_obj_t, brother_list);
+    gui_obj_t *list= gui_list_entry(parent->child_list.prev, gui_obj_t, brother_list);
     gui_obj_t *send_icon = gui_list_entry(parent->child_list.next, gui_obj_t, brother_list);
-    gui_obj_t *note_firt = gui_list_entry(list->child_list.next, gui_obj_t, brother_list);
-    gui_obj_t *note_center = gui_list_entry(note_firt->brother_list.next, gui_obj_t, brother_list);
-    gui_obj_t *note_last = gui_list_entry(list->child_list.prev, gui_obj_t, brother_list);
-    gui_obj_t *img = gui_list_entry(note_center->child_list.next, gui_obj_t, brother_list);
+    gui_obj_t *img = list;
+    if (mainface_num > 1)
+    {
+        gui_obj_t *note_first = gui_list_entry(list->child_list.next, gui_obj_t, brother_list);
+        gui_obj_t *note_center = gui_list_entry(note_first->brother_list.next, gui_obj_t, brother_list);
+        gui_obj_t *note_last = gui_list_entry(list->child_list.prev, gui_obj_t, brother_list);
+        img = gui_list_entry(note_center->child_list.next, gui_obj_t, brother_list);
+        gui_list_enable_scroll((void *)list, false);
+        gui_obj_hidden(note_first, true);
+        gui_obj_hidden(note_last, true);
+    }
     gui_img_set_focus((void *)img, img->w / 2, img->h / 2);
     gui_img_translate((void *)img, img->w / 2, img->h / 2);
     gui_obj_create_timer(img, 10, true, img_zoom_timer_cb);
     gui_obj_hidden(send_icon, true);
-    gui_list_enable_scroll((void *)list, false);
-    gui_obj_hidden(note_firt, true);
-    gui_obj_hidden(note_last, true);
     
     mainface_idx = list_index;
 }
@@ -1777,14 +1839,54 @@ static void click_button_2_share(void *obj, gui_event_t *e)
 {
     GUI_UNUSED(obj);
     GUI_UNUSED(e);
-
+    switch (share_file_status)
+    {
+    case SHARE_DEFAULT:
+    {
+        share_file_status = SHARE_ING;
+        gui_arc_create(obj, 0, 50, 50, 42, -90.f, -89.f, 6, gui_rgb(0xff, 0xff, 0xff));
+        gui_obj_create_timer(obj, 500, true, prog_arc_timer);
+        gui_obj_start_timer(obj);
 #ifndef _HONEYGUI_SIMULATOR_
-    uint32_t addr = (uint32_t)mainface_list[list_index].raw;
-    uint32_t len = RES_SIZE(addr);
-    hmi_ble_central_send_file(HMI_L2_XFER_TYPE_IMAGE,
-                                (const uint8_t *)addr, len,
-                                "share_0", done_cb);      // on_done_cb(result, bytes) 报进度/结果
+        gui_log("\nResource %d 0x%x \n", list_index, (unsigned int)(uint32_t)mainface_list[list_index].raw);
+        if ((uint32_t)mainface_list[list_index].raw < USER_RESOURCE_ADDR || (uint32_t)mainface_list[list_index].raw >= USER_RESOURCE_ADDR_END)  
+        {
+            gui_log("\nResource is not in user resource area, cannot share!\n");
+            return;
+        }
+
+        uint32_t addr = (uint32_t)mainface_list[list_index].raw;
+        uint32_t len = RES_SIZE(addr);
+        gui_log("Sending file: %p, size: %d\n", (void *)addr, len);
+        hmi_ble_central_send_file(HMI_L2_XFER_TYPE_IMAGE,
+                                    (const uint8_t *)addr, len,
+                                    "share_0", done_cb);      // on_done_cb(result, bytes) 报进度/结果
 #endif
+        break;
+    }
+    case SHARE_ING:
+        break;
+    case SHARE_DONE:
+    case SHARE_FAIL:
+    {
+        share_file_status = SHARE_DEFAULT;
+        if (is_link_error)
+        {
+            is_link_error = false;
+            dev_mode = MODE_DEFAULT;
+            msg_2_regenerate_view(NULL);
+        }
+        else
+        {
+            gui_img_set_src(obj, "/image/dev_send_icon.bin", IMG_SRC_FILESYS);
+            gui_fb_change();
+        }
+        break;
+    }
+    
+    default:
+        break;
+    }
 }
 
 static void click_button_2_connect(void *obj, gui_event_t *e)
@@ -1800,6 +1902,8 @@ static void click_button_2_disconnect(void *obj, gui_event_t *e)
     GUI_UNUSED(obj);
     GUI_UNUSED(e);
 
+    if (share_file_status == SHARE_ING) return;
+
 #ifndef _HONEYGUI_SIMULATOR_
     if (hmi_ble_central_disconnect())
     {
@@ -1813,6 +1917,7 @@ static void click_button_2_disconnect(void *obj, gui_event_t *e)
     if (gui_view_get_next() == NULL)
     {
         dev_mode = MODE_DEFAULT;
+        share_file_status = SHARE_DEFAULT;
         gui_view_t *view_current = gui_view_get_current();
         gui_obj_t *dev_send = gui_list_entry(view_current->base.child_list.next, gui_obj_t, brother_list);
         gui_obj_t *dev_disconn = gui_list_entry(dev_send->brother_list.next, gui_obj_t, brother_list);
@@ -1856,17 +1961,41 @@ void switch_in_mainface_list(gui_view_t *view)
     }
 
     pic_size = 160;
-    gui_list_t *lst_mainface = gui_list_create((gui_obj_t *)view, "lst_mainface", -pic_size / 2, 0, screen_size + pic_size, screen_size, 
-                                pic_size, screen_size / 2 - pic_size, HORIZONTAL, lst_mainface_note_design, NULL, false);
-    gui_list_set_style(lst_mainface, LIST_ZOOM);
-    gui_list_set_note_num(lst_mainface, mainface_num);
-    gui_list_set_auto_align(lst_mainface, true);
-    gui_list_enable_loop(lst_mainface, true);
-    gui_list_set_inertia(lst_mainface, false);
-    gui_list_set_offset(lst_mainface, (screen_size / 2) * (1 - list_index));
+    if (mainface_num == 1)
+    {
+        uint16_t pic_size = 160;
+        uint16_t img_x = (screen_size - pic_size) / 2;
+        uint16_t img_y = (screen_size - pic_size) / 4;
 
-    gui_obj_create_timer((void *)lst_mainface, 10, true, list_timer_cb);
-    gui_obj_start_timer((void *)lst_mainface);
+    #ifdef _HONEYGUI_SIMULATOR_
+        gui_img_t *img = gui_img_create_from_fs(view, 0, mainface_list[mainface_idx].img_preview, img_x, img_y, 0, 0);
+    #else
+        gui_img_t *img = NULL;
+        if (((uint32_t)mainface_list[mainface_idx].data) >= USER_RESOURCE_ADDR && ((uint32_t)mainface_list[mainface_idx].data) < (USER_RESOURCE_ADDR_END))
+        {
+            img = gui_img_create_from_mem(view, 0, mainface_list[mainface_idx].img_preview, img_x, img_y, 0, 0);
+        }
+        else
+        {
+            img = gui_img_create_from_fs(view, 0, mainface_list[mainface_idx].img_preview, img_x, img_y, 0, 0);
+        }
+    #endif
+        gui_img_set_mode(img, IMG_SRC_OVER_MODE);
+    }
+    else
+    {
+        gui_list_t *lst_mainface = gui_list_create((gui_obj_t *)view, "lst_mainface", -pic_size / 2, 0, screen_size + pic_size, screen_size, 
+                                pic_size, screen_size / 2 - pic_size, HORIZONTAL, lst_mainface_note_design, NULL, false);
+        gui_list_set_style(lst_mainface, LIST_CIRCLE);
+        gui_list_set_note_num(lst_mainface, mainface_num * 2);
+        gui_list_set_auto_align(lst_mainface, true);
+        gui_list_enable_loop(lst_mainface, true);
+        gui_list_set_inertia(lst_mainface, false);
+        gui_list_set_offset(lst_mainface, (screen_size / 2) * (1 - list_index));
+
+        gui_obj_create_timer((void *)lst_mainface, 10, true, list_timer_cb);
+        gui_obj_start_timer((void *)lst_mainface);
+    }
 
     gui_color_t bg_color;
     bg_color.color.argb_full = mainface_list[list_index].color;

@@ -54,6 +54,7 @@ char bd_addr_array[BD_NUM_MAX][20] =
     "00:10:20:30:40:51",
     "00:10:20:30:40:52",
 };
+static char bd_addr_str[20] = "11:22:33:44:55:66";
 uint8_t bd_dev_num = 3;
 
 void click_share_image_button(void *obj, gui_event_t *e)
@@ -84,10 +85,13 @@ static void re_scan_dev(void *obj, gui_event_t *e)
 {
     GUI_UNUSED(obj);
     GUI_UNUSED(e);
-    if (dev_mode == MODE_DEFAULT) return;
-    gui_obj_t *parent = ((gui_obj_t *)obj)->parent;
-    gui_obj_child_free(parent);
-    gui_view_create(parent, "ShareConnView", 0, 0, 0, 0);
+    if (dev_mode == MODE_DEFAULT)
+    {
+        gui_obj_t *parent = ((gui_obj_t *)obj)->parent;
+        gui_obj_child_free(parent);
+        dev_mode = MODE_SHARE;
+        gui_view_create(parent, "ShareConnView", 0, 0, 0, 0);
+    }
 }
 
 void switch_in_share_view(gui_view_t *view)
@@ -99,9 +103,23 @@ void switch_in_share_view(gui_view_t *view)
 #ifndef _HONEYGUI_SIMULATOR_
         extern bool hmi_ble_central_start_scan(void);
         hmi_ble_central_start_scan(); 
-        gui_log("hmi_ble_central_start_scan\n");
+        gui_log("hmi_ble_central_start_scan....\n");
 #endif
     }
+
+#ifndef _HONEYGUI_SIMULATOR_
+    extern bool hmi_ble_gap_get_local_addr(uint8_t bd_addr[6]);
+    uint8_t bd_local_addr[6];
+    hmi_ble_gap_get_local_addr(bd_local_addr);
+    sprintf(bd_addr_str, "%02x:%02x:%02x:%02x:%02x:%02x", bd_local_addr[5]&0xff, bd_local_addr[4]&0xff, bd_local_addr[3]&0xff,bd_local_addr[2]&0xff, bd_local_addr[1]&0xff, bd_local_addr[0]&0xff);
+
+    // extern bool hmi_ble_gap_get_local_name(char *buf, uint8_t buf_len);
+    // char local_name[32];
+    // hmi_ble_gap_get_local_name(local_name, sizeof(local_name));
+    // gui_log("local name %s\n", local_name);
+    // gui_log("local addr %02x:%02x:%02x:%02x:%02x:%02x\n", bd_local_addr[5]&0xff, bd_local_addr[4]&0xff, bd_local_addr[3]&0xff,bd_local_addr[2]&0xff, bd_local_addr[1]&0xff, bd_local_addr[0]&0xff);
+#endif
+    gui_text_content_set(bd_addr_self, bd_addr_str, strlen(bd_addr_str));
 
     gui_obj_add_event_cb(view, (gui_event_cb_t)re_scan_dev, GUI_EVENT_TOUCH_CLICKED, NULL);
 }
@@ -109,6 +127,12 @@ void switch_in_share_view(gui_view_t *view)
 void switch_out_share_view(gui_view_t *view)
 {
     GUI_UNUSED(view);
+
+// #ifndef _HONEYGUI_SIMULATOR_
+//     bool hmi_ble_central_stop_scan(void);
+//     hmi_ble_central_stop_scan();
+// #endif
+    // gui_log("hmi_ble_central_stop_scan....\n");
     dev_mode = MODE_DEFAULT;
 }
 
@@ -128,6 +152,7 @@ void click_2_conn_dev_by_idx(void *obj, gui_event_t *e)
     bool res = hmi_ble_central_connect(index);
     if (res)
     {
+        gui_log("hmi_ble_central_connect success\n");
         dev_mode = MODE_SHARE;
         is_dev_connect = true;
         gui_view_switch_direct(gui_view_get_current(), "view_mainface_list", SWITCH_OUT_NONE_ANIMATION, SWITCH_IN_NONE_ANIMATION);
