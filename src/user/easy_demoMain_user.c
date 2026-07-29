@@ -367,6 +367,7 @@ void win_timer_gsensor_cb(void *obj)
     {
         shake_sample_count = 0;
         shake_direction = 0;
+        filter_valid = false;
         return;
     }
 
@@ -395,11 +396,11 @@ void win_timer_gsensor_cb(void *obj)
         int32_t abs_y = linear_y < 0 ? -linear_y : linear_y;
         int32_t abs_z = linear_z < 0 ? -linear_z : linear_z;
 
-        const int32_t shake_threshold = 300;
-        const int32_t strong_shake_threshold = 400;
-        const int32_t quiet_threshold = 80;
+        const int32_t shake_threshold = 250;
+        const int32_t strong_shake_threshold = 350;
+        const int32_t quiet_threshold = 50;
         const uint8_t shake_confirm_score = 3;
-        const uint8_t quiet_confirm_samples = 1;
+        const uint8_t quiet_confirm_samples = 2;
 
         /* Let the gravity filter settle for about 240 ms after startup. */
         if (filter_warmup_count < 8)
@@ -462,15 +463,15 @@ void win_timer_gsensor_cb(void *obj)
             shake_sample_count = 0;
             quiet_sample_count = 0;
 
-            if (direction > 0)
+            if (direction < 0)
             {
                 gui_view_switch_direct(view_current, view_r, SWITCH_INIT_STATE,
-                                       SWITCH_IN_ANIMATION_RASTER_HORIZONTAL);
+                                       SWITCH_IN_ANIMATION_RASTER_HORIZONTAL_REVERSE);
             }
             else
             {
                 gui_view_switch_direct(view_current, view_l, SWITCH_INIT_STATE,
-                                       SWITCH_IN_ANIMATION_RASTER_HORIZONTAL_REVERSE);
+                                       SWITCH_IN_ANIMATION_RASTER_HORIZONTAL);
             }
         }
     }
@@ -562,6 +563,7 @@ void switch_mainface(gui_obj_t *parent, uint8_t idx)
         break;
     }
     gui_obj_create_timer((void *)win, 20, true, timer_cb);
+    gui_obj_start_timer((void *)win);
 
     if (mainface_num == 0)
     {
@@ -702,7 +704,7 @@ void switch_mainface(gui_obj_t *parent, uint8_t idx)
     case SRC_FLIP_COIN:
     {
         extern void flip_coin_init(gui_obj_t *parent);
-        flip_coin_init(parent);
+        flip_coin_init((void *)win);
         break;
     }
         
@@ -1865,6 +1867,7 @@ static void click_button_2_share(void *obj, gui_event_t *e)
          * returning true only meant "connecting"; a send before READY is
          * rejected by hmi_ble_central_send_file() and the progress arc would
          * otherwise freeze at 0 (bytes/total = 0/0). */
+        extern bool hmi_ble_central_is_ready(void);
         if (!hmi_ble_central_is_ready())
         {
             gui_log("share: central link not READY, refuse send\n");

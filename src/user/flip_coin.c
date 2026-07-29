@@ -13,6 +13,7 @@ static bool coin_status = true; // true: positive, false: negative
 static bool coin_flipping = false;
 static uint32_t xorshift_state = 0x2545F491u;
 
+static void gsensor_cb(void *obj);
 static uint32_t xorshift32(void)
 {
     uint32_t x = xorshift_state;
@@ -26,12 +27,13 @@ static uint32_t xorshift32(void)
 static void img_cb(void *obj)
 {
     gui_obj_t *img = obj;
-    gui_lite_video_t *vid = (void *)gui_list_entry(img->brother_list.next, gui_obj_t, brother_list);
+    gui_lite_video_t *vid = (void *)gui_list_entry(img->parent->child_list.prev, gui_obj_t, brother_list);
     if (vid->state == GUI_VIDEO_STATE_STOP)
     {
         coin_flipping = false;
         gui_obj_tree_free_async(vid);
-        gui_obj_stop_timer(obj);
+        gui_obj_create_timer((void *)img, 10, true, gsensor_cb);
+        gui_obj_start_timer((void *)img);
     }
 }
 
@@ -63,14 +65,13 @@ static void click_flip_coin(void *obj, gui_event_t *e)
     gui_obj_start_timer(obj);
 }
 
-static void view_cb(void *obj)
+static void gsensor_cb(void *obj)
 {
     GUI_UNUSED(obj);
 #ifndef _HONEYGUI_SIMULATOR_
+    if (coin_flipping) return;
     extern bool gsensor_sc7a20_read_xyz(int16_t *x, int16_t *y, int16_t *z);
     static bool initialized = false;
-    static bool shake_locked = false;
-    static uint8_t quiet_count = 0;
     static int32_t gravity_x = 0;
     static int32_t gravity_y = 0;
     static int32_t gravity_z = 0;
@@ -101,27 +102,10 @@ static void view_cb(void *obj)
                      (motion_y < 0 ? -motion_y : motion_y) +
                      (motion_z < 0 ? -motion_z : motion_z);
 
-    if (shake_locked)
-    {
-        if (motion < 100)
-        {
-            if (++quiet_count >= 5)
-            {
-                shake_locked = false;
-                quiet_count = 0;
-            }
-        }
-        else
-        {
-            quiet_count = 0;
-        }
-        return;
-    }
 
     if (motion >= 500)
     {
-        shake_locked = true;
-        quiet_count = 0;
+        initialized = false;
         click_flip_coin(obj, NULL);
     }
 #endif
@@ -148,8 +132,8 @@ void flip_coin_init(gui_obj_t *parent)
     }
     gui_img_t *img = gui_img_create_from_fs(parent, 0, img_addr, 0, 0, 0, 0);
     gui_img_set_mode(img, IMG_BYPASS_MODE);
-    gui_obj_create_timer(img, 10, true, view_cb);
-    gui_obj_start_timer(img);
+    gui_obj_create_timer((void *)img, 10, true, gsensor_cb);
+    gui_obj_start_timer((void *)img);
 
     gui_obj_add_event_cb(img, (gui_event_cb_t)click_flip_coin, GUI_EVENT_TOUCH_CLICKED, NULL);
 }

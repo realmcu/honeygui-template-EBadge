@@ -446,7 +446,6 @@ void easy_demoMainView_update_idx_cb(void *obj)
 {
     GUI_UNUSED(obj);
     mainface_idx = 0;
-    gui_obj_focus_set(obj);
     win_timer_0_cb(obj);
 }
 
@@ -454,7 +453,6 @@ void mainface_view_1_update_idx_cb(void *obj)
 {
     GUI_UNUSED(obj);
     mainface_idx = 1;
-    gui_obj_focus_set(obj);
     win_timer_0_cb(obj);
 }
 
@@ -462,7 +460,6 @@ void mainface_view_2_update_idx_cb(void *obj)
 {
     GUI_UNUSED(obj);
     mainface_idx = 2;
-    gui_obj_focus_set(obj);
     win_timer_0_cb(obj);
 }
 
@@ -470,7 +467,6 @@ void mainface_view_3_update_idx_cb(void *obj)
 {
     GUI_UNUSED(obj);
     mainface_idx = 3;
-    gui_obj_focus_set(obj);
     win_timer_0_cb(obj);
 }
 
@@ -478,7 +474,6 @@ void mainface_view_4_update_idx_cb(void *obj)
 {
     GUI_UNUSED(obj);
     mainface_idx = 4;
-    gui_obj_focus_set(obj);
     win_timer_0_cb(obj);
 }
 
@@ -486,7 +481,6 @@ void mainface_view_5_update_idx_cb(void *obj)
 {
     GUI_UNUSED(obj);
     mainface_idx = 5;
-    gui_obj_focus_set(obj);
     win_timer_0_cb(obj);
 }
 
@@ -494,7 +488,6 @@ void mainface_view_6_update_idx_cb(void *obj)
 {
     GUI_UNUSED(obj);
     mainface_idx = 6;
-    gui_obj_focus_set(obj);
     win_timer_0_cb(obj);
 }
 
@@ -502,7 +495,6 @@ void mainface_view_7_update_idx_cb(void *obj)
 {
     GUI_UNUSED(obj);
     mainface_idx = 7;
-    gui_obj_focus_set(obj);
     win_timer_0_cb(obj);
 }
 
@@ -510,7 +502,6 @@ void mainface_view_8_update_idx_cb(void *obj)
 {
     GUI_UNUSED(obj);
     mainface_idx = 8;
-    gui_obj_focus_set(obj);
     win_timer_0_cb(obj);
 }
 
@@ -518,7 +509,6 @@ void mainface_view_9_update_idx_cb(void *obj)
 {
     GUI_UNUSED(obj);
     mainface_idx = 9;
-    gui_obj_focus_set(obj);
     win_timer_0_cb(obj);
 }
 
