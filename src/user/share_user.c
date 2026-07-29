@@ -299,9 +299,34 @@ static void list_note_design(gui_obj_t *obj, void *param)
     gui_obj_add_event_cb(obj, (gui_event_cb_t)click_2_conn_dev_by_idx, GUI_EVENT_TOUCH_CLICKED, NULL);
 }
 
+static void SelectDevView_key_0_cb(void *obj, gui_event_t *e)
+{
+    GUI_UNUSED(obj);
+    GUI_UNUSED(e);
+    if (is_connecting) return;
+    if (strcmp(e->indev_name, "Menu") == 0)
+    {
+        gui_view_switch_direct(gui_view_get_current(), "top_view", SWITCH_OUT_NONE_ANIMATION, SWITCH_IN_NONE_ANIMATION);
+    }
+    else if (strcmp(e->indev_name, "Home") == 0)
+    {
+        gui_view_switch_direct(gui_view_get_current(), "easy_demoMainView", SWITCH_OUT_NONE_ANIMATION, SWITCH_IN_NONE_ANIMATION);
+    }
+}
+
+static void SelectDevView_slide_cb(void *obj, gui_event_t *e)
+{
+    GUI_UNUSED(obj);
+    GUI_UNUSED(e);
+    if (is_connecting) return;
+    gui_view_switch_direct(gui_view_get_current(), "top_view", SWITCH_OUT_NONE_ANIMATION, SWITCH_IN_NONE_ANIMATION);
+}
+
 void switch_in_select_dev_view(gui_view_t *view)
 {
     GUI_UNUSED(view);
+    is_connecting = false;
+    
     gui_dispdev_t *dc = gui_get_dc();
     uint16_t screen_size = dc->screen_width;
     gui_list_t *list = gui_list_create((gui_obj_t *)view, 0, 0, screen_size / 6, screen_size, screen_size, 
@@ -310,6 +335,11 @@ void switch_in_select_dev_view(gui_view_t *view)
     gui_list_set_note_num(list, bd_dev_num);
     gui_list_set_auto_align(list, true);
     gui_list_enable_loop(list, false);
+
+    gui_obj_add_event_cb((gui_obj_t *)view, (gui_event_cb_t)SelectDevView_slide_cb, GUI_EVENT_TOUCH_LEFT_SLIDE_QUICK, NULL);
+    gui_obj_add_event_cb((gui_obj_t *)view, (gui_event_cb_t)SelectDevView_slide_cb, GUI_EVENT_TOUCH_RIGHT_SLIDE_QUICK, NULL);
+    gui_obj_add_event_cb((gui_obj_t *)view, (gui_event_cb_t)SelectDevView_key_0_cb, GUI_EVENT_KB_SHORT_PRESSED, NULL);
+    gui_obj_focus_set((gui_obj_t *)view);
 }
 
 void switch_out_select_dev_view(gui_view_t *view)
