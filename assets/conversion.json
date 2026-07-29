@@ -8,83 +8,38 @@
     "videoQuality": 5
   },
   "items": {
-    "image/wallpaper_6_mid.png": {
+    "coin_flip_no.png": {
       "compression": "rle",
       "format": "RGB565"
     },
-    "image/wallpaper_6.png": {
+    "coin_flip_yes.png": {
+      "compression": "rle",
       "format": "RGB565"
     },
-    "image/wallpaper_4.png": {
-      "format": "RGB565"
-    },
-    "image/wallpaper_5.png": {
-      "format": "RGB565"
-    },
-    "image/565": {
-      "format": "RGB565",
-      "compression": "rle"
-    },
-    "image/565/wallpaper_6.png": {
-      "compression": "none"
-    },
-    "wallpaper_1.mp4": {
-      "videoFormat": "CINEPAK",
-      "videoQuality": 10,
-      "videoFrameRate": 23
-    },
-    "wallpaper_2.mp4": {
-      "videoFormat": "CINEPAK",
-      "videoFrameRate": 23,
-      "videoScale": {
-        "mode": "pixels",
-        "width": 360
-      }
-    },
-    "wallpaper_3.mp4": {
-      "videoFormat": "CINEPAK",
-      "videoFrameRate": 23
-    },
-    "smoke.mp4": {
-      "videoFormat": "CINEPAK",
-      "videoQuality": 5,
-      "videoFrameRate": 25
-    },
-    "earth_7_30.avi": {
-      "videoFormat": "H264",
-      "videoQuality": 30,
-      "videoFrameRate": 30,
-      "videoCrop": {
-        "width": 400,
-        "height": 496
-      }
-    },
-    "wallpaper_video.mp4": {
+    "coin_flip_2_no.webm": {
+      "videoFrameRate": 20,
       "videoFormat": "CINEPAK"
     },
-    "background_clean_360.jpg": {
-      "format": "RGB565",
-      "compression": "adaptive"
+    "coin_flip_2_yes.webm": {
+      "videoFormat": "CINEPAK",
+      "videoFrameRate": 20
     },
-    "foreground_360.png": {
-      "format": "ARGB8565",
-      "compression": "adaptive"
-    },
-    "foreground.png": {
-      "format": "ARGB8565",
-      "compression": "adaptive"
-    },
-    "background_clean.jpg": {
-      "format": "RGB565",
-      "compression": "adaptive"
+    "wallpaper_video.mp4": {
+      "videoFrameRate": 20,
+      "videoFormat": "CINEPAK"
     },
     "image": {
       "compression": "rle",
       "format": "ARGB8565"
     },
+    "image/shake_lot": {
+      "format": "RGB565"
+    },
     "image/A8": {
-      "format": "ARGB8565",
-      "compression": "rle"
+      "format": "ARGB8565"
+    },
+    "image/565": {
+      "format": "RGB565"
     }
   }
 }

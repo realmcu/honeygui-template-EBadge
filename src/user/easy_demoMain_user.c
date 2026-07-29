@@ -26,16 +26,16 @@
 gui_win_t *win_view = NULL;
 
 uint8_t mainface_idx = 0;
-uint8_t mainface_num = 5;
+uint8_t mainface_num = 7;
 mainface_src_t mainface_list[MAINFACE_NUM_MAX] =
 {
     {"/image/565/wallpaper_danmu.bin",      SRC_DANMU,          NULL, "/user/hello_0040F8.bin", 0xff0040F8},
     {"/user/gltf_desc_Fox.bin",             SRC_3D,             NULL, "/user/fox_40A840.bin", 0xff40A840},
     {"/foreground_360.bin",                 SRC_IMG_SPATIAL,    NULL, "/user/eva_D0C9B9.bin", 0xffD0C9B9},
+    {"/image/shake_lot/lot_start.bin",      SRC_SHAKE_LOT,      NULL, "/user/lot_BC0500.bin", 0xffBC0500},
+    {"/coin_flip_2_yes.avi",                SRC_FLIP_COIN,      NULL, "/user/coin_F8E446.bin", 0xffffffff},
     {"/wallpaper_video.avi",                SRC_VIDEO,          NULL, "/user/wsq_F4EFD9.bin", 0xffF4EFD9},
     {"/image/565/wallpaper_static_img.bin", SRC_IMG,            NULL, "/user/pig_F8C8C8.bin", 0xffF8C8C8},
-    
-
 };
 uint8_t list_index = 0;
 bool is_auto_sleep_mode = false;
@@ -361,10 +361,13 @@ void win_timer_gsensor_cb(void *obj)
     int16_t gx = 0, gy = 0, gz = 0;
 
     if (gui_view_get_next() != NULL || !enable_switch_mainface ||
-            !is_displaying_mainface)
+            !is_displaying_mainface ||
+            mainface_list[mainface_idx].type == SRC_SHAKE_LOT ||
+            mainface_list[mainface_idx].type == SRC_FLIP_COIN)
     {
         shake_sample_count = 0;
         shake_direction = 0;
+        filter_valid = false;
         return;
     }
 
@@ -393,11 +396,11 @@ void win_timer_gsensor_cb(void *obj)
         int32_t abs_y = linear_y < 0 ? -linear_y : linear_y;
         int32_t abs_z = linear_z < 0 ? -linear_z : linear_z;
 
-        const int32_t shake_threshold = 300;
-        const int32_t strong_shake_threshold = 400;
-        const int32_t quiet_threshold = 80;
+        const int32_t shake_threshold = 250;
+        const int32_t strong_shake_threshold = 350;
+        const int32_t quiet_threshold = 50;
         const uint8_t shake_confirm_score = 3;
-        const uint8_t quiet_confirm_samples = 1;
+        const uint8_t quiet_confirm_samples = 2;
 
         /* Let the gravity filter settle for about 240 ms after startup. */
         if (filter_warmup_count < 8)
@@ -460,15 +463,15 @@ void win_timer_gsensor_cb(void *obj)
             shake_sample_count = 0;
             quiet_sample_count = 0;
 
-            if (direction > 0)
+            if (direction < 0)
             {
                 gui_view_switch_direct(view_current, view_r, SWITCH_INIT_STATE,
-                                       SWITCH_IN_ANIMATION_RASTER_HORIZONTAL);
+                                       SWITCH_IN_ANIMATION_RASTER_HORIZONTAL_REVERSE);
             }
             else
             {
                 gui_view_switch_direct(view_current, view_l, SWITCH_INIT_STATE,
-                                       SWITCH_IN_ANIMATION_RASTER_HORIZONTAL_REVERSE);
+                                       SWITCH_IN_ANIMATION_RASTER_HORIZONTAL);
             }
         }
     }
@@ -560,6 +563,7 @@ void switch_mainface(gui_obj_t *parent, uint8_t idx)
         break;
     }
     gui_obj_create_timer((void *)win, 20, true, timer_cb);
+    gui_obj_start_timer((void *)win);
 
     if (mainface_num == 0)
     {
@@ -687,6 +691,20 @@ void switch_mainface(gui_obj_t *parent, uint8_t idx)
         //     }
         //     gui_view_set_bg_color((gui_view_t *)parent, bg_color);
         // }
+        break;
+    }
+    case SRC_SHAKE_LOT:
+    {
+        /* 摇签独立表盘：摇晃播放 lite video，停止后按概率出签 */
+        extern int shake_lot(gui_obj_t *parent);
+        gui_obj_t *sl_root = gui_obj_create(win, "sl_root", 0, 0, 0, 0);
+        shake_lot(sl_root);
+        break;
+    }
+    case SRC_FLIP_COIN:
+    {
+        extern void flip_coin_init(gui_obj_t *parent);
+        flip_coin_init((void *)win);
         break;
     }
         
@@ -832,7 +850,7 @@ void done_cb(T_XFER_CLIENT_RESULT result, uint32_t bytes_sent)
     }
     else if (result == XFER_CLIENT_ERR_LINK)
     {
-        dev_mode = SHARE_FAIL;
+        share_file_status = SHARE_FAIL;   /* was dev_mode -- wrong var (MODE_TYPE) */
         is_link_error = true;
     }
     else
@@ -1147,7 +1165,7 @@ void click_camera_ctl_icon(void *obj, gui_event_t *e)
 uint8_t mainface_list_init(void **data_list, uint32_t n)
 {
     uint8_t idx = 0;
-    uint8_t reserved = 3;
+    uint8_t reserved = 5;
     if (data_list == NULL || !n) return idx;
     
 
@@ -1763,7 +1781,7 @@ void img_zoom_timer_cb(void *param)
 static void prog_arc_timer(void *param)
 {
     gui_obj_t *obj = (gui_obj_t *)param;
-    gui_arc_t *arc = (gui_arc_t *)gui_list_entry(obj->child_list.next, gui_obj_t, brother_list);;
+    gui_arc_t *arc = (gui_arc_t *)gui_list_entry(obj->child_list.next, gui_obj_t, brother_list);
 #ifdef _HONEYGUI_SIMULATOR_
     static float angle = 0.f;
     angle += 40.f;
@@ -1843,11 +1861,20 @@ static void click_button_2_share(void *obj, gui_event_t *e)
     {
     case SHARE_DEFAULT:
     {
-        share_file_status = SHARE_ING;
-        gui_arc_create(obj, 0, 50, 50, 42, -90.f, -89.f, 6, gui_rgb(0xff, 0xff, 0xff));
-        gui_obj_create_timer(obj, 500, true, prog_arc_timer);
-        gui_obj_start_timer(obj);
 #ifndef _HONEYGUI_SIMULATOR_
+        /* B: gate the send on the central link being READY (connected + HMI
+         * service discovered + notify enabled).  hmi_ble_central_connect()
+         * returning true only meant "connecting"; a send before READY is
+         * rejected by hmi_ble_central_send_file() and the progress arc would
+         * otherwise freeze at 0 (bytes/total = 0/0). */
+        extern bool hmi_ble_central_is_ready(void);
+        if (!hmi_ble_central_is_ready())
+        {
+            gui_log("share: central link not READY, refuse send\n");
+            share_file_status = SHARE_FAIL;
+            is_link_error = true;
+            break;
+        }
         gui_log("\nResource %d 0x%x \n", list_index, (unsigned int)(uint32_t)mainface_list[list_index].raw);
         if ((uint32_t)mainface_list[list_index].raw < USER_RESOURCE_ADDR || (uint32_t)mainface_list[list_index].raw >= USER_RESOURCE_ADDR_END)  
         {
@@ -1857,11 +1884,24 @@ static void click_button_2_share(void *obj, gui_event_t *e)
 
         uint32_t addr = (uint32_t)mainface_list[list_index].raw;
         uint32_t len = RES_SIZE(addr);
-        gui_log("Sending file: %p, size: %d\n", (void *)addr, len);
-        hmi_ble_central_send_file(HMI_L2_XFER_TYPE_IMAGE,
+        
+        int res = hmi_ble_central_send_file(HMI_L2_XFER_TYPE_IMAGE,
                                     (const uint8_t *)addr, len,
                                     "share_0", done_cb);      // on_done_cb(result, bytes) 报进度/结果
+        gui_log("Sending file: %p, size: %d, result: %d\n", (void *)addr, len, res);
+        if (!res)
+        {
+            /* Rejected at the stack (e.g. link dropped between the READY check
+             * and here) -- surface FAIL instead of a progress arc frozen at 0. */
+            gui_log("share: send_file rejected -> mark FAIL\n");
+            share_file_status = SHARE_FAIL;
+            is_link_error = true;
+        }
 #endif
+        share_file_status = SHARE_ING;
+        gui_arc_create(obj, 0, 50, 50, 42, -90.f, -89.f, 6, gui_rgb(0xff, 0xff, 0xff));
+        gui_obj_create_timer(obj, 500, true, prog_arc_timer);
+        gui_obj_start_timer(obj);
         break;
     }
     case SHARE_ING:

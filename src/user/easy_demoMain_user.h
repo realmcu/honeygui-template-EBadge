@@ -41,6 +41,8 @@ typedef enum
     SRC_3D,
     SRC_IMG_SPATIAL,
     SRC_DANMU,
+    SRC_FLIP_COIN,
+    SRC_SHAKE_LOT,
 } MAINFACE_SRC_TYPE;
 
 #pragma pack(push, 1)  
