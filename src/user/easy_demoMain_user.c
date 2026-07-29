@@ -925,57 +925,6 @@ void click_screen_light_icon(void *obj, gui_event_t *e)
         break;
     }
     gui_img_set_src(icon_sl, img_src, IMG_SRC_FILESYS);
-#ifdef _HONEYGUI_SIMULATOR_
-    // TODO
-#else
-    // TODO
-    gui_log("click_screen_light_icon %d\n", screen_light_idx);
-    static uint8_t n = 0;
-    static bool connect = 0;
-    switch (screen_light_idx)
-    {
-    case 0:
-        break;
-    case 1:
-        hmi_ble_central_start_scan(); 
-        gui_log("hmi_ble_central_start_scan\n");
-        break;
-    case 2:
-        n = hmi_ble_central_get_dev_count();
-        gui_log("hmi_ble_central_get_dev_count %d\n", n);
-        for(uint8_t i=0; i<n; i++)
-        {
-            uint8_t idx; 
-            uint8_t bd_addr[6]; 
-            uint8_t addr_type;
-            int8_t rssi;
-            char name[32];
-            uint8_t name_len;
-            hmi_ble_central_get_dev(i, bd_addr, &addr_type, &rssi, name, sizeof(name));
-            gui_log("%d name %s %x:%x:%x:%x:%x:%x\n", i, name, bd_addr[5]&0xff, bd_addr[4]&0xff, bd_addr[3]&0xff,bd_addr[2]&0xff, bd_addr[1]&0xff, bd_addr[0]&0xff);
-        }
-        break;
-    case 3:
-        if(n && !connect)
-        {
-            connect = hmi_ble_central_connect(0);
-            gui_log("hmi_ble_central_connect %d\n", connect);
-        }
-        break;
-    case 4:
-        if(connect)
-        {
-            connect = hmi_ble_central_disconnect() ? 0:1;
-            gui_log("hmi_ble_central_disconnect %d\n", connect);
-        }
-        break;
-    case 5:
-        break;
-    default:
-        break;
-    }
-
-#endif
 }
 
 void click_delete_icon(void *obj, gui_event_t *e)
