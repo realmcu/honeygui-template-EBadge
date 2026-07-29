@@ -1819,7 +1819,7 @@ static void prog_arc_timer(void *param)
     }
     if (share_file_status == SHARE_DONE || share_file_status == SHARE_FAIL)
     {
-        gui_obj_stop_timer(obj);
+        gui_obj_delete_timer(obj);
         gui_obj_child_free(obj);
         gui_fb_change();
     }
@@ -1861,6 +1861,9 @@ static void click_button_2_share(void *obj, gui_event_t *e)
     {
     case SHARE_DEFAULT:
     {
+        gui_arc_create(obj, 0, 50, 50, 42, -90.f, -89.f, 6, gui_rgb(0xff, 0xff, 0xff));
+        gui_obj_create_timer(obj, 500, true, prog_arc_timer);
+        share_file_status = SHARE_ING;
 #ifndef _HONEYGUI_SIMULATOR_
         /* B: gate the send on the central link being READY (connected + HMI
          * service discovered + notify enabled).  hmi_ble_central_connect()
@@ -1873,10 +1876,7 @@ static void click_button_2_share(void *obj, gui_event_t *e)
             gui_log("share: central link not READY, refuse send\n");
             share_file_status = SHARE_FAIL;
             is_link_error = true;
-            gui_arc_create(obj, 0, 50, 50, 42, -90.f, -89.f, 6, gui_rgb(0xff, 0xff, 0xff));
-            gui_obj_create_timer(obj, 500, true, prog_arc_timer);
-            gui_obj_start_timer(obj);
-            break;
+            return;
         }
         gui_log("\nResource %d 0x%x \n", list_index, (unsigned int)(uint32_t)mainface_list[list_index].raw);
         if ((uint32_t)mainface_list[list_index].raw < USER_RESOURCE_ADDR || (uint32_t)mainface_list[list_index].raw >= USER_RESOURCE_ADDR_END)  
@@ -1901,10 +1901,6 @@ static void click_button_2_share(void *obj, gui_event_t *e)
             is_link_error = true;
         }
 #endif
-        share_file_status = SHARE_ING;
-        gui_arc_create(obj, 0, 50, 50, 42, -90.f, -89.f, 6, gui_rgb(0xff, 0xff, 0xff));
-        gui_obj_create_timer(obj, 500, true, prog_arc_timer);
-        gui_obj_start_timer(obj);
         break;
     }
     case SHARE_ING:

@@ -24,7 +24,6 @@
                 <events>
                     <event type="onClick">
                         <action type="callFunction" functionName="click_share_image_button" />
-                        <action type="switchView" target="ShareConnView" switchOutStyle="SWITCH_INIT_STATE" switchInStyle="SWITCH_IN_NONE_ANIMATION" />
                     </event>
                 </events>
             </hg_image>
@@ -32,7 +31,6 @@
                 <events>
                     <event type="onClick">
                         <action type="callFunction" functionName="click_receive_image_button" />
-                        <action type="switchView" target="ShareConnView" switchOutStyle="SWITCH_INIT_STATE" switchInStyle="SWITCH_IN_NONE_ANIMATION" />
                     </event>
                 </events>
             </hg_image>
