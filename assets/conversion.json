@@ -40,6 +40,17 @@
     },
     "image/565": {
       "format": "RGB565"
+    },
+    "image/shake_lot/stick.gif": {
+      "gifAsVideo": true,
+      "videoFormat": "CINEPAK",
+      "videoQuality": 5,
+      "videoFrameRate": 20,
+      "videoScale": {
+        "mode": "pixels",
+        "width": 466,
+        "height": 466
+      }
     }
   }
 }

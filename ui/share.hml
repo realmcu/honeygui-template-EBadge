@@ -63,21 +63,6 @@
             </hg_window>
             <hg_label id="bd_addr_self" x="0" y="312" width="466" height="30" hAlign="CENTER" vAlign="MID" color="#ffffff" letterSpacing="0" lineSpacing="0" wordWrap="false" wordBreak="false" text="11:11:11:11:11:11" fontFile="/font/Inter_24pt_Regular.ttf" fontSize="20" characterSets="[{&quot;type&quot;:&quot;string&quot;,&quot;value&quot;:&quot;01234567890:ABCDEF&quot;}]" zIndex="1" />
         </hg_view>
-        <hg_view id="SelectDevView" x="694" y="612" width="466" height="466" backgroundColor="#000000" borderRadius="20" padding="12" overflow="auto" entry="false" animateStep="466" switchInFunctionName="switch_in_select_dev_view" switchOutFunctionName="switch_out_select_dev_view" zIndex="1">
-            <events>
-                <event type="onSwipeLeftQuick">
-                    <action type="switchView" target="shareMainView" switchOutStyle="SWITCH_OUT_NONE_ANIMATION" switchInStyle="SWITCH_IN_NONE_ANIMATION" />
-                </event>
-                <event type="onSwipeRightQuick">
-                    <action type="switchView" target="shareMainView" switchOutStyle="SWITCH_OUT_NONE_ANIMATION" switchInStyle="SWITCH_IN_NONE_ANIMATION" />
-                </event>
-                <event type="onKeyShortPress" keyName="Menu">
-                    <action type="switchView" target="top_view" switchOutStyle="SWITCH_OUT_NONE_ANIMATION" switchInStyle="SWITCH_IN_NONE_ANIMATION" />
-                </event>
-                <event type="onKeyShortPress" keyName="Home">
-                    <action type="switchView" target="easy_demoMainView" switchOutStyle="SWITCH_OUT_NONE_ANIMATION" switchInStyle="SWITCH_IN_NONE_ANIMATION" />
-                </event>
-            </events>
-        </hg_view>
+        <hg_view id="SelectDevView" x="694" y="612" width="466" height="466" backgroundColor="#000000" borderRadius="20" padding="12" overflow="auto" entry="false" animateStep="466" switchInFunctionName="switch_in_select_dev_view" switchOutFunctionName="switch_out_select_dev_view" zIndex="1" />
     </view>
 </hml>

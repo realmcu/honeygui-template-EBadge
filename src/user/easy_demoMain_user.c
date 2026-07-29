@@ -35,7 +35,7 @@ mainface_src_t mainface_list[MAINFACE_NUM_MAX] =
     {"/image/shake_lot/lot_start.bin",      SRC_SHAKE_LOT,      NULL, "/user/lot_BC0500.bin", 0xffBC0500},
     {"/coin_flip_2_yes.avi",                SRC_FLIP_COIN,      NULL, "/user/coin_F8E446.bin", 0xffffffff},
     {"/wallpaper_video.avi",                SRC_VIDEO,          NULL, "/user/wsq_F4EFD9.bin", 0xffF4EFD9},
-    {"/image/565/wallpaper_static_img.bin", SRC_IMG,            NULL, "/user/pig_F8C8C8.bin", 0xffF8C8C8},
+    {"/image/565/wallpaper_static_img.bin", SRC_IMG,            NULL, "/user/pig_F8C8C8.bin", 0xffF8C8C8}, 
 };
 uint8_t list_index = 0;
 bool is_auto_sleep_mode = false;
@@ -353,21 +353,32 @@ void win_timer_gsensor_cb(void *obj)
     extern bool gsensor_sc7a20_read_xyz(int16_t *x, int16_t *y, int16_t *z);
     static bool filter_valid = false;
     static bool shake_locked = false;
+    static bool return_seen = false;
     static uint8_t filter_warmup_count = 0;
     static uint8_t shake_sample_count = 0;
+    static uint8_t shake_window_count = 0;
     static uint8_t quiet_sample_count = 0;
+    static uint8_t lock_sample_count = 0;
     static int8_t shake_direction = 0;
+    static int32_t gesture_start_gravity_y = 0;
+    static int32_t gesture_gravity_excursion = 0;
     static int32_t gravity_x = 0, gravity_y = 0, gravity_z = 0;
+    static int16_t previous_x = 0, previous_y = 0, previous_z = 0;
     int16_t gx = 0, gy = 0, gz = 0;
 
-    if (gui_view_get_next() != NULL || !enable_switch_mainface ||
-            !is_displaying_mainface ||
+    if (!enable_switch_mainface || !is_displaying_mainface ||
             mainface_list[mainface_idx].type == SRC_SHAKE_LOT ||
             mainface_list[mainface_idx].type == SRC_FLIP_COIN)
     {
         shake_sample_count = 0;
+        shake_window_count = 0;
+        quiet_sample_count = 0;
+        lock_sample_count = 0;
         shake_direction = 0;
+        shake_locked = false;
+        return_seen = false;
         filter_valid = false;
+        filter_warmup_count = 0;
         return;
     }
 
@@ -378,6 +389,9 @@ void win_timer_gsensor_cb(void *obj)
             gravity_x = gx;
             gravity_y = gy;
             gravity_z = gz;
+            previous_x = gx;
+            previous_y = gy;
+            previous_z = gz;
             filter_valid = true;
             return;
         }
@@ -395,15 +409,33 @@ void win_timer_gsensor_cb(void *obj)
         int32_t abs_x = linear_x < 0 ? -linear_x : linear_x;
         int32_t abs_y = linear_y < 0 ? -linear_y : linear_y;
         int32_t abs_z = linear_z < 0 ? -linear_z : linear_z;
+        int32_t delta_x = (int32_t)gx - previous_x;
+        int32_t delta_y = (int32_t)gy - previous_y;
+        int32_t delta_z = (int32_t)gz - previous_z;
+        int32_t abs_delta_x = delta_x < 0 ? -delta_x : delta_x;
+        int32_t abs_delta_y = delta_y < 0 ? -delta_y : delta_y;
+        int32_t abs_delta_z = delta_z < 0 ? -delta_z : delta_z;
+        previous_x = gx;
+        previous_y = gy;
+        previous_z = gz;
 
-        const int32_t shake_threshold = 250;
-        const int32_t strong_shake_threshold = 350;
-        const int32_t quiet_threshold = 50;
-        const uint8_t shake_confirm_score = 3;
-        const uint8_t quiet_confirm_samples = 2;
+        /* This callback is registered with a 30 ms timer. Keep all timing
+         * parameters expressed as sample counts derived from that period. */
+        const uint8_t gsensor_period_ms = 30;
+        const int32_t shake_threshold = 140;
+        const int32_t return_threshold = 120;
+        const int32_t still_delta_threshold = 80;
+        const int32_t quiet_linear_threshold = 180;
+        const int32_t impact_threshold = 1400;
+        const int32_t gravity_excursion_threshold = 240;
+        const uint8_t filter_warmup_samples = 240 / gsensor_period_ms; /* 240 ms */
+        const uint8_t gesture_window_samples = 600 / gsensor_period_ms;/* 600 ms */
+        const uint8_t lock_hold_samples = 150 / gsensor_period_ms;    /* 150 ms */
+        const uint8_t quiet_confirm_samples = 300 / gsensor_period_ms;/* 300 ms */
+        const uint8_t fallback_quiet_samples = 600 / gsensor_period_ms;/* 600 ms */
 
         /* Let the gravity filter settle for about 240 ms after startup. */
-        if (filter_warmup_count < 8)
+        if (filter_warmup_count < filter_warmup_samples)
         {
             filter_warmup_count++;
             return;
@@ -411,13 +443,41 @@ void win_timer_gsensor_cb(void *obj)
 
         if (shake_locked)
         {
-            if (abs_x < quiet_threshold && abs_y < quiet_threshold &&
-                abs_z < quiet_threshold)
+            if (lock_sample_count < lock_hold_samples)
             {
-                if (++quiet_sample_count >= quiet_confirm_samples)
+                lock_sample_count++;
+                return;
+            }
+
+            /* A normal hand return produces acceleration opposite to the
+             * triggering direction. Ignore that movement, then rearm quickly
+             * once it settles. Also allow a slow return with no clear peak. */
+            if (!return_seen &&
+                ((shake_direction > 0 && linear_y <= -return_threshold) ||
+                 (shake_direction < 0 && linear_y >= return_threshold)))
+            {
+                return_seen = true;
+                quiet_sample_count = 0;
+            }
+
+            /* Raw sample deltas show that the hand has stopped immediately;
+             * unlike high-pass values, they do not wait for gravity to settle. */
+            bool is_still = abs_delta_y < still_delta_threshold &&
+                            abs_delta_x < still_delta_threshold * 2 &&
+                            abs_delta_z < still_delta_threshold * 2 &&
+                            abs_y < quiet_linear_threshold;
+            if (is_still)
+            {
+                quiet_sample_count++;
+                uint8_t required_quiet = return_seen ? quiet_confirm_samples :
+                                         fallback_quiet_samples;
+                if (quiet_sample_count >= required_quiet)
                 {
                     shake_locked = false;
+                    return_seen = false;
                     quiet_sample_count = 0;
+                    lock_sample_count = 0;
+                    shake_direction = 0;
                 }
             }
             else
@@ -427,43 +487,106 @@ void win_timer_gsensor_cb(void *obj)
             return;
         }
 
-        /* +y is screen-left. Y only needs to be the largest linear component;
-         * a real hand shake often contains some x/z motion as well. Accumulate
-         * medium peaks in a short leaky window, or accept one strong peak. */
-        bool is_horizontal_shake = abs_y >= shake_threshold &&
-                                   abs_y >= abs_x && abs_y >= abs_z;
-        int8_t direction = linear_y > 0 ? 1 : -1;
-        if (is_horizontal_shake)
+        /* Keep processing LOCKED during the view animation so recovery can be
+         * observed, but never start a new switch while a view is transitioning. */
+        if (gui_view_get_next() != NULL)
         {
-            if (direction != shake_direction)
+            shake_sample_count = 0;
+            shake_window_count = 0;
+            shake_direction = 0;
+            return;
+        }
+
+        /* Reject only saturation-like impacts. Normal flips in the captured
+         * logs can reach about 970 on x/z, while pickup impact reached 2604. */
+        if (abs_x >= impact_threshold || abs_y >= impact_threshold ||
+            abs_z >= impact_threshold)
+        {
+            shake_sample_count = 0;
+            shake_window_count = 0;
+            shake_direction = 0;
+            gravity_x = gx;
+            gravity_y = gy;
+            gravity_z = gz;
+            return;
+        }
+
+        /* A deliberate left/right flip has two phases: acceleration toward one
+         * side, followed by opposite acceleration while the hand brakes. */
+        int8_t direction = linear_y > 0 ? 1 : -1;
+        int32_t max_cross_axis = abs_x > abs_z ? abs_x : abs_z;
+        bool is_lateral_peak = abs_y >= shake_threshold &&
+                               abs_y * 2 >= max_cross_axis;
+
+        if (shake_window_count > 0)
+        {
+            int32_t gravity_delta = gravity_y - gesture_start_gravity_y;
+            int32_t abs_gravity_delta = gravity_delta < 0 ?
+                                        -gravity_delta : gravity_delta;
+            if (abs_gravity_delta > gesture_gravity_excursion)
             {
-                shake_direction = direction;
-                shake_sample_count = 0;
+                gesture_gravity_excursion = abs_gravity_delta;
             }
 
-            shake_sample_count += abs_y >= strong_shake_threshold ? 2 : 1;
-        }
-        else if (shake_sample_count > 0)
-        {
-            /* Do not discard a valid short peak immediately. */
-            shake_sample_count--;
-        }
-        else
-        {
-            shake_direction = 0;
+            if (++shake_window_count > gesture_window_samples)
+            {
+                shake_sample_count = 0;
+                shake_window_count = 0;
+                shake_direction = 0;
+                gesture_gravity_excursion = 0;
+            }
         }
 
-        if (shake_sample_count >= shake_confirm_score)
+        if (is_lateral_peak)
+        {
+            if (shake_sample_count == 0)
+            {
+                shake_direction = direction;
+                shake_sample_count = 1;
+                shake_window_count = 1;
+                gesture_start_gravity_y = gravity_y;
+                gesture_gravity_excursion = 0;
+            }
+            else if (direction == -shake_direction)
+            {
+                int32_t gravity_y_abs = gravity_y < 0 ? -gravity_y : gravity_y;
+                int32_t start_gravity_y_abs = gesture_start_gravity_y < 0 ?
+                                              -gesture_start_gravity_y :
+                                              gesture_start_gravity_y;
+                bool crossed_side_tilt = gravity_y * gesture_start_gravity_y < 0 &&
+                                         gravity_y_abs >= gravity_excursion_threshold / 2 &&
+                                         start_gravity_y_abs >= gravity_excursion_threshold / 2;
+                bool reached_side_tilt = gesture_gravity_excursion >=
+                                         gravity_excursion_threshold &&
+                                         (gravity_y_abs >= gravity_excursion_threshold / 2 ||
+                                          start_gravity_y_abs >= gravity_excursion_threshold / 2);
+                if (crossed_side_tilt || reached_side_tilt)
+                {
+                    shake_sample_count = 2;
+                }
+                else
+                {
+                    shake_sample_count = 0;
+                    shake_window_count = 0;
+                    shake_direction = 0;
+                }
+            }
+        }
+
+        if (shake_sample_count >= 2)
         {
             gui_view_t *view_current = gui_view_get_current();
             const char *view_l = view_current->on_event[3]->descriptor->name;
             const char *view_r = view_current->on_event[2]->descriptor->name;
-            gui_view_set_animate_step(view_current, 20);
+            gui_view_set_animate_step(view_current, view_current->base.w / 25);
             shake_locked = true;
+            return_seen = false;
+            lock_sample_count = 0;
             shake_sample_count = 0;
+            shake_window_count = 0;
+            gesture_gravity_excursion = 0;
             quiet_sample_count = 0;
-
-            if (direction < 0)
+            if (shake_direction < 0)
             {
                 gui_view_switch_direct(view_current, view_r, SWITCH_INIT_STATE,
                                        SWITCH_IN_ANIMATION_RASTER_HORIZONTAL_REVERSE);
@@ -925,57 +1048,6 @@ void click_screen_light_icon(void *obj, gui_event_t *e)
         break;
     }
     gui_img_set_src(icon_sl, img_src, IMG_SRC_FILESYS);
-#ifdef _HONEYGUI_SIMULATOR_
-    // TODO
-#else
-    // TODO
-    gui_log("click_screen_light_icon %d\n", screen_light_idx);
-    static uint8_t n = 0;
-    static bool connect = 0;
-    switch (screen_light_idx)
-    {
-    case 0:
-        break;
-    case 1:
-        hmi_ble_central_start_scan(); 
-        gui_log("hmi_ble_central_start_scan\n");
-        break;
-    case 2:
-        n = hmi_ble_central_get_dev_count();
-        gui_log("hmi_ble_central_get_dev_count %d\n", n);
-        for(uint8_t i=0; i<n; i++)
-        {
-            uint8_t idx; 
-            uint8_t bd_addr[6]; 
-            uint8_t addr_type;
-            int8_t rssi;
-            char name[32];
-            uint8_t name_len;
-            hmi_ble_central_get_dev(i, bd_addr, &addr_type, &rssi, name, sizeof(name));
-            gui_log("%d name %s %x:%x:%x:%x:%x:%x\n", i, name, bd_addr[5]&0xff, bd_addr[4]&0xff, bd_addr[3]&0xff,bd_addr[2]&0xff, bd_addr[1]&0xff, bd_addr[0]&0xff);
-        }
-        break;
-    case 3:
-        if(n && !connect)
-        {
-            connect = hmi_ble_central_connect(0);
-            gui_log("hmi_ble_central_connect %d\n", connect);
-        }
-        break;
-    case 4:
-        if(connect)
-        {
-            connect = hmi_ble_central_disconnect() ? 0:1;
-            gui_log("hmi_ble_central_disconnect %d\n", connect);
-        }
-        break;
-    case 5:
-        break;
-    default:
-        break;
-    }
-
-#endif
 }
 
 void click_delete_icon(void *obj, gui_event_t *e)
@@ -1087,7 +1159,7 @@ static void mainface_list_add(void *data)
         gui_log("New passed resource  is NULL!!!!!!!!!!!!!!!!!\n");
         return ;
     }
-    PACKET_HEADER_T *header = (PACKET_HEADER_T *)info[0]; 
+    PACKET_HEADER_T *header = (PACKET_HEADER_T *)(uintptr_t)info[0]; 
 
     
     mainface_list[mainface_num].raw = (void *)header;
@@ -1308,7 +1380,7 @@ void ui_process_msg(void *arg)
 
 void ui_add_resource(uint32_t payload)
 {
-    gui_msg_t msg = {.event = GUI_EVENT_USER_DEFINE, .sub_event = ADD_MAINFACE, .cb = (gui_msg_cb)ui_process_msg, .payload = (void *)payload};    
+    gui_msg_t msg = {.event = GUI_EVENT_USER_DEFINE, .sub_event = ADD_MAINFACE, .cb = (gui_msg_cb)ui_process_msg, .payload = (void *)(uintptr_t)payload};    
     gui_send_msg_to_server(&msg);
 }
 void ui_jump_streaming(void)
@@ -1819,7 +1891,7 @@ static void prog_arc_timer(void *param)
     }
     if (share_file_status == SHARE_DONE || share_file_status == SHARE_FAIL)
     {
-        gui_obj_stop_timer(obj);
+        gui_obj_delete_timer(obj);
         gui_obj_child_free(obj);
         gui_fb_change();
     }
@@ -1861,6 +1933,9 @@ static void click_button_2_share(void *obj, gui_event_t *e)
     {
     case SHARE_DEFAULT:
     {
+        gui_arc_create(obj, 0, 50, 50, 42, -90.f, -89.f, 6, gui_rgb(0xff, 0xff, 0xff));
+        gui_obj_create_timer(obj, 500, true, prog_arc_timer);
+        share_file_status = SHARE_ING;
 #ifndef _HONEYGUI_SIMULATOR_
         /* B: gate the send on the central link being READY (connected + HMI
          * service discovered + notify enabled).  hmi_ble_central_connect()
@@ -1873,7 +1948,7 @@ static void click_button_2_share(void *obj, gui_event_t *e)
             gui_log("share: central link not READY, refuse send\n");
             share_file_status = SHARE_FAIL;
             is_link_error = true;
-            break;
+            return;
         }
         gui_log("\nResource %d 0x%x \n", list_index, (unsigned int)(uint32_t)mainface_list[list_index].raw);
         if ((uint32_t)mainface_list[list_index].raw < USER_RESOURCE_ADDR || (uint32_t)mainface_list[list_index].raw >= USER_RESOURCE_ADDR_END)  
@@ -1898,10 +1973,6 @@ static void click_button_2_share(void *obj, gui_event_t *e)
             is_link_error = true;
         }
 #endif
-        share_file_status = SHARE_ING;
-        gui_arc_create(obj, 0, 50, 50, 42, -90.f, -89.f, 6, gui_rgb(0xff, 0xff, 0xff));
-        gui_obj_create_timer(obj, 500, true, prog_arc_timer);
-        gui_obj_start_timer(obj);
         break;
     }
     case SHARE_ING:
@@ -1974,9 +2045,16 @@ static void click_button_2_disconnect(void *obj, gui_event_t *e)
     }
 }
 
+static void mainface_list_view_timer_0_cb(void *obj)
+{
+    GUI_UNUSED(obj);
+    is_displaying_mainface = false;
+}
+
 void switch_in_mainface_list(gui_view_t *view)
 {
     list_index = mainface_idx;
+    gui_obj_create_timer((void *)view, 10, true, mainface_list_view_timer_0_cb);
     gui_dispdev_t *dc = gui_get_dc();
     uint16_t screen_size = dc->screen_width;
     uint16_t pic_size = 100;

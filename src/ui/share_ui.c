@@ -158,11 +158,6 @@ static void SelectDevView_switch_in(gui_view_t *view)
     // Set background color
     gui_view_set_bg_color(view, gui_rgb(0, 0, 0));
 
-    gui_view_switch_on_event(view, "shareMainView", SWITCH_OUT_NONE_ANIMATION, SWITCH_IN_NONE_ANIMATION, GUI_EVENT_TOUCH_LEFT_SLIDE_QUICK);
-    gui_view_switch_on_event(view, "shareMainView", SWITCH_OUT_NONE_ANIMATION, SWITCH_IN_NONE_ANIMATION, GUI_EVENT_TOUCH_RIGHT_SLIDE_QUICK);
-
-    gui_obj_add_event_cb((gui_obj_t *)view, (gui_event_cb_t)SelectDevView_key_0_cb, GUI_EVENT_KB_SHORT_PRESSED, NULL);
-    gui_obj_focus_set((gui_obj_t *)view);
 
     switch_in_select_dev_view(view);
 }
