@@ -44,8 +44,8 @@
  *============================================================================*/
 
  #define SL_IMG_START_PATH   "/image/shake_lot/lot_start.bin"
-/* 摇签动画：复用当前 assets 唯一的视频（AVI，MSV1/Cinepak 自动识别）。 */
-#define SL_VIDEO_PATH   "/wallpaper_video.avi"
+/* 摇签动画 */
+#define SL_VIDEO_PATH   "/image/shake_lot/sitck.avi"
 
 #define SL_LOT_COUNT    7   /* 签的种类数 */
 

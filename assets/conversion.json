@@ -27,6 +27,15 @@
     "wallpaper_video.mp4": {
       "videoFrameRate": 20,
       "videoFormat": "CINEPAK"
+    },
+    "image/shake_lot/sitck.gif": {
+      "gifAsVideo": true,
+      "videoFormat": "CINEPAK",
+      "videoScale": {
+        "mode": "pixels",
+        "width": 360,
+        "height": 360
+      }
     }
   }
 }
