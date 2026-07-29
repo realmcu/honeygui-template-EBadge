@@ -45,7 +45,7 @@
 
  #define SL_IMG_START_PATH   "/image/shake_lot/lot_start.bin"
 /* 摇签动画 */
-#define SL_VIDEO_PATH   "/image/shake_lot/sitck.avi"
+#define SL_VIDEO_PATH   "/image/shake_lot/stick.avi"
 
 #define SL_LOT_COUNT    7   /* 签的种类数 */
 
@@ -61,7 +61,7 @@ static const char *const k_lot_img[SL_LOT_COUNT] =
     "/image/shake_lot/lot_dx.bin",
 };
 
-/* 7 种签的默认概率权重（任意正整数，按总和归一化）。留待后续修改。 */
+/* 7 种签的默认概率权重（任意正整数，按总和归一化）。。 */
 static uint16_t k_lot_weight[SL_LOT_COUNT] =
 {
     20, 22, 25, 18, 10, 4, 1,   /* 和 = 100 */

@@ -35,7 +35,7 @@ mainface_src_t mainface_list[MAINFACE_NUM_MAX] =
     {"/image/shake_lot/lot_start.bin",      SRC_SHAKE_LOT,      NULL, "/user/lot_BC0500.bin", 0xffBC0500},
     {"/coin_flip_2_yes.avi",                SRC_FLIP_COIN,      NULL, "/user/coin_F8E446.bin", 0xffffffff},
     {"/wallpaper_video.avi",                SRC_VIDEO,          NULL, "/user/wsq_F4EFD9.bin", 0xffF4EFD9},
-    {"/image/565/wallpaper_static_img.bin", SRC_IMG,            NULL, "/user/pig_F8C8C8.bin", 0xffF8C8C8},
+    {"/image/565/wallpaper_static_img.bin", SRC_IMG,            NULL, "/user/pig_F8C8C8.bin", 0xffF8C8C8}, 
 };
 uint8_t list_index = 0;
 bool is_auto_sleep_mode = false;

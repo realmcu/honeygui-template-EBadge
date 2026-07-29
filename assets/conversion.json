@@ -28,7 +28,7 @@
       "videoFrameRate": 20,
       "videoFormat": "CINEPAK"
     },
-    "image/shake_lot/sitck.gif": {
+    "image/shake_lot/stick.gif": {
       "gifAsVideo": true,
       "videoFormat": "CINEPAK",
       "videoScale": {
