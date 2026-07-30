@@ -22,7 +22,7 @@ gui_stream_t *streaming_1 = NULL;
 // Create easy_demoMainView (hg_view)
 static void easy_demoMainView_switch_out(gui_view_t *view)
 {
-    GUI_UNUSED(view);
+    switch_out_mainface(view);
 }
 
 static void easy_demoMainView_switch_in(gui_view_t *view)
@@ -48,7 +48,7 @@ GUI_VIEW_INSTANCE("easy_demoMainView", false, easy_demoMainView_switch_in, easy_
 // Create mainface_view_1 (hg_view)
 static void mainface_view_1_switch_out(gui_view_t *view)
 {
-    GUI_UNUSED(view);
+    switch_out_mainface(view);
 }
 
 static void mainface_view_1_switch_in(gui_view_t *view)
@@ -74,7 +74,7 @@ GUI_VIEW_INSTANCE("mainface_view_1", false, mainface_view_1_switch_in, mainface_
 // Create mainface_view_2 (hg_view)
 static void mainface_view_2_switch_out(gui_view_t *view)
 {
-    GUI_UNUSED(view);
+    switch_out_mainface(view);
 }
 
 static void mainface_view_2_switch_in(gui_view_t *view)
@@ -97,188 +97,6 @@ static void mainface_view_2_switch_in(gui_view_t *view)
 }
 GUI_VIEW_INSTANCE("mainface_view_2", false, mainface_view_2_switch_in, mainface_view_2_switch_out, true);
 
-// Create mainface_view_3 (hg_view)
-static void mainface_view_3_switch_out(gui_view_t *view)
-{
-    GUI_UNUSED(view);
-}
-
-static void mainface_view_3_switch_in(gui_view_t *view)
-{
-    // Set animation step
-    gui_view_set_animate_step(view, 36);
-
-    // Set opacity
-    gui_view_set_opacity(view, 255);
-
-    // Set background color
-    gui_view_set_bg_color(view, gui_rgb(0, 0, 0));
-
-
-    gui_obj_add_event_cb((gui_obj_t *)view, (gui_event_cb_t)mainface_view_3_key_0_cb, GUI_EVENT_KB_SHORT_PRESSED, NULL);
-    gui_obj_add_event_cb((gui_obj_t *)view, (gui_event_cb_t)mainface_view_3_key_1_cb, GUI_EVENT_KB_LONG_PRESSED, NULL);
-    gui_obj_focus_set((gui_obj_t *)view);
-
-    switch_in_mainface_3(view);
-}
-GUI_VIEW_INSTANCE("mainface_view_3", false, mainface_view_3_switch_in, mainface_view_3_switch_out, true);
-
-// Create mainface_view_4 (hg_view)
-static void mainface_view_4_switch_out(gui_view_t *view)
-{
-    GUI_UNUSED(view);
-}
-
-static void mainface_view_4_switch_in(gui_view_t *view)
-{
-    // Set animation step
-    gui_view_set_animate_step(view, 36);
-
-    // Set opacity
-    gui_view_set_opacity(view, 255);
-
-    // Set background color
-    gui_view_set_bg_color(view, gui_rgb(0, 0, 0));
-
-
-    gui_obj_add_event_cb((gui_obj_t *)view, (gui_event_cb_t)mainface_view_4_key_0_cb, GUI_EVENT_KB_SHORT_PRESSED, NULL);
-    gui_obj_add_event_cb((gui_obj_t *)view, (gui_event_cb_t)mainface_view_4_key_1_cb, GUI_EVENT_KB_LONG_PRESSED, NULL);
-    gui_obj_focus_set((gui_obj_t *)view);
-
-    switch_in_mainface_4(view);
-}
-GUI_VIEW_INSTANCE("mainface_view_4", false, mainface_view_4_switch_in, mainface_view_4_switch_out, true);
-
-// Create mainface_view_5 (hg_view)
-static void mainface_view_5_switch_out(gui_view_t *view)
-{
-    GUI_UNUSED(view);
-}
-
-static void mainface_view_5_switch_in(gui_view_t *view)
-{
-    // Set animation step
-    gui_view_set_animate_step(view, 36);
-
-    // Set opacity
-    gui_view_set_opacity(view, 255);
-
-    // Set background color
-    gui_view_set_bg_color(view, gui_rgb(0, 0, 0));
-
-
-    gui_obj_add_event_cb((gui_obj_t *)view, (gui_event_cb_t)mainface_view_5_key_0_cb, GUI_EVENT_KB_SHORT_PRESSED, NULL);
-    gui_obj_add_event_cb((gui_obj_t *)view, (gui_event_cb_t)mainface_view_5_key_1_cb, GUI_EVENT_KB_LONG_PRESSED, NULL);
-    gui_obj_focus_set((gui_obj_t *)view);
-
-    switch_in_mainface_5(view);
-}
-GUI_VIEW_INSTANCE("mainface_view_5", false, mainface_view_5_switch_in, mainface_view_5_switch_out, true);
-
-// Create mainface_view_6 (hg_view)
-static void mainface_view_6_switch_out(gui_view_t *view)
-{
-    GUI_UNUSED(view);
-}
-
-static void mainface_view_6_switch_in(gui_view_t *view)
-{
-    // Set animation step
-    gui_view_set_animate_step(view, 36);
-
-    // Set opacity
-    gui_view_set_opacity(view, 255);
-
-    // Set background color
-    gui_view_set_bg_color(view, gui_rgb(0, 0, 0));
-
-
-    gui_obj_add_event_cb((gui_obj_t *)view, (gui_event_cb_t)mainface_view_6_key_0_cb, GUI_EVENT_KB_SHORT_PRESSED, NULL);
-    gui_obj_add_event_cb((gui_obj_t *)view, (gui_event_cb_t)mainface_view_6_key_1_cb, GUI_EVENT_KB_LONG_PRESSED, NULL);
-    gui_obj_focus_set((gui_obj_t *)view);
-
-    switch_in_mainface_6(view);
-}
-GUI_VIEW_INSTANCE("mainface_view_6", false, mainface_view_6_switch_in, mainface_view_6_switch_out, true);
-
-// Create mainface_view_7 (hg_view)
-static void mainface_view_7_switch_out(gui_view_t *view)
-{
-    GUI_UNUSED(view);
-}
-
-static void mainface_view_7_switch_in(gui_view_t *view)
-{
-    // Set animation step
-    gui_view_set_animate_step(view, 36);
-
-    // Set opacity
-    gui_view_set_opacity(view, 255);
-
-    // Set background color
-    gui_view_set_bg_color(view, gui_rgb(0, 0, 0));
-
-
-    gui_obj_add_event_cb((gui_obj_t *)view, (gui_event_cb_t)mainface_view_7_key_0_cb, GUI_EVENT_KB_SHORT_PRESSED, NULL);
-    gui_obj_add_event_cb((gui_obj_t *)view, (gui_event_cb_t)mainface_view_7_key_1_cb, GUI_EVENT_KB_LONG_PRESSED, NULL);
-    gui_obj_focus_set((gui_obj_t *)view);
-
-    switch_in_mainface_7(view);
-}
-GUI_VIEW_INSTANCE("mainface_view_7", false, mainface_view_7_switch_in, mainface_view_7_switch_out, true);
-
-// Create mainface_view_8 (hg_view)
-static void mainface_view_8_switch_out(gui_view_t *view)
-{
-    GUI_UNUSED(view);
-}
-
-static void mainface_view_8_switch_in(gui_view_t *view)
-{
-    // Set animation step
-    gui_view_set_animate_step(view, 36);
-
-    // Set opacity
-    gui_view_set_opacity(view, 255);
-
-    // Set background color
-    gui_view_set_bg_color(view, gui_rgb(0, 0, 0));
-
-
-    gui_obj_add_event_cb((gui_obj_t *)view, (gui_event_cb_t)mainface_view_8_key_0_cb, GUI_EVENT_KB_SHORT_PRESSED, NULL);
-    gui_obj_add_event_cb((gui_obj_t *)view, (gui_event_cb_t)mainface_view_8_key_1_cb, GUI_EVENT_KB_LONG_PRESSED, NULL);
-    gui_obj_focus_set((gui_obj_t *)view);
-
-    switch_in_mainface_8(view);
-}
-GUI_VIEW_INSTANCE("mainface_view_8", false, mainface_view_8_switch_in, mainface_view_8_switch_out, true);
-
-// Create mainface_view_9 (hg_view)
-static void mainface_view_9_switch_out(gui_view_t *view)
-{
-    GUI_UNUSED(view);
-}
-
-static void mainface_view_9_switch_in(gui_view_t *view)
-{
-    // Set animation step
-    gui_view_set_animate_step(view, 36);
-
-    // Set opacity
-    gui_view_set_opacity(view, 255);
-
-    // Set background color
-    gui_view_set_bg_color(view, gui_rgb(0, 0, 0));
-
-
-    gui_obj_add_event_cb((gui_obj_t *)view, (gui_event_cb_t)mainface_view_9_key_0_cb, GUI_EVENT_KB_SHORT_PRESSED, NULL);
-    gui_obj_add_event_cb((gui_obj_t *)view, (gui_event_cb_t)mainface_view_9_key_1_cb, GUI_EVENT_KB_LONG_PRESSED, NULL);
-    gui_obj_focus_set((gui_obj_t *)view);
-
-    switch_in_mainface_9(view);
-}
-GUI_VIEW_INSTANCE("mainface_view_9", false, mainface_view_9_switch_in, mainface_view_9_switch_out, true);
-
 // Create top_view (hg_view)
 static void top_view_switch_out(gui_view_t *view)
 {
@@ -296,10 +114,6 @@ static void top_view_switch_in(gui_view_t *view)
     // Set background color
     gui_view_set_bg_color(view, gui_rgb(0, 0, 0));
 
-    // Bind timer: 动画 1
-    gui_obj_create_timer((gui_obj_t *)view, 1000, true, top_view_timer_0_cb);
-
-    GUI_UNUSED(view);
 
 
     // Create bg_circle (hg_image)
@@ -355,6 +169,8 @@ static void top_view_switch_in(gui_view_t *view)
     gui_obj_add_event_cb((gui_obj_t *)view, (gui_event_cb_t)top_view_key_0_cb, GUI_EVENT_KB_SHORT_PRESSED, NULL);
     gui_obj_add_event_cb((gui_obj_t *)view, (gui_event_cb_t)top_view_key_1_cb, GUI_EVENT_KB_LONG_PRESSED, NULL);
     gui_obj_focus_set((gui_obj_t *)view);
+
+    switch_in_top_view(view);
 }
 GUI_VIEW_INSTANCE("top_view", false, top_view_switch_in, top_view_switch_out, false);
 
@@ -375,14 +191,14 @@ static void view_cam_ctl_switch_in(gui_view_t *view)
     // Set background color
     gui_view_set_bg_color(view, gui_rgb(0, 0, 0));
 
-    gui_view_switch_on_event(view, "easy_demoMainView", SWITCH_OUT_NONE_ANIMATION, SWITCH_IN_NONE_ANIMATION, GUI_EVENT_TOUCH_LEFT_SLIDE_QUICK);
-    gui_view_switch_on_event(view, "easy_demoMainView", SWITCH_OUT_NONE_ANIMATION, SWITCH_IN_NONE_ANIMATION, GUI_EVENT_TOUCH_RIGHT_SLIDE_QUICK);
 
 
     // Create streaming_1 (hg_streaming)
     streaming_1 = gui_stream_create((gui_obj_t *)view, "streaming_1", GUI_STREAM_CODEC_H264, gui_stream_transport_get(), 0, 0, 368, 368);
     gui_stream_set_update_interval((gui_stream_t *)streaming_1, 10);
     gui_stream_set_state((gui_stream_t *)streaming_1, GUI_VIDEO_STATE_PLAYING);
+
+    switch_in_view_cam_ctl(view);
 }
 GUI_VIEW_INSTANCE("view_cam_ctl", false, view_cam_ctl_switch_in, view_cam_ctl_switch_out, false);
 
