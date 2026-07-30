@@ -838,10 +838,15 @@ void switch_mainface(gui_obj_t *parent, uint8_t idx)
     bg_color.color.argb_full = mainface_list[mainface_idx].color;
     gui_view_set_bg_color((gui_view_t *)parent, bg_color);
     
-    gui_img_t *img = gui_img_create_from_fs(win, 0, "/image/lock_icon.bin", 90, 90, 0, 0);
-    gui_obj_hidden((gui_obj_t *)img, true);
-    img = gui_img_create_from_fs(win, 0, prog_arc_array[0], 90, 90, 0, 0);
-    gui_obj_hidden((gui_obj_t *)img, true);
+    /* lock icon & prog_arc */
+    {
+        int16_t img_size = 180;
+        int16_t pos = (screen_size - img_size) / 2;
+        gui_img_t *img = gui_img_create_from_fs(win, 0, "/image/lock_icon.bin", pos, pos, 0, 0);
+        gui_obj_hidden((gui_obj_t *)img, true);
+        img = gui_img_create_from_fs(win, 0, prog_arc_array[0], pos, pos, 0, 0);
+        gui_obj_hidden((gui_obj_t *)img, true);
+    }
 
     if (dev_mode != MODE_DELETE && !enable_switch_mainface) return;
 

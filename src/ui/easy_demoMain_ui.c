@@ -423,7 +423,7 @@ static void view_fl_switch_in(gui_view_t *view)
     gui_view_set_opacity(view, 255);
 
     // Set background color
-    gui_view_set_bg_color(view, gui_rgb(0, 0, 0));
+    gui_view_set_bg_color(view, gui_rgb(255, 255, 255));
 
     // Bind timer: 动画 1
     gui_obj_create_timer((gui_obj_t *)view, 10, true, view_fl_timer_0_cb);
