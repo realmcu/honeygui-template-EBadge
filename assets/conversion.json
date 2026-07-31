@@ -36,6 +36,18 @@
         "width": 360,
         "height": 360
       }
+    },
+    "image/dice": {
+      "format": "ARGB8565",
+      "compression": "adaptive"
+    },
+    "image/dice/floor_bg_360.png": {
+      "format": "RGB565",
+      "compression": "adaptive"
+    },
+    "image/stream": {
+      "format": "ARGB8565",
+      "compression": "adaptive"
     }
   }
 }

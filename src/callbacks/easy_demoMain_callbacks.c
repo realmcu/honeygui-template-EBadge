@@ -143,6 +143,27 @@ void icon_cam_clicked_cb(void *obj, gui_event_t *e)
     gui_view_switch_direct(gui_view_get_current(), "view_cam_ctl", SWITCH_OUT_NONE_ANIMATION, SWITCH_IN_NONE_ANIMATION);
 }
 
+void img_shutter_clicked_cb(void *obj, gui_event_t *e)
+{
+    GUI_UNUSED(obj);
+    GUI_UNUSED(e);
+    click_camera_shutter(obj, e);
+}
+
+void img_1x_clicked_cb(void *obj, gui_event_t *e)
+{
+    GUI_UNUSED(obj);
+    GUI_UNUSED(e);
+    click_camera_1x(obj, e);
+}
+
+void img_2x_clicked_cb(void *obj, gui_event_t *e)
+{
+    GUI_UNUSED(obj);
+    GUI_UNUSED(e);
+    click_camera_2x(obj, e);
+}
+
 void view_fl_key_0_cb(void *obj, gui_event_t *e)
 {
     GUI_UNUSED(obj);

@@ -17,6 +17,10 @@ gui_img_t *icon_as = NULL;
 gui_img_t *icon_cam = NULL;
 gui_text_t *lbl_1 = NULL;
 gui_stream_t *streaming_1 = NULL;
+gui_img_t *img_shutter = NULL;
+gui_img_t *img_19 = NULL;
+gui_img_t *img_1x = NULL;
+gui_img_t *img_2x = NULL;
 
 
 // Create easy_demoMainView (hg_view)
@@ -191,6 +195,8 @@ static void view_cam_ctl_switch_in(gui_view_t *view)
     // Set background color
     gui_view_set_bg_color(view, gui_rgb(0, 0, 0));
 
+    gui_view_switch_on_event(view, "easy_demoMainView", SWITCH_OUT_NONE_ANIMATION, SWITCH_IN_NONE_ANIMATION, GUI_EVENT_TOUCH_LEFT_SLIDE_QUICK);
+    gui_view_switch_on_event(view, "easy_demoMainView", SWITCH_OUT_NONE_ANIMATION, SWITCH_IN_NONE_ANIMATION, GUI_EVENT_TOUCH_RIGHT_SLIDE_QUICK);
 
 
     // Create streaming_1 (hg_streaming)
@@ -198,7 +204,20 @@ static void view_cam_ctl_switch_in(gui_view_t *view)
     gui_stream_set_update_interval((gui_stream_t *)streaming_1, 10);
     gui_stream_set_state((gui_stream_t *)streaming_1, GUI_VIDEO_STATE_PLAYING);
 
-    switch_in_view_cam_ctl(view);
+    // Create img_shutter (hg_image)
+    img_shutter = gui_img_create_from_fs((gui_obj_t *)view, "img_shutter", "/image/stream/shutter.bin", 130, 248, 100, 100);
+    gui_obj_add_event_cb(img_shutter, (gui_event_cb_t)img_shutter_clicked_cb, GUI_EVENT_TOUCH_CLICKED, NULL);
+
+    // Create img_19 (hg_image)
+    img_19 = gui_img_create_from_fs((gui_obj_t *)view, "img_19", "/image/stream/bg.bin", 237, 197, 110, 125);
+
+    // Create img_1x (hg_image)
+    img_1x = gui_img_create_from_fs((gui_obj_t *)view, "img_1x", "/image/stream/1x_hl.bin", 250, 259, 50, 50);
+    gui_obj_add_event_cb(img_1x, (gui_event_cb_t)img_1x_clicked_cb, GUI_EVENT_TOUCH_CLICKED, NULL);
+
+    // Create img_2x (hg_image)
+    img_2x = gui_img_create_from_fs((gui_obj_t *)view, "img_2x", "/image/stream/2x_df.bin", 284, 210, 50, 50);
+    gui_obj_add_event_cb(img_2x, (gui_event_cb_t)img_2x_clicked_cb, GUI_EVENT_TOUCH_CLICKED, NULL);
 }
 GUI_VIEW_INSTANCE("view_cam_ctl", false, view_cam_ctl_switch_in, view_cam_ctl_switch_out, false);
 

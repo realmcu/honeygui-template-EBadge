@@ -26,5 +26,9 @@ extern gui_img_t *icon_as;
 extern gui_img_t *icon_cam;
 extern gui_text_t *lbl_1;
 extern gui_stream_t *streaming_1;
+extern gui_img_t *img_shutter;
+extern gui_img_t *img_19;
+extern gui_img_t *img_1x;
+extern gui_img_t *img_2x;
 
 #endif // EASY_DEMOMAIN_UI_H

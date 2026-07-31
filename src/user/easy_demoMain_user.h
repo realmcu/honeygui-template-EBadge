@@ -44,6 +44,7 @@ typedef enum
     SRC_FLIP_COIN,
     
     SRC_SHAKE_LOT,
+    SRC_DICE
 } MAINFACE_SRC_TYPE;
 
 #pragma pack(push, 1)  
@@ -132,6 +133,10 @@ void click_delete_icon(void *obj, gui_event_t *e);
 void click_delete_icon_detail(void *obj, gui_event_t *e);
 void click_back_icon(void *obj, gui_event_t *e);
 void click_camera_ctl_icon(void *obj, gui_event_t *e);
+void click_camera_shutter(void *obj, gui_event_t *e);
+void click_camera_1x(void *obj, gui_event_t *e);
+void click_camera_2x(void *obj, gui_event_t *e);
+
 
 void switch_in_mainface_0(gui_view_t *view);
 void switch_in_mainface_1(gui_view_t *view);

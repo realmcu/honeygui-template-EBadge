@@ -26,7 +26,7 @@
 gui_win_t *win_view = NULL;
 
 uint8_t mainface_idx = 0;
-uint8_t mainface_num = 7;
+uint8_t mainface_num = 8;
 mainface_src_t mainface_list[MAINFACE_NUM_MAX] =
 {
     {"/image/565/wallpaper_danmu.bin",      SRC_DANMU,          NULL, "/user/hello_0040F8.bin", 0xff0040F8},
@@ -34,6 +34,7 @@ mainface_src_t mainface_list[MAINFACE_NUM_MAX] =
     {"/foreground_360.bin",                 SRC_IMG_SPATIAL,    NULL, "/user/eva_D0C9B9.bin", 0xffD0C9B9},
     {"/image/shake_lot/lot_start.bin",      SRC_SHAKE_LOT,      NULL, "/user/lot_BC0500.bin", 0xffBC0500},
     {"/coin_flip_2_yes.avi",                SRC_FLIP_COIN,      NULL, "/user/coin_F8E446.bin", 0xffffffff},
+    {"/coin_flip_2_yes.avi",                SRC_DICE,      NULL, "/user/coin_F8E446.bin", 0xffffffff},
     {"/wallpaper_video.avi",                SRC_VIDEO,          NULL, "/user/wsq_F4EFD9.bin", 0xffF4EFD9},
     {"/image/565/wallpaper_static_img.bin", SRC_IMG,            NULL, "/user/pig_F8C8C8.bin", 0xffF8C8C8}, 
 };
@@ -783,6 +784,13 @@ static void switch_mainface(gui_obj_t *parent)
         flip_coin_init((void *)win);
         break;
     }
+    case SRC_DICE:
+    {
+        extern void dice_demo(gui_obj_t *parent);
+        gui_obj_t *dice_root = gui_obj_create(win, "dice_root", 0, 0, 0, 0);
+        dice_demo((void *)dice_root);
+        break;
+    }
         
     default:
         break;
@@ -1057,10 +1065,32 @@ void click_camera_ctl_icon(void *obj, gui_event_t *e)
     }
 }
 
+
+void click_camera_shutter(void *obj, gui_event_t *e)
+{
+    GUI_UNUSED(obj);
+    GUI_UNUSED(e);
+    gui_log("click shutter\n");
+}
+void click_camera_1x(void *obj, gui_event_t *e)
+{
+    GUI_UNUSED(obj);
+    GUI_UNUSED(e);
+    gui_log("click 1x\n");
+}
+void click_camera_2x(void *obj, gui_event_t *e)
+{
+    GUI_UNUSED(obj);
+    GUI_UNUSED(e);
+    gui_log("click 2x\n");
+
+}
+
+
 uint8_t mainface_list_init(void **data_list, uint32_t n)
 {
     uint8_t idx = 0;
-    uint8_t reserved = 5;
+    uint8_t reserved = 6;
     if (data_list == NULL || !n) return idx;
     
 

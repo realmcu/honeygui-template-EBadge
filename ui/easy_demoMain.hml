@@ -90,8 +90,38 @@
             </hg_image>
             <hg_label id="lbl_1" x="0" y="180" width="360" height="24" hAlign="CENTER" vAlign="MID" color="#ffffff" letterSpacing="0" lineSpacing="0" wordWrap="false" wordBreak="false" text="Auto sleep mode" fontFile="/font/Inter_24pt_SemiBold.ttf" fontSize="16" timers="[{&quot;id&quot;:&quot;timer_0&quot;,&quot;name&quot;:&quot;动画 1&quot;,&quot;enabled&quot;:true,&quot;interval&quot;:10,&quot;reload&quot;:false,&quot;mode&quot;:&quot;custom&quot;,&quot;callback&quot;:&quot;lbl_1_timer_0_cb&quot;,&quot;duration&quot;:1000,&quot;stopOnComplete&quot;:true,&quot;delayStart&quot;:0,&quot;actions&quot;:[],&quot;segments&quot;:[],&quot;runImmediately&quot;:true}]" characterSets="[{&quot;type&quot;:&quot;range&quot;,&quot;value&quot;:&quot;0x20-0x7E&quot;}]" zIndex="8" />
         </hg_view>
-        <hg_view id="view_cam_ctl" x="611" y="-416" width="360" height="360" backgroundColor="#000000" borderRadius="20" padding="12" overflow="auto" entry="false" animateStep="360" switchInFunctionName="switch_in_view_cam_ctl" zIndex="1">
-            <hg_streaming id="streaming_1" x="0" y="0" width="368" height="368" codec="h264" updateInterval="10" dropMode="none" transporter="gui_stream_transport_get()" zIndex="1" />
+        <hg_view id="view_cam_ctl" x="611" y="-416" width="360" height="360" backgroundColor="#000000" borderRadius="20" padding="12" overflow="auto" entry="false" animateStep="360" zIndex="1">
+            <events>
+                <event type="onSwipeLeftQuick">
+                    <action type="switchView" target="easy_demoMainView" switchOutStyle="SWITCH_OUT_NONE_ANIMATION" switchInStyle="SWITCH_IN_NONE_ANIMATION" />
+                </event>
+                <event type="onSwipeRightQuick">
+                    <action type="switchView" target="easy_demoMainView" switchOutStyle="SWITCH_OUT_NONE_ANIMATION" switchInStyle="SWITCH_IN_NONE_ANIMATION" />
+                </event>
+            </events>
+            <hg_streaming id="streaming_1" x="0" y="0" width="368" height="368" codec="h264" updateInterval="10" dropMode="none" transporter="gui_stream_transport_get()" zIndex="0" />
+            <hg_image id="img_shutter" x="130" y="248" width="100" height="100" src="assets/image/stream/shutter.png" zIndex="1">
+                <events>
+                    <event type="onClick">
+                        <action type="callFunction" functionName="click_camera_shutter" />
+                    </event>
+                </events>
+            </hg_image>
+            <hg_image id="img_19" x="237" y="197" width="110" height="125" src="assets/image/stream/bg.png" zIndex="2" />
+            <hg_image id="img_1x" x="250" y="259" width="50" height="50" src="assets/image/stream/1x_hl.png" zIndex="5">
+                <events>
+                    <event type="onClick">
+                        <action type="callFunction" functionName="click_camera_1x" />
+                    </event>
+                </events>
+            </hg_image>
+            <hg_image id="img_2x" x="284" y="210" width="50" height="50" src="assets/image/stream/2x_df.png" zIndex="6">
+                <events>
+                    <event type="onClick">
+                        <action type="callFunction" functionName="click_camera_2x" />
+                    </event>
+                </events>
+            </hg_image>
         </hg_view>
         <hg_view id="view_mainface_list" x="11" y="481" width="360" height="360" backgroundColor="#000000" borderRadius="20" padding="12" overflow="auto" entry="false" switchInFunctionName="switch_in_mainface_list" animateStep="360" zIndex="1" />
         <hg_view id="view_fl" x="-487" y="-416" width="360" height="360" backgroundColor="#FFFFFF" borderRadius="20" padding="12" overflow="auto" entry="false" animateStep="360" timers="[{&quot;id&quot;:&quot;timer_0&quot;,&quot;name&quot;:&quot;动画 1&quot;,&quot;enabled&quot;:true,&quot;interval&quot;:10,&quot;reload&quot;:true,&quot;mode&quot;:&quot;custom&quot;,&quot;callback&quot;:&quot;view_fl_timer_0_cb&quot;,&quot;duration&quot;:1000,&quot;stopOnComplete&quot;:true,&quot;delayStart&quot;:0,&quot;actions&quot;:[],&quot;segments&quot;:[],&quot;runImmediately&quot;:true}]" zIndex="2">
