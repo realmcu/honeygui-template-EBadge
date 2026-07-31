@@ -1256,7 +1256,7 @@ void ui_process_msg(void *arg)
             img_src = "/image/stream/2x_df.bin";
             gui_img_set_src(img_2x, img_src, IMG_SRC_FILESYS);
         }
-        else if(zoom_x100 = 200)
+        else if(zoom_x100 == 200)
         {
             void *img_src = "/image/stream/2x_hl.bin";
             gui_img_set_src(img_2x, img_src, IMG_SRC_FILESYS);
