@@ -1,0 +1,46 @@
+name: Mirror to Gitee
+
+on:
+  push:
+    branches: ["*"]
+    tags: ["*"]
+
+jobs:
+  mirror:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Push to Gitee
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          REPO_NAME="${{ github.event.repository.name }}"
+          GITEE_URL="https://oauth2:${{ secrets.GITEE_TOKEN }}@gitee.com/realmcu/${REPO_NAME}.git"
+
+          git remote remove gitee 2>/dev/null || true
+          git remote add gitee "$GITEE_URL"
+
+          retry() {
+            local max_attempts="$1"
+            local delay_seconds="$2"
+            shift 2
+
+            local attempt=1
+            until "$@"; do
+              if [ "$attempt" -ge "$max_attempts" ]; then
+                echo "Command failed after ${attempt} attempts: $*"
+                return 1
+              fi
+
+              echo "Command failed on attempt ${attempt}. Retrying in ${delay_seconds}s: $*"
+              sleep "$delay_seconds"
+              attempt=$((attempt + 1))
+            done
+          }
+
+          retry 3 10 git push gitee --all --force
+          retry 3 10 git push gitee --tags --force
