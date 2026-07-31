@@ -34,7 +34,7 @@ mainface_src_t mainface_list[MAINFACE_NUM_MAX] =
     {"/foreground_360.bin",                 SRC_IMG_SPATIAL,    NULL, "/user/eva_D0C9B9.bin", 0xffD0C9B9},
     {"/image/shake_lot/lot_start.bin",      SRC_SHAKE_LOT,      NULL, "/user/lot_BC0500.bin", 0xffBC0500},
     {"/coin_flip_2_yes.avi",                SRC_FLIP_COIN,      NULL, "/user/coin_F8E446.bin", 0xffffffff},
-    {"/coin_flip_2_yes.avi",                SRC_DICE,      NULL, "/user/coin_F8E446.bin", 0xffffffff},
+    {"/coin_flip_2_yes.avi",                SRC_DICE,           NULL, "/user/dice_582808.bin", 0xff582808},
     {"/wallpaper_video.avi",                SRC_VIDEO,          NULL, "/user/wsq_F4EFD9.bin", 0xffF4EFD9},
     {"/image/565/wallpaper_static_img.bin", SRC_IMG,            NULL, "/user/pig_F8C8C8.bin", 0xffF8C8C8}, 
 };
@@ -832,6 +832,7 @@ static void switch_mainface(gui_obj_t *parent)
 #else
 #include "hmi_ble_central.h"
 #include "hmi_l2.h"
+#include "hmi_l2_cmd_remote.h"
 extern bool hmi_ble_central_send_file(uint8_t type, const uint8_t *src, uint32_t total,
                                const char *fname, xfer_client_done_cb_t done_cb);
 extern bool hmi_ble_central_get_send_progress(uint32_t *bytes_sent, uint32_t *total,
@@ -1071,19 +1072,39 @@ void click_camera_shutter(void *obj, gui_event_t *e)
     GUI_UNUSED(obj);
     GUI_UNUSED(e);
     gui_log("click shutter\n");
+#ifndef _HONEYGUI_SIMULATOR_
+    /* CMD 0x0F CAPTURE (spec v2 5.1).  Do not touch local UI here -- wait for
+     * app's LAST_SHOT_READY / STATE_REPORT (spec section 2, principle 1). */
+    hmi_l2_remote_send_capture();
+#endif
 }
 void click_camera_1x(void *obj, gui_event_t *e)
 {
     GUI_UNUSED(obj);
     GUI_UNUSED(e);
     gui_log("click 1x\n");
+    void *img_src = "/image/stream/1x_hl.bin";
+    gui_img_set_src(img_1x, img_src, IMG_SRC_FILESYS);
+    img_src = "/image/stream/2x_df.bin";
+    gui_img_set_src(img_2x, img_src, IMG_SRC_FILESYS);
+
+#ifndef _HONEYGUI_SIMULATOR_
+    hmi_l2_remote_send_set_zoom(100u);   /* 1.0x */
+#endif
 }
 void click_camera_2x(void *obj, gui_event_t *e)
 {
     GUI_UNUSED(obj);
     GUI_UNUSED(e);
     gui_log("click 2x\n");
+    void *img_src = "/image/stream/2x_hl.bin";
+    gui_img_set_src(img_2x, img_src, IMG_SRC_FILESYS);
+    img_src = "/image/stream/1x_df.bin";
+    gui_img_set_src(img_1x, img_src, IMG_SRC_FILESYS);
 
+#ifndef _HONEYGUI_SIMULATOR_
+    hmi_l2_remote_send_set_zoom(200u);   /* 2.0x */
+#endif
 }
 
 
@@ -1224,6 +1245,34 @@ void ui_process_msg(void *arg)
         gui_view_create(GUI_BASE(win_view), view_rec, 0, 0, 0, 0);
         break;
     }
+    case REMOTE_CHANGE:
+    {
+        gui_log("remote change zoom %d\n", msg->payload);
+        uint16_t zoom_x100 = msg->payload;
+        if(zoom_x100 == 100)
+        {
+            void *img_src = "/image/stream/1x_hl.bin";
+            gui_img_set_src(img_1x, img_src, IMG_SRC_FILESYS);
+            img_src = "/image/stream/2x_df.bin";
+            gui_img_set_src(img_2x, img_src, IMG_SRC_FILESYS);
+        }
+        else if(zoom_x100 = 200)
+        {
+            void *img_src = "/image/stream/2x_hl.bin";
+            gui_img_set_src(img_2x, img_src, IMG_SRC_FILESYS);
+            img_src = "/image/stream/1x_df.bin";
+            gui_img_set_src(img_1x, img_src, IMG_SRC_FILESYS);
+        }
+        else
+        {
+            void *img_src = "/image/stream/1x_df.bin";
+            gui_img_set_src(img_1x, img_src, IMG_SRC_FILESYS);
+            img_src = "/image/stream/2x_df.bin";
+            gui_img_set_src(img_2x, img_src, IMG_SRC_FILESYS);
+        }
+
+        break;
+    }
         
     default:
         break;
@@ -1239,6 +1288,11 @@ void ui_add_resource(uint32_t payload)
 void ui_jump_streaming(void)
 {
     gui_msg_t msg = {.event = GUI_EVENT_USER_DEFINE, .sub_event = CAST_START, .cb = (gui_msg_cb)ui_process_msg};    
+    gui_send_msg_to_server(&msg);
+}
+void ui_remote_change(uint32_t payload)
+{
+    gui_msg_t msg = {.event = GUI_EVENT_USER_DEFINE, .sub_event = REMOTE_CHANGE, .cb = (gui_msg_cb)ui_process_msg, .payload = (void *)(uintptr_t)payload};    
     gui_send_msg_to_server(&msg);
 }
 
@@ -2043,5 +2097,60 @@ int app_stream_transport_init(void)
     gui_log("app_stream: transport ready (%u buffers x %u KB)\n",
             (unsigned)APP_STREAM_BUF_COUNT,
             (unsigned)(APP_STREAM_MAX_FRAME / 1024u));
+    return 0;
+}
+
+/*============================================================================*
+ * CMD 0x0F remote-control callbacks (spec v2 section 2, principle 2)
+ *----------------------------------------------------------------------------*
+ * State parsing itself lives in app/l2_handlers/hmi_l2_cmd_remote.c
+ * (parse_state_report -- the ONLY writer of the authoritative state mirror).
+ * UI-side wiring is just: register a callback, pull latest via getters, redraw.
+ *
+ * BEWARE: these callbacks run on the BLE / L2 RX thread, NOT on the GUI thread.
+ * Do NOT touch widgets directly here -- either only log (P0 today), or post a
+ * message to the GUI thread when you add zoom / recording indicator controls.
+ *============================================================================*/
+static void on_remote_state_changed(void)
+{
+    gui_log("remote: STATE zoom=%u.%02ux rec=%d facing=%s shot(has=%d id=%u)\n",
+            (unsigned)(hmi_l2_remote_state_zoom_x100() / 100u),
+            (unsigned)(hmi_l2_remote_state_zoom_x100() % 100u),
+            (int)hmi_l2_remote_state_recording(),
+            hmi_l2_remote_state_facing() ? "front" : "back",
+            (int)hmi_l2_remote_state_has_last_shot(),
+            (unsigned)hmi_l2_remote_state_last_shot_id());
+    /* TODO(ui): once zoom label / rec-dot widgets exist, post a redraw msg
+     * to the GUI thread from here (do NOT call widget APIs directly). */
+
+    ui_remote_change(hmi_l2_remote_state_zoom_x100());
+
+}
+
+static void on_remote_shot_ready(uint16_t shot_id)
+{
+    gui_log("remote: LAST_SHOT_READY id=%u\n", (unsigned)shot_id);
+    /* TODO(ui): pop a "new photo" hint / trigger thumbnail refresh. */
+}
+
+static void on_remote_ctrl_result(uint8_t key, uint8_t code)
+{
+    /* App rejected one of our requests (success is signaled implicitly through
+     * STATE_REPORT -- see spec section 5.2). */
+    gui_log("remote: CTRL_RESULT key=0x%02x code=0x%02x (%s)\n",
+            (unsigned)key, (unsigned)code,
+            code == 0x01 ? "unsupported" :
+            code == 0x02 ? "busy" :
+            code == 0x03 ? "out_of_range" :
+            code == 0x04 ? "not_ready" : "unknown");
+    /* TODO(ui): toast the error to the user. */
+}
+
+int app_remote_ctrl_init(void)
+{
+    hmi_l2_remote_set_state_cb(on_remote_state_changed);
+    hmi_l2_remote_set_shot_cb(on_remote_shot_ready);
+    hmi_l2_remote_set_ctrl_result_cb(on_remote_ctrl_result);
+    gui_log("app_remote: callbacks registered (CMD 0x0F)\n");
     return 0;
 }

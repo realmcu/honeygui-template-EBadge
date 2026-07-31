@@ -87,6 +87,7 @@ typedef enum
     CAST_STOP,
     CONNECT_DEV,
     DISCONNECT_DEV,
+    REMOTE_CHANGE,
 
 } UI_SUBEVENT_TYPE;
 

@@ -31,6 +31,9 @@ static int app_init(void)
     extern int app_stream_transport_init(void);
     app_stream_transport_init();
 
+    extern int app_remote_ctrl_init(void);
+    app_remote_ctrl_init();
+
 #endif
 
     extern gui_win_t *win_view;

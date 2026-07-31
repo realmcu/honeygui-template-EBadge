@@ -67,20 +67,19 @@
 #define Z_REST          0.28f   /* 落地回弹:只保留 ~8% 高度,一弹即停,消除多次小弹 */
 #define Z_STOP          4.5f    /* 回弹停止阈值:随重力抬高,末端不再碎弹 */
 
-/* ---------------- 加速度计驱动(倾斜滚动 + 甩动弹跳) ----------------
-   每帧读三轴:低通分离"重力"(设备倾斜姿态)与"运动"(晃动分量)。
-   - 重力在设备平面的两个分量 → 世界水平加速度(pos[0]左右 / pos[1]深度),骰子朝低处滚;
-   - 运动分量突增(曼哈顿距离超阈值)→ 一次"甩动",按其方向给水平冲量 + 向上弹跳。
-   轴序/符号取决于传感器在表上的安装方向,先在板子上翻正: */
+/* ---------------- 加速度计驱动(仅甩动触发,倾斜不驱动) ----------------
+   每帧读三轴,做低通得到"重力基线"(设备姿态);当前读数减去基线 = 运动分量,
+   曼哈顿距离超阈值才触发一次"甩动":按其方向给水平冲量 + 向上弹跳。
+   倾斜分量不再驱动骰子滚动 -- 静置时(哪怕板子有小倾斜)骰子始终由 align 弹簧
+   保持面着地。要动就摇,要停就放桌上。 */
 #define ACC_FULLSCALE   1024.0f  /* SC7A20 ±2g/12bit:约 1024 计数/g,用于把原始值归一化到 g */
-#define ACC_IDX_X       0        /* 用哪个轴当"世界左右"(pos[0]) */
-#define ACC_IDX_Z       1        /* 用哪个轴当"世界深度"(pos[1]) */
-#define ACC_SIGN_X      (1.0f)   /* 左右符号:倾斜方向反了就改 -1 */
-#define ACC_SIGN_Z      (1.0f)   /* 深度符号 */
-#define TILT_DEADZONE   0.07f    /* 倾斜死区(g):小于此按 0,避免静止时缓慢漂移 */
-#define TILT_ACCEL      80.0f    /* 满倾(1g)对应的水平加速度(世界单位/s²):随 GRAVITY 抬升同步加大,倾斜时"推得动" */
-#define ROLL_FRICTION   0.92f    /* 倾斜滚动每帧摩擦(<1):稍紧一点,倾斜归零后能更快停 */
-#define SHAKE_THRESHOLD 500      /* 甩动触发阈值(运动分量三轴曼哈顿距离);越大越钝 */
+#define ACC_IDX_X       0        /* shake 方向映射:哪个轴当"世界左右" */
+#define ACC_IDX_Z       1        /* shake 方向映射:哪个轴当"世界深度" */
+#define ACC_SIGN_X      (1.0f)   /* 甩动方向符号:反了就改 -1 */
+#define ACC_SIGN_Z      (1.0f)
+#define SHAKE_THRESHOLD 1500     /* 甩动触发阈值(运动分量三轴曼哈顿距离,~1.5g 峰值等价);
+                                    抬得比原 500 高很多,静态噪声(几十计数)+ 小晃动都过不了,
+                                    只有"甩"这种主动动作才能触发 */
 #define SHAKE_SCALE     900.0f   /* 甩动强度归一:motion / 此值 得 strength(≈1 为一次有力甩) */
 
 /* 模拟器预览(无加速度计):按住/拖拽=把"桌面"朝手指方向倾斜,点击一下=朝手指方向甩一把 */
@@ -140,9 +139,12 @@ static int s_thrown = 0;
 static int s_prev_press = 0;
 
 /* 本帧的倾斜输入(g 分量, [-1,1]),由 dice_handle_input 每帧写入、physics_step 读取。
-   g_tilt_gx→世界左右(pos[0]),g_tilt_gz→世界深度(pos[1]);落在死区内时为 0。 */
+   g_tilt_gx→世界左右(pos[0]),g_tilt_gz→世界深度(pos[1]);落在死区内时为 0。
+   g_tilt_active: Schmitt trigger 状态,0=当前在"静止"区间(align 弹簧起作用),
+   1=当前在"倾斜"区间(tilt 分支强赋 omega)。用高/低阈值形成迟滞,避免临界噪声二值抖动。 */
 static float g_tilt_gx = 0.0f;
 static float g_tilt_gz = 0.0f;
+static int   g_tilt_active = 0;
 
 /* ---------------- 小工具 ---------------- */
 static unsigned int s_rng = 0x1234abcdu;
@@ -359,21 +361,12 @@ static void physics_step(dice_state_t *dice, int n)
         }
 
         float tilt_mag2 = g_tilt_gx * g_tilt_gx + g_tilt_gz * g_tilt_gz;
-        if (on_ground && tilt_mag2 > 0.0f)
+        (void)tilt_mag2;
+        (void)g_tilt_active;
+        if (on_ground)
         {
-            /* 倾斜驱动:桌面朝低处倾 → 水平加速度;摩擦给终端速度并可停住。 */
-            d->vel[0] += g_tilt_gx * TILT_ACCEL * dt;
-            d->vel[1] += g_tilt_gz * TILT_ACCEL * dt;
-            d->vel[0] *= ROLL_FRICTION;
-            d->vel[1] *= ROLL_FRICTION;
-            /* 滚而非滑:角速度由水平速度决定,绕桌面内水平轴翻滚(ω = up × v / R)。 */
-            d->omega[0] =  d->vel[1] / DIE_R;
-            d->omega[1] *= SETTLE_ADAMP;
-            d->omega[2] = -d->vel[0] / DIE_R;
-            s_thrown = 1;   /* 倾斜停下后由下面的沉降/对齐逻辑接管,把骰子摆正 */
-        }
-        else if (s_thrown && on_ground)
-        {
+            /* 只有 shake_impulse 才让骰子动 -- tilt 分支已删。
+               静止(含板子小倾斜)时:一直走这条 align 弹簧,骰子牢牢面着地。 */
             d->vel[0] *= SETTLE_DAMP; d->vel[1] *= SETTLE_DAMP;
             for (int k = 0; k < 3; k++) { d->omega[k] *= SETTLE_ADAMP; }
 
@@ -833,36 +826,28 @@ static void dice_shake_impulse(float dirx, float dirz, float strength)
 static void dice_handle_input(void)
 {
 #ifdef _HONEYGUI_SIMULATOR_
-    /* 模拟器无加速度计:用鼠标模拟。按住/拖拽 = 把桌面朝手指方向倾斜(骰子朝手指滚);
-       点击的上升沿 = 朝手指方向甩一把。便于在 PC 上预览两种手感。 */
+    /* 模拟器:点击的上升沿 = 朝手指方向甩一把(离屏心方向为甩动向量)。
+       tilt-roll 已废弃 -- 静止时任何倾斜(含桌面不平/加速度计噪声)都不驱动骰子。 */
     touch_info_t *tp = tp_get_info();
     int pressing = (tp && tp->pressing) ? 1 : 0;
-    if (pressing)
+    g_tilt_gx = 0.0f; g_tilt_gz = 0.0f;
+    g_tilt_active = 0;
+    if (pressing && !s_prev_press)
     {
         float nx = ((float)tp->x - BG_W * 0.5f) / (BG_W * 0.5f);
         float ny = ((float)tp->y - BG_H * 0.5f) / (BG_H * 0.5f);
-        if (nx >  1.0f) { nx =  1.0f; } if (nx < -1.0f) { nx = -1.0f; }
-        if (ny >  1.0f) { ny =  1.0f; } if (ny < -1.0f) { ny = -1.0f; }
-        g_tilt_gx = nx;
-        g_tilt_gz = SIM_DEPTH_SIGN * ny;
-    }
-    else
-    {
-        g_tilt_gx = 0.0f; g_tilt_gz = 0.0f;
-    }
-    if (pressing && !s_prev_press)
-    {
-        float dx = g_tilt_gx, dz = g_tilt_gz;
+        float dx = nx, dz = SIM_DEPTH_SIGN * ny;
         float dn = sqrtf(dx * dx + dz * dz);
         if (dn > 1e-3f) { dx /= dn; dz /= dn; } else { dx = 0.0f; dz = 0.0f; }
         dice_shake_impulse(dx, dz, 1.0f);
     }
     s_prev_press = pressing;
 #else
-    /* 板子:加速度计三轴实时驱动(倾斜滚动 + 甩动弹跳),读取方式参考 EBadge flip_coin.c。
-       1) 低通滤波(/8)让 gravity_* 跟踪重力方向 = 设备倾斜姿态;
-       2) 重力在设备平面的两个分量归一化到 g → 世界水平倾斜(死区外才生效);
-       3) 当前读数减去重力 = 运动分量,曼哈顿距离超阈值 → 按其方向甩一把。 */
+    /* 板子:仅 shake 触发动作,倾斜不驱动。
+       1) 低通(/8)跟踪 gravity 基线(即当前设备姿态);
+       2) 当前读数减去基线 = 运动分量,曼哈顿距离超阈值 → 按其方向甩一把。
+       静置时(哪怕板子有 10 度小倾斜)不会有任何位移或滚动,骰子由 align 弹簧
+       持续锁在"面着地"上。 */
     extern bool gsensor_sc7a20_read_xyz(int16_t *x, int16_t *y, int16_t *z);
     static bool    initialized = false;
     static int32_t grav[3] = { 0, 0, 0 };
@@ -880,11 +865,10 @@ static void dice_handle_input(void)
 
     for (int k = 0; k < 3; k++) { grav[k] += (raw[k] - grav[k]) / 8; }
 
-    /* 倾斜 → 世界水平 g 分量(死区内按 0,防静止漂移) */
-    float txg = ACC_SIGN_X * (float)grav[ACC_IDX_X] / ACC_FULLSCALE;
-    float tzg = ACC_SIGN_Z * (float)grav[ACC_IDX_Z] / ACC_FULLSCALE;
-    g_tilt_gx = (txg > TILT_DEADZONE || txg < -TILT_DEADZONE) ? txg : 0.0f;
-    g_tilt_gz = (tzg > TILT_DEADZONE || tzg < -TILT_DEADZONE) ? tzg : 0.0f;
+    /* 兼容变量,现只做诊断用:tilt 分支已删,physics_step 不再读它们。 */
+    g_tilt_gx = 0.0f;
+    g_tilt_gz = 0.0f;
+    g_tilt_active = 0;
 
     /* 运动分量 → 甩动检测与方向 */
     int32_t m[3];
@@ -1117,9 +1101,9 @@ static gui_dice_t *dice2d5_create(gui_obj_t *parent)
             /* q<6 点数主面(64x64);6..17 棱面(Side 64x12);18..25 角面(Angle 16x16) */
             const void *tex; int tw, th;
             // int is_corner = (q >= N_FACE + N_EDGE);
-            if (q < N_FACE)              { tex = s_face_img[q];        tw = th = DICE_IMG_WH; }
-            else if (q < N_FACE + N_EDGE) { tex = (const void *)"/image/dice/Side.bin";  tw = SIDE_W;  th = SIDE_H;  }
-            else                          { tex = (const void *)"/image/dice/Angle.bin"; tw = ANGLE_W; th = ANGLE_H; }
+            if (q < N_FACE)                 { tex = s_face_img[q];        tw = th = DICE_IMG_WH; }
+            else if (q < N_FACE + N_EDGE)   { tex = (const void *)"/image/dice/Side.bin";  tw = SIDE_W;  th = SIDE_H;  }
+            else                            { tex = (const void *)"/image/dice/Angle.bin"; tw = ANGLE_W; th = ANGLE_H; }
 
             const void *img_data = gui_vfs_get_file_address(tex);
             if (!img_data)
@@ -1140,7 +1124,7 @@ static gui_dice_t *dice2d5_create(gui_obj_t *parent)
                 GUI_ASSERT(img_data != NULL);
                 gui_vfs_read(f, (void *)img_data, size);
                 gui_vfs_close(f);
-                gui_log("dice2d5_create: loaded %s (%d bytes) into memory\n", (const char *)tex, size);
+                // gui_log("dice2d5_create: loaded %s (%d bytes) into memory\n", (const char *)tex, size);
 
             }
 
@@ -1163,7 +1147,7 @@ static gui_dice_t *dice2d5_create(gui_obj_t *parent)
             this->draw_img_refl[d][q].opacity_value = 0;
             this->draw_img_refl[d][q].blend_mode = IMG_SRC_OVER_MODE;
 
-            gui_log("data 0x%x 0x%x\n", this->draw_img[d][q].data, this->draw_img_refl[d][q].data);
+            // gui_log("data 0x%x 0x%x\n", this->draw_img[d][q].data, this->draw_img_refl[d][q].data);
         }
     }
 
