@@ -11,7 +11,7 @@
 
 
 // Add custom declarations here
-#define  MAINFACE_NUM_MAX  10
+#define  MAINFACE_NUM_MAX  30
 #define  BD_NUM_MAX        10
 
 #define COLOR_TRANSITION_SRGB          0
@@ -42,6 +42,7 @@ typedef enum
     SRC_IMG_SPATIAL,
     SRC_DANMU,
     SRC_FLIP_COIN,
+    
     SRC_SHAKE_LOT,
 } MAINFACE_SRC_TYPE;
 
@@ -121,7 +122,6 @@ extern int8_t fl_color_idx; //white, red, orange, yellow, green, blue, indigo, v
 extern char bd_addr_array[BD_NUM_MAX][20];
 extern uint8_t bd_dev_num;
 
-void switch_mainface(gui_obj_t *parent, uint8_t idx);
 void set_flashlight_color(void *obj);
 
 void win_timer_0_cb(void *obj); // move long image
@@ -136,14 +136,10 @@ void click_camera_ctl_icon(void *obj, gui_event_t *e);
 void switch_in_mainface_0(gui_view_t *view);
 void switch_in_mainface_1(gui_view_t *view);
 void switch_in_mainface_2(gui_view_t *view);
-void switch_in_mainface_3(gui_view_t *view);
-void switch_in_mainface_4(gui_view_t *view);
-void switch_in_mainface_5(gui_view_t *view);
-void switch_in_mainface_6(gui_view_t *view);
-void switch_in_mainface_7(gui_view_t *view);
-void switch_in_mainface_8(gui_view_t *view);
-void switch_in_mainface_9(gui_view_t *view);
+void switch_out_mainface(gui_view_t *view);
+void switch_in_top_view(gui_view_t *view);
 void switch_in_mainface_list(gui_view_t *view);
+void switch_in_view_cam_ctl(gui_view_t *view);
 
 /* Interact api */ 
 uint8_t mainface_list_init(void **data_list, uint32_t n); //ret: user's mainface num

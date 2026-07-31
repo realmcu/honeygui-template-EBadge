@@ -51,6 +51,14 @@ uint8_t soc_val = 100;
 uint8_t screen_light_idx = 5; // 0~5
 
 const char *view_rec = "easy_demoMainView";
+const char *view_array[3] = 
+{
+    "easy_demoMainView",
+    "mainface_view_1",
+    "mainface_view_2"
+};
+static int8_t view_idx_curr = 0;
+static int8_t view_idx_next = 0;
 
 static bool has_released = true;
 static bool has_created_win_del = false;
@@ -601,91 +609,36 @@ void win_timer_gsensor_cb(void *obj)
 #endif
 }
 
-static void *get_view_name_by_index(uint8_t idx)
+static void switch_mainface(gui_obj_t *parent)
 {
-    void *view_mainface = NULL;
-    switch (idx)
+    int8_t diff = view_idx_next - view_idx_curr;
+    uint8_t idx = mainface_idx;
+    if (diff != 0)
     {
-    case 0:
-        view_mainface = "easy_demoMainView";
-        break;
-    case 1:
-        view_mainface = "mainface_view_1";
-        break;
-    case 2:
-        view_mainface = "mainface_view_2";
-        break;
-    case 3:
-        view_mainface = "mainface_view_3";
-        break;
-    case 4:
-        view_mainface = "mainface_view_4";
-        break;
-    case 5:
-        view_mainface = "mainface_view_5";
-        break;
-    case 6:
-        view_mainface = "mainface_view_6";
-        break;
-    case 7:
-        view_mainface = "mainface_view_7";
-        break;
-    case 8:
-        view_mainface = "mainface_view_8";
-        break;
-    case 9:
-        view_mainface = "mainface_view_9";
-        break;
-
-    default:
-        break;
+        int8_t temp = mainface_idx;
+        switch (diff)
+        {
+        case -1:
+        case 2:
+            temp--;
+            break;
+        case 1:
+            temp++;
+            break;
+        case -2:
+            temp++;
+            break;
+        default:
+            break;
+        }
+        temp += mainface_num;
+        temp %= mainface_num;
+        idx = temp;
     }
-    return view_mainface;
-}
-
-void switch_mainface(gui_obj_t *parent, uint8_t idx)
-{
+    
     gui_win_t *win = gui_win_create(parent, 0, 0, 0, 0, 0);
     win->base.user_data = &mainface_list[idx];
-    mainface_idx = idx;
-    void (*timer_cb)(void *) = NULL;
-    switch (idx)
-    {
-    case 0:
-        timer_cb = easy_demoMainView_update_idx_cb;
-        break;
-    case 1:
-        timer_cb = mainface_view_1_update_idx_cb;
-        break;
-    case 2:
-        timer_cb = mainface_view_2_update_idx_cb;
-        break;
-    case 3:
-        timer_cb = mainface_view_3_update_idx_cb;
-        break;
-    case 4:
-        timer_cb = mainface_view_4_update_idx_cb;
-        break;
-    case 5:
-        timer_cb = mainface_view_5_update_idx_cb;
-        break;
-    case 6:
-        timer_cb = mainface_view_6_update_idx_cb;
-        break;
-    case 7:
-        timer_cb = mainface_view_7_update_idx_cb;
-        break;
-    case 8:
-        timer_cb = mainface_view_8_update_idx_cb;
-        break;
-    case 9:
-        timer_cb = mainface_view_9_update_idx_cb;
-        break;
-
-       default:
-        break;
-    }
-    gui_obj_create_timer((void *)win, 20, true, timer_cb);
+    gui_obj_create_timer((void *)win, 20, true, win_timer_0_cb);
     gui_obj_start_timer((void *)win);
 
     if (mainface_num == 0)
@@ -835,16 +788,20 @@ void switch_mainface(gui_obj_t *parent, uint8_t idx)
         break;
     }
     gui_color_t bg_color;
-    bg_color.color.argb_full = mainface_list[mainface_idx].color;
+    bg_color.color.argb_full = mainface_list[idx].color;
     gui_view_set_bg_color((gui_view_t *)parent, bg_color);
     
-    gui_img_t *img = gui_img_create_from_fs(win, 0, "/image/lock_icon.bin", 90, 90, 0, 0);
-    gui_obj_hidden((gui_obj_t *)img, true);
-    img = gui_img_create_from_fs(win, 0, prog_arc_array[0], 90, 90, 0, 0);
-    gui_obj_hidden((gui_obj_t *)img, true);
+    /* lock icon & prog_arc */
+    {
+        int16_t img_size = 180;
+        int16_t pos = (screen_size - img_size) / 2;
+        gui_img_t *img = gui_img_create_from_fs(win, 0, "/image/lock_icon.bin", pos, pos, 0, 0);
+        gui_obj_hidden((gui_obj_t *)img, true);
+        img = gui_img_create_from_fs(win, 0, prog_arc_array[0], pos, pos, 0, 0);
+        gui_obj_hidden((gui_obj_t *)img, true);
+    }
 
     if (dev_mode != MODE_DELETE && !enable_switch_mainface) return;
-
     if (dev_mode == MODE_DELETE)
     {
         create_win_del();
@@ -857,100 +814,8 @@ void switch_mainface(gui_obj_t *parent, uint8_t idx)
             gui_view_switch_on_event((void *)parent, "view_mainface_list", SWITCH_INIT_STATE, SWITCH_IN_FROM_BOTTOM_USE_TRANSLATION, GUI_EVENT_TOUCH_MOVE_UP);
         }
     }
-
-    void *view_first = "easy_demoMainView";
-    void *view_last = NULL;
-    switch (mainface_num)
-    {
-    case 1:
-        return;
-        break;
-    case 2:
-        view_last = "mainface_view_1";
-        break;
-    case 3:
-        view_last = "mainface_view_2";
-        break;
-    case 4:
-        view_last = "mainface_view_3";
-        break;
-    case 5:
-        view_last = "mainface_view_4";
-        break;
-    case 6:
-        view_last = "mainface_view_5";
-        break;
-    case 7:
-        view_last = "mainface_view_6";
-        break;
-    case 8:
-        view_last = "mainface_view_7";
-        break;
-    case 9:
-        view_last = "mainface_view_8";
-        break;
-    case 10:
-        view_last = "mainface_view_9";
-        break;
-
-    default:
-        break;
-    }
-
-    void *view_left = view_first;
-    void *view_right = view_first;
-    switch (idx)
-    {
-    case 0:
-        view_left = view_last;
-        view_right = "mainface_view_1";
-        break;
-    case 1:
-        view_left = view_first;
-        view_right = "mainface_view_2";
-        break;
-    case 2:
-        view_left = "mainface_view_1";
-        view_right = "mainface_view_3";
-        break;
-    case 3:
-        view_left = "mainface_view_2";
-        view_right = "mainface_view_4";
-        break;
-    case 4:
-        view_left = "mainface_view_3";
-        view_right = "mainface_view_5";
-        break;
-    case 5:
-        view_left = "mainface_view_4";
-        view_right = "mainface_view_6";
-        break;
-    case 6:
-        view_left = "mainface_view_5";
-        view_right = "mainface_view_7";
-        break;
-    case 7:
-        view_left = "mainface_view_6";
-        view_right = "mainface_view_8";
-        break;
-    case 8:
-        view_left = "mainface_view_7";
-        view_right = "mainface_view_9";
-        break;
-    case 9:
-        view_left = "mainface_view_8";
-        view_right = view_first;
-        break;
-        
-    default:
-        break;
-    }
-    if (idx == mainface_num - 1)
-    {
-        view_right = view_first;
-    }
-    gui_view_switch_on_event((void *)parent, view_right, SWITCH_OUT_TO_LEFT_USE_TRANSLATION, SWITCH_IN_FROM_RIGHT_USE_TRANSLATION, event_code_l);
-    gui_view_switch_on_event((void *)parent, view_left, SWITCH_OUT_TO_RIGHT_USE_TRANSLATION, SWITCH_IN_FROM_LEFT_USE_TRANSLATION, event_code_r);
+    gui_view_switch_on_event((void *)parent, view_array[(view_idx_next + 1) % 3], SWITCH_OUT_TO_LEFT_USE_TRANSLATION, SWITCH_IN_FROM_RIGHT_USE_TRANSLATION, event_code_l);
+    gui_view_switch_on_event((void *)parent, view_array[(view_idx_next - 1 + 3) % 3], SWITCH_OUT_TO_RIGHT_USE_TRANSLATION, SWITCH_IN_FROM_LEFT_USE_TRANSLATION, event_code_r);
 }
 
 
@@ -1057,8 +922,7 @@ void click_delete_icon(void *obj, gui_event_t *e)
     if (mainface_num == 0) return;
 
     dev_mode = MODE_DELETE;
-    void *view_mainface = get_view_name_by_index(mainface_idx);
-    gui_view_switch_direct(gui_view_get_current(), view_mainface, SWITCH_OUT_NONE_ANIMATION, SWITCH_IN_NONE_ANIMATION);
+    gui_view_switch_direct(gui_view_get_current(), view_array[view_idx_curr], SWITCH_OUT_NONE_ANIMATION, SWITCH_IN_NONE_ANIMATION);
 #ifdef _HONEYGUI_SIMULATOR_
     // TODO
 #else
@@ -1077,49 +941,9 @@ void mainface_list_delete(void *obj)
         memcpy(&mainface_list[i], &mainface_list[i + 1], sizeof(mainface_src_t));
     }
     mainface_num--;
-    void *view_left = NULL;
     if (mainface_num != 0) 
     {
-        if (mainface_idx == mainface_num)
-        {
-            switch (mainface_num)
-            {
-            case 1:
-                view_left = "easy_demoMainView";
-                break;
-            case 2:
-                view_left = "mainface_view_1";
-                break;  
-            case 3:
-                view_left = "mainface_view_2";
-                break;
-            case 4:
-                view_left = "mainface_view_3";
-                break;
-            case 5:
-                view_left = "mainface_view_4";
-                break;
-            case 6:
-                view_left = "mainface_view_5";
-                break;
-            case 7:
-                view_left = "mainface_view_6";
-                break;
-            case 8:
-                view_left = "mainface_view_7";
-                break;
-            case 9:
-                view_left = "mainface_view_8";
-                break;
-            case 10:
-                view_left = "mainface_view_9";
-                break;
-
-            default:
-                break;
-            }
-            if (mainface_idx != 0) mainface_idx--;
-        }
+        if (mainface_idx != 0) mainface_idx--;
     }
     else
     {
@@ -1140,11 +964,10 @@ void mainface_list_delete(void *obj)
     extern fdb_err_t fdb_bf_delete_by_addr(fdb_bf_t db, uint32_t addr);
     fdb_bf_delete_by_addr(app_get_bf(), (uint32_t)addr_del);
 #endif
-
-    void *view_target = view_left? view_left : (void *)gui_view_get_current()->base.name;
-    // gui_log("view_target = %s, view_left = %s, idx = %d, num = %d, dev_mode = %d\n", view_target, view_left, mainface_idx, mainface_num, dev_mode);
+    view_idx_curr = 0;
+    view_idx_next = 0;
     gui_obj_child_free(GUI_BASE(win_view));
-    gui_view_create(GUI_BASE(win_view), view_target, 0, 0, 0, 0);
+    gui_view_create(GUI_BASE(win_view), view_array[view_idx_curr], 0, 0, 0, 0);
 }
 
 static void mainface_list_add(void *data)
@@ -1175,10 +998,10 @@ static void mainface_list_add(void *data)
     mainface_num++;
 
     mainface_idx = mainface_num - 1;
-    void *view = get_view_name_by_index(mainface_idx);
-
+    view_idx_curr = 0;
+    view_idx_next = 0;
     gui_obj_child_free(GUI_BASE(win_view));
-    gui_view_create(GUI_BASE(win_view), view, 0, 0, 0, 0);
+    gui_view_create(GUI_BASE(win_view), view_array[view_idx_curr], 0, 0, 0, 0);
 }
 
 void click_delete_icon_detail(void *obj, gui_event_t *e)
@@ -1392,61 +1215,63 @@ void ui_jump_streaming(void)
 void switch_in_mainface_0(gui_view_t *view)
 {
     GUI_UNUSED(view);
-    switch_mainface(GUI_BASE(view), 0);
+    view_idx_next = 0;
+    switch_mainface(GUI_BASE(view));
 }
 
 void switch_in_mainface_1(gui_view_t *view)
 {
     GUI_UNUSED(view);
-    switch_mainface(GUI_BASE(view), 1);
+    view_idx_next = 1;
+    switch_mainface(GUI_BASE(view));
 }
 
 void switch_in_mainface_2(gui_view_t *view)
 {
     GUI_UNUSED(view);
-    switch_mainface(GUI_BASE(view), 2);
+    view_idx_next = 2;
+    switch_mainface(GUI_BASE(view));
 }
 
-void switch_in_mainface_3(gui_view_t *view)
+void switch_out_mainface(gui_view_t *view)
 {
     GUI_UNUSED(view);
-    switch_mainface(GUI_BASE(view), 3);
+    if (strcmp(view->base.name, view_array[view_idx_curr]) == 0 && 
+        gui_view_get_current() != NULL)
+    {
+        int8_t diff = view_idx_next - view_idx_curr;
+        if (diff != 0)
+        {
+            int8_t temp = mainface_idx;
+            switch (diff)
+            {
+            case -1:
+            case 2:
+                temp--;
+                break;
+            case 1:
+            case -2:
+                temp++;
+                break;
+            default:
+                break;
+            }
+            temp += mainface_num;
+            temp %= mainface_num;
+            mainface_idx = temp;
+            view_idx_curr = view_idx_next;
+        }
+    }
 }
 
-void switch_in_mainface_4(gui_view_t *view)
+void switch_in_top_view(gui_view_t *view)
 {
-    GUI_UNUSED(view);
-    switch_mainface(GUI_BASE(view), 4);
+    gui_view_switch_on_event(view, view_array[view_idx_curr], SWITCH_OUT_TO_TOP_USE_TRANSLATION, SWITCH_INIT_STATE, GUI_EVENT_TOUCH_MOVE_UP);
 }
-
-void switch_in_mainface_5(gui_view_t *view)
+void switch_in_view_cam_ctl(gui_view_t *view)
 {
-    GUI_UNUSED(view);
-    switch_mainface(GUI_BASE(view), 5);
-}
-
-void switch_in_mainface_6(gui_view_t *view)
-{
-    GUI_UNUSED(view);
-    switch_mainface(GUI_BASE(view), 6);
-}
-
-void switch_in_mainface_7(gui_view_t *view)
-{
-    GUI_UNUSED(view);
-    switch_mainface(GUI_BASE(view), 7);
-}
-
-void switch_in_mainface_8(gui_view_t *view)
-{
-    GUI_UNUSED(view);
-    switch_mainface(GUI_BASE(view), 8);
-}
-
-void switch_in_mainface_9(gui_view_t *view)
-{
-    GUI_UNUSED(view);
-    switch_mainface(GUI_BASE(view), 9);
+    gui_view_switch_on_event(view, view_array[view_idx_curr], SWITCH_OUT_NONE_ANIMATION, SWITCH_IN_NONE_ANIMATION, GUI_EVENT_TOUCH_LEFT_SLIDE_QUICK);
+    gui_view_switch_on_event(view, view_array[view_idx_curr], SWITCH_OUT_NONE_ANIMATION, SWITCH_IN_NONE_ANIMATION, GUI_EVENT_TOUCH_RIGHT_SLIDE_QUICK);
 }
 
 typedef struct
@@ -1846,7 +1671,7 @@ void img_zoom_timer_cb(void *param)
     {
         cnt = 0;
         gui_obj_stop_timer(obj);
-        gui_view_switch_direct(gui_view_get_current(), get_view_name_by_index(mainface_idx), SWITCH_INIT_STATE, SWITCH_IN_NONE_ANIMATION);
+        gui_view_switch_direct(gui_view_get_current(), view_array[view_idx_curr], SWITCH_INIT_STATE, SWITCH_IN_NONE_ANIMATION);
     }
 }
 
@@ -2041,7 +1866,7 @@ static void click_button_2_disconnect(void *obj, gui_event_t *e)
         gui_img_set_src((void *)dev_disconn, "/image/dev_send_icon.bin", IMG_SRC_FILESYS);
         dev_disconn->event_dsc[0].event_cb = click_button_2_connect;
         gui_obj_add_event_cb(view_current, (gui_event_cb_t)click_2_mainface_view, GUI_EVENT_TOUCH_CLICKED, NULL);
-        gui_view_switch_on_event(view_current, get_view_name_by_index(mainface_idx), SWITCH_OUT_TO_BOTTOM_USE_TRANSLATION, SWITCH_INIT_STATE, GUI_EVENT_TOUCH_MOVE_DOWN);
+        gui_view_switch_on_event(view_current, view_array[view_idx_curr], SWITCH_OUT_TO_BOTTOM_USE_TRANSLATION, SWITCH_INIT_STATE, GUI_EVENT_TOUCH_MOVE_DOWN);
     }
 }
 
@@ -2075,7 +1900,7 @@ void switch_in_mainface_list(gui_view_t *view)
         gui_obj_add_event_cb(dev_conn, (gui_event_cb_t)click_button_2_connect, GUI_EVENT_TOUCH_CLICKED, NULL);
 
         gui_obj_add_event_cb(view, (gui_event_cb_t)click_2_mainface_view, GUI_EVENT_TOUCH_CLICKED, NULL);
-        gui_view_switch_on_event(view, get_view_name_by_index(mainface_idx), SWITCH_OUT_TO_BOTTOM_USE_TRANSLATION, SWITCH_INIT_STATE, GUI_EVENT_TOUCH_MOVE_DOWN);
+        gui_view_switch_on_event(view, view_array[view_idx_curr], SWITCH_OUT_TO_BOTTOM_USE_TRANSLATION, SWITCH_INIT_STATE, GUI_EVENT_TOUCH_MOVE_DOWN);
     }
 
     pic_size = 160;
