@@ -2113,6 +2113,9 @@ int app_stream_transport_init(void)
  *============================================================================*/
 static void on_remote_state_changed(void)
 {
+#ifdef _HONEYGUI_SIMULATOR_
+    gui_log("on_remote_state_changed");
+#else
     gui_log("remote: STATE zoom=%u.%02ux rec=%d facing=%s shot(has=%d id=%u)\n",
             (unsigned)(hmi_l2_remote_state_zoom_x100() / 100u),
             (unsigned)(hmi_l2_remote_state_zoom_x100() % 100u),
@@ -2124,7 +2127,7 @@ static void on_remote_state_changed(void)
      * to the GUI thread from here (do NOT call widget APIs directly). */
 
     ui_remote_change(hmi_l2_remote_state_zoom_x100());
-
+#endif
 }
 
 static void on_remote_shot_ready(uint16_t shot_id)
@@ -2148,9 +2151,13 @@ static void on_remote_ctrl_result(uint8_t key, uint8_t code)
 
 int app_remote_ctrl_init(void)
 {
+#ifdef _HONEYGUI_SIMULATOR_
+    gui_log("app_remote_ctrl_init\n");
+#else
     hmi_l2_remote_set_state_cb(on_remote_state_changed);
     hmi_l2_remote_set_shot_cb(on_remote_shot_ready);
     hmi_l2_remote_set_ctrl_result_cb(on_remote_ctrl_result);
+#endif
     gui_log("app_remote: callbacks registered (CMD 0x0F)\n");
     return 0;
 }
