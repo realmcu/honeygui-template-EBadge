@@ -56,9 +56,12 @@ char bd_addr_array[BD_NUM_MAX][20] =
     "00:10:20:30:40:50",
     "00:10:20:30:40:51",
     "00:10:20:30:40:52",
+    "00:10:20:30:40:50",
+    "00:10:20:30:40:51",
+    "00:10:20:30:40:52",
 };
 static char bd_addr_str[20] = "11:22:33:44:55:66";
-uint8_t bd_dev_num = 3;
+uint8_t bd_dev_num = 6;
 static bool is_connecting = false;
 
 static void wait_conn_animation(gui_img_t *img)
@@ -158,6 +161,7 @@ static void conn_ready_poll_cb(void *obj)
         is_dev_connect = false;
         is_connecting = false;
         gui_obj_tree_free_async(obj);
+        gui_list_enable_scroll(lst_bd, true);
         gui_log("central connect failed/timeout (active=%d, ticks=%d), stay on dev list\n",
                 hmi_ble_central_is_active(), s_conn_wait_ticks);
         /* Deliberately no view switch: SelectDevView stays up for a retry tap. */
@@ -227,6 +231,7 @@ void click_2_conn_dev_by_idx(void *obj, gui_event_t *e)
     GUI_UNUSED(e);
     if (is_connecting) return;
     is_connecting = true;
+    gui_list_enable_scroll(lst_bd, false);
     gui_dispdev_t *dc = gui_get_dc();
     uint16_t screen_size = dc->screen_width;
     gui_view_t *view = gui_view_get_current();
@@ -279,26 +284,6 @@ void click_2_conn_dev_by_idx(void *obj, gui_event_t *e)
 #endif
 }
 
-static void list_note_design(gui_obj_t *obj, void *param)
-{
-    GUI_UNUSED(param);
-    
-    // Cast obj to gui_list_note_t * type
-    gui_list_note_t *note = (gui_list_note_t *)obj;
-    uint16_t index = note->index % bd_dev_num;
-    gui_dispdev_t *dc = gui_get_dc();
-    uint16_t screen_size = dc->screen_width;
-
-    gui_rect_create((gui_obj_t *)obj, 0, screen_size / 8, note->base.h, screen_size * 3/4, 4, 0, gui_rgb(97, 103, 107));
-
-    gui_text_t *text = gui_text_create((gui_obj_t *)obj, 0, 0, 0, screen_size, note->base.h);
-    gui_text_set(text, bd_addr_array[index], GUI_FONT_SRC_BMP, gui_rgb(255, 255, 255), strlen(bd_addr_array[index]), 24);
-    gui_text_type_set(text, "/font/Inter_24pt_SemiBold_size24_bits4_bitmap.bin", FONT_SRC_FILESYS);
-    gui_text_mode_set(text, MID_CENTER);
-
-    gui_obj_add_event_cb(obj, (gui_event_cb_t)click_2_conn_dev_by_idx, GUI_EVENT_TOUCH_CLICKED, NULL);
-}
-
 static void SelectDevView_key_0_cb(void *obj, gui_event_t *e)
 {
     GUI_UNUSED(obj);
@@ -322,19 +307,34 @@ static void SelectDevView_slide_cb(void *obj, gui_event_t *e)
     gui_view_switch_direct(gui_view_get_current(), "top_view", SWITCH_OUT_NONE_ANIMATION, SWITCH_IN_NONE_ANIMATION);
 }
 
+void list_bd_note_design(gui_obj_t *obj, void *param)
+{
+    GUI_UNUSED(param);
+    
+    // Cast obj to gui_list_note_t * type
+    gui_list_note_t *note = (gui_list_note_t *)obj;
+    int16_t index = note->index % (bd_dev_num + 1);
+    if (index == 0) return;
+    index -= 1;
+    gui_dispdev_t *dc = gui_get_dc();
+    uint16_t screen_size = dc->screen_width;
+
+    gui_rect_create((gui_obj_t *)obj, 0, screen_size / 8, note->base.h, screen_size * 3/4, 4, 0, gui_rgb(97, 103, 107));
+
+    gui_text_t *text = gui_text_create((gui_obj_t *)obj, 0, 0, 0, screen_size, note->base.h);
+    gui_text_set(text, bd_addr_array[index], GUI_FONT_SRC_BMP, gui_rgb(255, 255, 255), strlen(bd_addr_array[index]), 24);
+    gui_text_type_set(text, "/font/Inter_24pt_SemiBold_size24_bits4_bitmap.bin", FONT_SRC_FILESYS);
+    gui_text_mode_set(text, MID_CENTER);
+
+    gui_obj_add_event_cb(obj, (gui_event_cb_t)click_2_conn_dev_by_idx, GUI_EVENT_TOUCH_CLICKED, NULL);
+}
+
 void switch_in_select_dev_view(gui_view_t *view)
 {
     GUI_UNUSED(view);
     is_connecting = false;
     
-    gui_dispdev_t *dc = gui_get_dc();
-    uint16_t screen_size = dc->screen_width;
-    gui_list_t *list = gui_list_create((gui_obj_t *)view, 0, 0, screen_size / 6, screen_size, screen_size, 
-                                screen_size / 6, 5, VERTICAL, list_note_design, NULL, false);
-    gui_list_set_style(list, LIST_CLASSIC);
-    gui_list_set_note_num(list, bd_dev_num);
-    gui_list_set_auto_align(list, true);
-    gui_list_enable_loop(list, false);
+    gui_list_set_note_num(lst_bd, bd_dev_num + 2); // spare space at top and bottom
 
     gui_obj_add_event_cb((gui_obj_t *)view, (gui_event_cb_t)SelectDevView_slide_cb, GUI_EVENT_TOUCH_LEFT_SLIDE_QUICK, NULL);
     gui_obj_add_event_cb((gui_obj_t *)view, (gui_event_cb_t)SelectDevView_slide_cb, GUI_EVENT_TOUCH_RIGHT_SLIDE_QUICK, NULL);

@@ -147,6 +147,8 @@ void switch_in_top_view(gui_view_t *view);
 void switch_in_mainface_list(gui_view_t *view);
 void switch_in_view_cam_ctl(gui_view_t *view);
 
+void lst_mainface_note_design(gui_obj_t *obj, void *param);
+
 /* Interact api */ 
 uint8_t mainface_list_init(void **data_list, uint32_t n); //ret: user's mainface num
 void ui_process_msg(void *arg);

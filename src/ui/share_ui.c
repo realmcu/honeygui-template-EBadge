@@ -18,7 +18,9 @@ gui_win_t *win_share = NULL;
 gui_img_t *img_8 = NULL;
 gui_img_t *img_9 = NULL;
 gui_text_t *bd_addr_self = NULL;
+gui_list_t *lst_bd = NULL;
 
+// List component note_design callback functions
 
 // Create shareMainView (hg_view)
 static void shareMainView_switch_out(gui_view_t *view)
@@ -158,6 +160,14 @@ static void SelectDevView_switch_in(gui_view_t *view)
     // Set background color
     gui_view_set_bg_color(view, gui_rgb(0, 0, 0));
 
+
+
+    // Create lst_bd (hg_list)
+    lst_bd = gui_list_create((gui_obj_t *)view, "lst_bd", 0, 0, 360, 360, 60, 5, VERTICAL, list_bd_note_design, NULL, false);
+    gui_list_set_style(lst_bd, LIST_CLASSIC);
+    gui_list_set_note_num(lst_bd, 5);
+    gui_list_set_auto_align(lst_bd, true);
+    gui_list_set_inertia(lst_bd, false);
 
     switch_in_select_dev_view(view);
 }

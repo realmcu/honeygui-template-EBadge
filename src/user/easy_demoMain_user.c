@@ -1639,7 +1639,7 @@ static gui_color_t color_interpolate(gui_color_t origin, gui_color_t target, flo
     return color;
 }
 
-static void lst_mainface_note_design(gui_obj_t *obj, void *param)
+void lst_mainface_note_design(gui_obj_t *obj, void *param)
 {
     GUI_UNUSED(param);
     
@@ -1813,9 +1813,9 @@ static void click_2_mainface_view(void *obj, gui_event_t *e)
 
     if (list_moved) return;
     gui_obj_t *parent = obj;
-    gui_obj_t *list= gui_list_entry(parent->child_list.prev, gui_obj_t, brother_list);
-    gui_obj_t *send_icon = gui_list_entry(parent->child_list.next, gui_obj_t, brother_list);
-    gui_obj_t *img = list;
+    gui_obj_t *list= (void *)lst_mainface;
+    gui_obj_t *send_icon = gui_list_entry(list->brother_list.next, gui_obj_t, brother_list);
+    gui_obj_t *img = gui_list_entry(parent->child_list.prev, gui_obj_t, brother_list);
     if (mainface_num > 1)
     {
         gui_obj_t *note_first = gui_list_entry(list->child_list.next, gui_obj_t, brother_list);
@@ -1939,8 +1939,8 @@ static void click_button_2_disconnect(void *obj, gui_event_t *e)
         dev_mode = MODE_DEFAULT;
         share_file_status = SHARE_DEFAULT;
         gui_view_t *view_current = gui_view_get_current();
-        gui_obj_t *dev_send = gui_list_entry(view_current->base.child_list.next, gui_obj_t, brother_list);
-        gui_obj_t *dev_disconn = gui_list_entry(dev_send->brother_list.next, gui_obj_t, brother_list);
+        gui_obj_t *dev_send = gui_list_entry(view_current->base.child_list.prev, gui_obj_t, brother_list);
+        gui_obj_t *dev_disconn = gui_list_entry(dev_send->brother_list.prev, gui_obj_t, brother_list);
 
         gui_obj_tree_free(dev_send);
         gui_dispdev_t *dc = gui_get_dc();
@@ -2008,16 +2008,12 @@ void switch_in_mainface_list(gui_view_t *view)
         }
     #endif
         gui_img_set_mode(img, IMG_SRC_OVER_MODE);
+        gui_list_set_note_num(lst_mainface, 0);
     }
     else
     {
-        gui_list_t *lst_mainface = gui_list_create((gui_obj_t *)view, "lst_mainface", -pic_size / 2, 0, screen_size + pic_size, screen_size, 
-                                pic_size, screen_size / 2 - pic_size, HORIZONTAL, lst_mainface_note_design, NULL, false);
-        gui_list_set_style(lst_mainface, LIST_CIRCLE);
+        lst_mainface->base.w = 520;
         gui_list_set_note_num(lst_mainface, mainface_num * 2);
-        gui_list_set_auto_align(lst_mainface, true);
-        gui_list_enable_loop(lst_mainface, true);
-        gui_list_set_inertia(lst_mainface, false);
         gui_list_set_offset(lst_mainface, (screen_size / 2) * (1 - list_index));
 
         gui_obj_create_timer((void *)lst_mainface, 10, true, list_timer_cb);

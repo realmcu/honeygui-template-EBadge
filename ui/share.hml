@@ -61,6 +61,14 @@
             </hg_window>
             <hg_label id="bd_addr_self" x="0" y="241" width="360" height="29" hAlign="CENTER" vAlign="MID" color="#ffffff" letterSpacing="0" lineSpacing="0" wordWrap="false" wordBreak="false" text="11:11:11:11:11:11" fontFile="/font/Inter_24pt_Regular.ttf" fontSize="16" characterSets="[{&quot;type&quot;:&quot;range&quot;,&quot;value&quot;:&quot;0x20-0x7E&quot;}]" zIndex="2" />
         </hg_view>
-        <hg_view id="SelectDevView" x="715" y="420" width="360" height="360" backgroundColor="#000000" borderRadius="20" padding="12" overflow="auto" entry="false" animateStep="360" switchInFunctionName="switch_in_select_dev_view" switchOutFunctionName="switch_out_select_dev_view" zIndex="1" />
+        <hg_view id="SelectDevView" x="715" y="420" width="360" height="360" backgroundColor="#000000" borderRadius="20" padding="12" overflow="auto" entry="false" animateStep="360" switchInFunctionName="switch_in_select_dev_view" switchOutFunctionName="switch_out_select_dev_view" zIndex="1">
+            <hg_list id="lst_bd" x="0" y="0" width="360" height="360" itemWidth="360" itemHeight="60" space="5" direction="VERTICAL" style="LIST_CLASSIC" cardStackLocation="0" noteNum="5" offset="0" outScope="0" autoAlign="true" inertia="false" loop="false" createBar="false" enableAreaDisplay="false" keepNoteAlive="false" useUserNoteDesign="true" userNoteDesignFunc="list_bd_note_design" zIndex="1" showOverflow="true">
+                <hg_list_item id="lst_bd_item_0" x="0" y="0" width="360" height="60" index="0" zIndex="0" />
+                <hg_list_item id="lst_bd_item_1" x="0" y="65" width="360" height="60" index="1" zIndex="1" />
+                <hg_list_item id="lst_bd_item_2" x="0" y="130" width="360" height="60" index="2" zIndex="2" />
+                <hg_list_item id="lst_bd_item_3" x="0" y="195" width="360" height="60" index="3" zIndex="3" />
+                <hg_list_item id="lst_bd_item_4" x="0" y="260" width="360" height="60" index="4" zIndex="4" />
+            </hg_list>
+        </hg_view>
     </view>
 </hml>

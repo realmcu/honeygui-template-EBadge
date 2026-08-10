@@ -21,7 +21,9 @@ gui_img_t *img_shutter = NULL;
 gui_img_t *img_19 = NULL;
 gui_img_t *img_1x = NULL;
 gui_img_t *img_2x = NULL;
+gui_list_t *lst_mainface = NULL;
 
+// List component note_design callback functions
 
 // Create easy_demoMainView (hg_view)
 static void easy_demoMainView_switch_out(gui_view_t *view)
@@ -195,8 +197,6 @@ static void view_cam_ctl_switch_in(gui_view_t *view)
     // Set background color
     gui_view_set_bg_color(view, gui_rgb(0, 0, 0));
 
-    gui_view_switch_on_event(view, "easy_demoMainView", SWITCH_OUT_NONE_ANIMATION, SWITCH_IN_NONE_ANIMATION, GUI_EVENT_TOUCH_LEFT_SLIDE_QUICK);
-    gui_view_switch_on_event(view, "easy_demoMainView", SWITCH_OUT_NONE_ANIMATION, SWITCH_IN_NONE_ANIMATION, GUI_EVENT_TOUCH_RIGHT_SLIDE_QUICK);
 
 
     // Create streaming_1 (hg_streaming)
@@ -218,6 +218,8 @@ static void view_cam_ctl_switch_in(gui_view_t *view)
     // Create img_2x (hg_image)
     img_2x = gui_img_create_from_fs((gui_obj_t *)view, "img_2x", "/image/stream/2x_df.bin", 284, 210, 50, 50);
     gui_obj_add_event_cb(img_2x, (gui_event_cb_t)img_2x_clicked_cb, GUI_EVENT_TOUCH_CLICKED, NULL);
+
+    switch_in_view_cam_ctl(view);
 }
 GUI_VIEW_INSTANCE("view_cam_ctl", false, view_cam_ctl_switch_in, view_cam_ctl_switch_out, false);
 
@@ -238,6 +240,16 @@ static void view_mainface_list_switch_in(gui_view_t *view)
     // Set background color
     gui_view_set_bg_color(view, gui_rgb(0, 0, 0));
 
+
+
+    // Create lst_mainface (hg_list)
+    lst_mainface = gui_list_create((gui_obj_t *)view, "lst_mainface", -80, 0, 360, 360, 160, 20, HORIZONTAL, lst_mainface_note_design, NULL, false);
+    gui_list_set_style(lst_mainface, LIST_CIRCLE);
+    gui_list_set_note_num(lst_mainface, 3);
+    gui_list_set_auto_align(lst_mainface, true);
+    gui_list_set_inertia(lst_mainface, false);
+    gui_list_enable_loop(lst_mainface, true);
+    gui_list_set_circle_radius(lst_mainface, 360);
 
     switch_in_mainface_list(view);
 }
