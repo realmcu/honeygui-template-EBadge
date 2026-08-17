@@ -9,7 +9,7 @@
  *
  * 3D perspective-parallax wallpaper using ONLY a foreground + background image.
  *
- * Principle (mirrors the browser preview tool, see "3D 模式原理与计算.md"):
+ * Principle (mirrors the browser preview tool's 3D mode calculations):
  *   - Put the two images at different Z depths around a virtual "stage".
  *   - Each frame, rotate only the stage (rotateX / rotateY) by the device
  *     attitude. A pinhole-perspective projection then turns that single rotation
@@ -19,7 +19,7 @@
  *     the picture is pixel-aligned at rest.
  *   - Both layers are then grown by an `overscan` margin (cover-style) so that
  *     rotation/parallax never sweeps a layer edge into the frame -- otherwise
- *     the opaque background would expose a black border ("穿帮") when tilted.
+ *     the opaque background would expose a black border when tilted.
  *
  * Injection method:
  *   Each layer is a transform-node: a plain gui_obj container whose matrix we
@@ -51,17 +51,17 @@
 /*============================================================================*
  *                        Header Files
  *============================================================================*/
+#include <stdbool.h>
 #include <math.h>
 #include <string.h>
-#include <stdbool.h>
+
+#include "gsensor_reader.h"
 #include "guidef.h"
 #include "gui_api.h"
-#include "gui_obj.h"
+#include "gui_fb.h"
 #include "gui_img.h"
 #include "gui_matrix.h"
-#include "gui_fb.h"
-#include "gui_server.h"
-#include "gui_components_init.h"
+#include "gui_obj.h"
 
 /*============================================================================*
  *                           Resources
@@ -71,22 +71,8 @@
  * with every non-alphanumeric character replaced by '_'.
  *============================================================================*/
 
-// #define SW_BG_DATA   (const char *)"/background_clean_360.bin"
-// #define SW_FG_DATA   (const char *)"/foreground_360.bin"
-
-#define SW_BG_DATA   (const char *)"/background_clean.bin"
-#define SW_FG_DATA   (const char *)"/foreground.bin"
-
-#ifdef _HONEYGUI_SIMULATOR_
-// extern const unsigned char _binary_background_clean_scale_bin_start[];
-// extern const unsigned char _binary_foreground_scale_bin_start[];
-// #define SW_BG_DATA   ((const unsigned char *)_binary_background_clean_scale_bin_start)
-// #define SW_FG_DATA   ((const unsigned char *)_binary_foreground_scale_bin_start)
-#else
-/* Flash XIP addresses for on-target builds (fill in per board memory map). */
-// #define SW_BG_DATA   (const char *)"/background_clean_360.bin"//((const unsigned char *)0x00000000)
-// #define SW_FG_DATA   (const char *)"/foreground_360.bin"//((const unsigned char *)0x00000000)
-#endif
+#define SW_BG_DATA ((const char *)"/background_clean.bin")
+#define SW_FG_DATA ((const char *)"/foreground.bin")
 
 
 /*============================================================================*
@@ -114,7 +100,7 @@ typedef struct
     float fg_cap_ratio; /* fgZ clamp = ratio * D          default 0.6   */
     float overscan;     /* per-side edge margin (px). Browser 3D mode uses
                            max(max(bg, 2*blur), 44) + 8  ->  52 by default.
-                           Larger = more headroom vs. 穿帮, but more zoom-in. */
+                           Larger values prevent exposed edges but zoom in more. */
 
     /* ===== C. Attitude input (3-axis g-sensor) ===== */
     bool     sim_enable;   /* PC demo: synthesize g-sensor data internally  */
@@ -127,16 +113,6 @@ typedef struct
 } spatial_wallpaper_cfg_t;
 
 /* Edit this block to paste a browser-tuned effect; rebuild to apply. */
-// static spatial_wallpaper_cfg_t g_cfg =
-// {
-//     .persp = 1200.0f, .tilt3d = 8.0f, .fg = 30.0f, .bg = 16.0f,
-//     .lerp  = 0.4f,   .invert = false,
-//     .fg_cap_ratio = 0.6f, .overscan = 52.0f,
-//     .sim_enable = true, .timer_ms = 16, .g_one = 16384,
-//     .sim_tilt_deg = 45.0f, .sim_speed = 0.04f,
-//     .sim_freq_y = 0.73f, .sim_phase_y = 1.0f,
-// };
-
 static spatial_wallpaper_cfg_t g_cfg =
 {
     .persp = 970.0f, .tilt3d = 8.0f, .fg = 50.0f, .bg = 16.0f,
@@ -328,7 +304,10 @@ static void sw_layer_prepare(sw_layer_t *layer)
 
     memcpy(layer->stage->matrix, &h, sizeof(gui_matrix_t));
 
-    /* 壁纸做透视后图会超出 stage 的 360×360 边界，必须关掉 clip，否则前景被裁。 */
+    /*
+     * Perspective can extend the image beyond the 360 x 360 stage, so clipping
+     * must remain disabled to preserve the foreground edges.
+     */
     layer->img->need_clip = false;
 }
 
@@ -397,8 +376,26 @@ static void sw_tick(void *obj)
     gui_fb_change();
 }
 
+/* Create one transform stage and its zero-transform image child. */
+static void sw_create_layer(void *parent, sw_layer_t *layer, const char *stage_name,
+                            const char *img_name, const unsigned char *img_data)
+{
+    gui_obj_t *root = parent;
+
+    /* The stage matrix is replaced with the layer homography every frame. */
+    layer->stage = gui_obj_create(root, stage_name, 0, 0, 0, 0);
+    layer->stage->obj_cb = sw_stage_cb;
+    layer->stage->has_prepare_cb = true;
+    layer->stage->user_data = layer;
+
+    /* The child inherits the stage homography without an additional transform. */
+    layer->img = gui_img_create_from_fs(layer->stage, img_name,
+                                        (void *)img_data, 0, 0, 0, 0);
+    layer->img->need_clip = false;
+}
+
 /*============================================================================*
- *                         Public Interface
+ * Public Interface
  *============================================================================*/
 
 /**
@@ -413,42 +410,30 @@ static void sw_tick(void *obj)
  */
 void spatial_wallpaper_feed_gsensor(int16_t gx, int16_t gy, int16_t gz)
 {
-    /* sensor frame -> widget frame:
-     *   x_ui(left) = y_acc , y_ui(down) = x_acc , z_ui(out) = z_acc
-     * so gravity in widget axes is (gy, gx, gz). */
-    float ux = (float)gy;   /* gravity along screen-left (x_ui) */
-    float uy = (float)gx;   /* gravity along screen-down (y_ui) */
-    float uz = (float)gz;   /* gravity along screen-out  (z_ui) */
+    /*
+     * Sensor to widget axes:
+     * x_ui(left) = y_acc, y_ui(down) = x_acc, z_ui(out) = z_acc.
+     */
+    float ux = (float)gy;
+    float uy = (float)gx;
+    float uz = (float)gz;
 
-    float mag = sqrtf(ux * ux + uy * uy + uz * uz);
-    if (mag < 1.0f)
+    float magnitude = sqrtf(ux * ux + uy * uy + uz * uz);
+    if (magnitude < 1.0f)
     {
-        return;             /* free-fall / invalid sample: keep last attitude */
+        return;
     }
 
-    /* normalized tilt in [-1,1], independent of the sensor's LSB-per-g scale */
-    g_state.tgt_nx = sw_clampf(ux / mag, -1.0f, 1.0f);   /* left-right -> rotateY */
-    g_state.tgt_ny = sw_clampf(uy / mag, -1.0f, 1.0f);   /* up-down    -> rotateX */
+    /* Normalize tilt independently of the sensor's counts-per-g scale. */
+    g_state.tgt_nx = sw_clampf(ux / magnitude, -1.0f, 1.0f);
+    g_state.tgt_ny = sw_clampf(uy / magnitude, -1.0f, 1.0f);
 }
 
 /**
- * @brief Install a pull-style g-sensor reader (real-hardware integration).
+ * @brief Install a pull-style g-sensor reader.
  *
- * Once set, the attitude timer calls @p reader every tick and feeds whatever it
- * returns, taking precedence over the built-in simulator. Pass NULL to detach
- * and fall back to the simulator / external push.
- *
- * Example board hook:
- * @code
- *   static bool board_read_gsensor(int16_t *gx, int16_t *gy, int16_t *gz)
- *   {
- *       return bsp_accel_read_xyz(gx, gy, gz) == 0;   // raw int16 gravity
- *   }
- *   spatial_wallpaper_set_gsensor_reader(board_read_gsensor);
- * @endcode
- *
- * @param reader board callback filling gx/gy/gz (raw int16 gravity on sensor
- *               +x back / +y left / +z up), returning true when valid.
+ * The attitude timer calls the reader every tick. Pass NULL to detach it and
+ * use either the simulator or externally pushed samples.
  */
 void spatial_wallpaper_set_gsensor_reader(spatial_wallpaper_gsensor_reader_t reader)
 {
@@ -456,9 +441,9 @@ void spatial_wallpaper_set_gsensor_reader(spatial_wallpaper_gsensor_reader_t rea
 }
 
 /**
- * @brief Apply a configuration at runtime (e.g. live tuning / menu hook-up).
+ * @brief Apply a runtime configuration.
  *
- * Pass NULL to keep the current config and just recompute derived depths.
+ * Pass NULL to retain the current configuration and recompute derived depths.
  */
 void spatial_wallpaper_set_param(const spatial_wallpaper_cfg_t *cfg)
 {
@@ -470,50 +455,23 @@ void spatial_wallpaper_set_param(const spatial_wallpaper_cfg_t *cfg)
     gui_fb_change();
 }
 
-/*============================================================================*
- *                         Construction
- *============================================================================*/
-
-static void sw_create_layer(void *parent, sw_layer_t *layer, const char *stage_name,
-                            const char *img_name, const unsigned char *img_data)
-{
-    gui_obj_t *root = parent;
-
-    /* transform node: matrix gets overwritten with the homography each frame */
-    layer->stage = gui_obj_create(root, stage_name, 0, 0, 0, 0);
-    layer->stage->obj_cb         = sw_stage_cb;
-    layer->stage->has_prepare_cb = true;
-    layer->stage->user_data      = layer;
-
-    /* zero-transform child: inherits the stage homography and draws with it */
-    layer->img = gui_img_create_from_fs(layer->stage, img_name,
-                                         (void *)img_data, 0, 0, 0, 0);
-    layer->img->need_clip = false;
-}
-
-
 int spatial_wallpaper(gui_obj_t *parent)
 {
-#ifdef _HONEYGUI_SIMULATOR_
-    // TODO
-#else
-    extern bool gsensor_sc7a20_read_xyz(int16_t *x, int16_t *y, int16_t *z);
+#ifndef _HONEYGUI_SIMULATOR_
     spatial_wallpaper_set_gsensor_reader(gsensor_sc7a20_read_xyz);
 #endif
-    
 
-    /* compute static depths from the default config before the first frame */
+    /* Compute static depths before drawing the first frame. */
     spatial_wallpaper_set_param(&g_cfg);
 
-    /* background first (drawn behind); foreground second (alpha over background) */
+    /* Draw the background first, then alpha-blend the foreground over it. */
     sw_create_layer(parent, &g_bg, "sw_stage_bg", "sw_img_bg", SW_BG_DATA);
     sw_create_layer(parent, &g_fg, "sw_stage_fg", "sw_img_fg", SW_FG_DATA);
 
-    /* attitude driver: one reload timer smooths attitude and (in sim) feeds it */
+    /* One reload timer updates and smooths the current attitude. */
     g_ctrl = gui_obj_create(parent, "sw_ctrl", 0, 0, 1, 1);
     gui_obj_create_timer(g_ctrl, g_cfg.timer_ms, true, sw_tick);
     gui_obj_start_timer(g_ctrl);
 
     return 0;
 }
-// GUI_INIT_APP_EXPORT(app_init);

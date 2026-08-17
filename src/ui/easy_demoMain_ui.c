@@ -17,7 +17,13 @@ gui_img_t *icon_as = NULL;
 gui_img_t *icon_cam = NULL;
 gui_text_t *lbl_1 = NULL;
 gui_stream_t *streaming_1 = NULL;
+gui_img_t *img_18 = NULL;
+gui_img_t *img_19 = NULL;
+gui_img_t *img_1x = NULL;
+gui_img_t *img_2x = NULL;
+gui_list_t *lst_mainface = NULL;
 
+// List component note_design callback functions
 
 // Create easy_demoMainView (hg_view)
 static void easy_demoMainView_switch_out(gui_view_t *view)
@@ -199,6 +205,21 @@ static void view_cam_ctl_switch_in(gui_view_t *view)
     gui_stream_set_update_interval((gui_stream_t *)streaming_1, 10);
     gui_stream_set_state((gui_stream_t *)streaming_1, GUI_VIDEO_STATE_PLAYING);
 
+    // Create img_18 (hg_image)
+    img_18 = gui_img_create_from_fs((gui_obj_t *)view, "img_18", "/image/stream/shutter.bin", 183, 347, 100, 100);
+    gui_obj_add_event_cb(img_18, (gui_event_cb_t)img_18_clicked_cb, GUI_EVENT_TOUCH_CLICKED, NULL);
+
+    // Create img_19 (hg_image)
+    img_19 = gui_img_create_from_fs((gui_obj_t *)view, "img_19", "/image/stream/bg.bin", 307, 284, 110, 125);
+
+    // Create img_1x (hg_image)
+    img_1x = gui_img_create_from_fs((gui_obj_t *)view, "img_1x", "/image/stream/1x_hl.bin", 321, 345, 50, 50);
+    gui_obj_add_event_cb(img_1x, (gui_event_cb_t)img_1x_clicked_cb, GUI_EVENT_TOUCH_CLICKED, NULL);
+
+    // Create img_2x (hg_image)
+    img_2x = gui_img_create_from_fs((gui_obj_t *)view, "img_2x", "/image/stream/2x_df.bin", 353, 298, 50, 50);
+    gui_obj_add_event_cb(img_2x, (gui_event_cb_t)img_2x_clicked_cb, GUI_EVENT_TOUCH_CLICKED, NULL);
+
     switch_in_view_cam_ctl(view);
 }
 GUI_VIEW_INSTANCE("view_cam_ctl", false, view_cam_ctl_switch_in, view_cam_ctl_switch_out, false);
@@ -220,6 +241,16 @@ static void view_mainface_list_switch_in(gui_view_t *view)
     // Set background color
     gui_view_set_bg_color(view, gui_rgb(0, 0, 0));
 
+
+
+    // Create lst_mainface (hg_list)
+    lst_mainface = gui_list_create((gui_obj_t *)view, "lst_mainface", -80, 0, 466, 466, 160, 73, HORIZONTAL, lst_mainface_note_design, NULL, false);
+    gui_list_set_style(lst_mainface, LIST_CIRCLE);
+    gui_list_set_note_num(lst_mainface, 3);
+    gui_list_set_auto_align(lst_mainface, true);
+    gui_list_set_inertia(lst_mainface, false);
+    gui_list_enable_loop(lst_mainface, true);
+    gui_list_set_circle_radius(lst_mainface, 466);
 
     switch_in_mainface_list(view);
 }

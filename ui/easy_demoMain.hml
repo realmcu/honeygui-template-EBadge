@@ -35,7 +35,7 @@
                 </event>
             </events>
         </hg_view>
-        <hg_view id="top_view" x="-11" y="-565" width="466" height="466" backgroundColor="#000000" borderRadius="20" padding="12" overflow="auto" entry="false" animateStep="360" timers="[{&quot;id&quot;:&quot;timer_0&quot;,&quot;name&quot;:&quot;动画 1&quot;,&quot;enabled&quot;:true,&quot;interval&quot;:1000,&quot;reload&quot;:true,&quot;mode&quot;:&quot;custom&quot;,&quot;callback&quot;:&quot;top_view_timer_0_cb&quot;,&quot;duration&quot;:1000,&quot;stopOnComplete&quot;:true,&quot;delayStart&quot;:0,&quot;actions&quot;:[],&quot;segments&quot;:[],&quot;runImmediately&quot;:true}]" switchInFunctionName="switch_in_top_view" zIndex="1">
+        <hg_view id="top_view" x="11" y="-565" width="466" height="466" backgroundColor="#000000" borderRadius="20" padding="12" overflow="auto" entry="false" animateStep="360" timers="[{&quot;id&quot;:&quot;timer_0&quot;,&quot;name&quot;:&quot;动画 1&quot;,&quot;enabled&quot;:true,&quot;interval&quot;:1000,&quot;reload&quot;:true,&quot;mode&quot;:&quot;custom&quot;,&quot;callback&quot;:&quot;top_view_timer_0_cb&quot;,&quot;duration&quot;:1000,&quot;stopOnComplete&quot;:true,&quot;delayStart&quot;:0,&quot;actions&quot;:[],&quot;segments&quot;:[],&quot;runImmediately&quot;:true}]" switchInFunctionName="switch_in_top_view" zIndex="1">
             <events>
                 <event type="onKeyShortPress" keyName="Menu">
                     <action type="switchView" target="bt_View" switchOutStyle="SWITCH_OUT_NONE_ANIMATION" switchInStyle="SWITCH_IN_NONE_ANIMATION" />
@@ -44,7 +44,7 @@
                     <action type="switchView" target="menuMainView" switchOutStyle="SWITCH_OUT_NONE_ANIMATION" switchInStyle="SWITCH_IN_NONE_ANIMATION" />
                 </event>
             </events>
-            <hg_image id="bg_circle" x="0" y="0" width="466" height="466" transform="{&quot;opacity&quot;:100}" src="assets/image/A8/circle_360_bg.png" blendMode="IMG_SRC_OVER_MODE" fgColor="0xFF000000" timers="[{&quot;id&quot;:&quot;timer_0&quot;,&quot;name&quot;:&quot;动画 1&quot;,&quot;enabled&quot;:true,&quot;interval&quot;:20,&quot;reload&quot;:true,&quot;mode&quot;:&quot;custom&quot;,&quot;callback&quot;:&quot;bg_circle_timer_0_cb&quot;,&quot;duration&quot;:1000,&quot;stopOnComplete&quot;:true,&quot;delayStart&quot;:0,&quot;actions&quot;:[],&quot;segments&quot;:[],&quot;runImmediately&quot;:true}]" zIndex="0" />
+            <hg_image id="bg_circle" x="0" y="0" width="466" height="466" transform="{&quot;opacity&quot;:100}" src="assets/image/A8/circle_360_bg.png" blendMode="IMG_SRC_OVER_MODE" fgColor="0xFF000000" timers="[{&quot;id&quot;:&quot;timer_0&quot;,&quot;name&quot;:&quot;动画 1&quot;,&quot;enabled&quot;:true,&quot;interval&quot;:20,&quot;reload&quot;:true,&quot;mode&quot;:&quot;custom&quot;,&quot;callback&quot;:&quot;bg_circle_timer_0_cb&quot;,&quot;duration&quot;:1000,&quot;stopOnComplete&quot;:true,&quot;delayStart&quot;:0,&quot;actions&quot;:[],&quot;segments&quot;:[],&quot;runImmediately&quot;:true}]" locked="true" zIndex="0" />
             <hg_image id="icon_del" x="309" y="98" width="120" height="120" src="assets/image/A8/delete_icon.png" blendMode="IMG_SRC_OVER_MODE" zIndex="1">
                 <events>
                     <event type="onClick">
@@ -92,8 +92,36 @@
         </hg_view>
         <hg_view id="view_cam_ctl" x="589" y="-565" width="466" height="466" backgroundColor="#000000" borderRadius="20" padding="12" overflow="auto" entry="false" animateStep="360" switchInFunctionName="switch_in_view_cam_ctl" zIndex="1">
             <hg_streaming id="streaming_1" x="0" y="0" width="480" height="480" codec="h264" updateInterval="10" dropMode="none" transporter="gui_stream_transport_get()" zIndex="1" />
+            <hg_image id="img_18" x="183" y="347" width="100" height="100" src="assets/image/stream/shutter.png" zIndex="2">
+                <events>
+                    <event type="onClick">
+                        <action type="callFunction" functionName="click_camera_shutter" />
+                    </event>
+                </events>
+            </hg_image>
+            <hg_image id="img_19" x="307" y="284" width="110" height="125" src="assets/image/stream/bg.png" zIndex="3" />
+            <hg_image id="img_1x" x="321" y="345" width="50" height="50" src="assets/image/stream/1x_hl.png" zIndex="4">
+                <events>
+                    <event type="onClick">
+                        <action type="callFunction" functionName="click_camera_1x" />
+                    </event>
+                </events>
+            </hg_image>
+            <hg_image id="img_2x" x="353" y="298" width="50" height="50" src="assets/image/stream/2x_df.png" zIndex="5">
+                <events>
+                    <event type="onClick">
+                        <action type="callFunction" functionName="click_camera_2x" />
+                    </event>
+                </events>
+            </hg_image>
         </hg_view>
-        <hg_view id="view_mainface_list" x="11" y="560" width="466" height="466" backgroundColor="#000000" borderRadius="20" padding="12" overflow="auto" entry="false" animateStep="466" switchInFunctionName="switch_in_mainface_list" zIndex="1" />
+        <hg_view id="view_mainface_list" x="11" y="560" width="466" height="466" backgroundColor="#000000" borderRadius="20" padding="12" overflow="auto" entry="false" animateStep="466" switchInFunctionName="switch_in_mainface_list" zIndex="1">
+            <hg_list id="lst_mainface" x="-80" y="0" width="466" height="466" itemWidth="160" itemHeight="466" space="73" direction="HORIZONTAL" style="LIST_CIRCLE" cardStackLocation="0" noteNum="3" offset="0" outScope="0" autoAlign="true" inertia="false" loop="true" createBar="false" enableAreaDisplay="false" keepNoteAlive="false" useUserNoteDesign="true" userNoteDesignFunc="lst_mainface_note_design" zIndex="1" showOverflow="true">
+                <hg_list_item id="lst_mainface_item_0" x="0" y="0" width="160" height="466" index="0" zIndex="0" />
+                <hg_list_item id="lst_mainface_item_1" x="233" y="0" width="160" height="466" index="1" zIndex="1" />
+                <hg_list_item id="lst_mainface_item_2" x="466" y="0" width="160" height="466" index="2" zIndex="2" />
+            </hg_list>
+        </hg_view>
         <hg_view id="view_fl" x="-509" y="-565" width="466" height="466" backgroundColor="#FFFFFF" borderRadius="20" padding="12" overflow="auto" entry="false" animateStep="360" timers="[{&quot;id&quot;:&quot;timer_0&quot;,&quot;name&quot;:&quot;动画 1&quot;,&quot;enabled&quot;:true,&quot;interval&quot;:10,&quot;reload&quot;:true,&quot;mode&quot;:&quot;custom&quot;,&quot;callback&quot;:&quot;view_fl_timer_0_cb&quot;,&quot;duration&quot;:1000,&quot;stopOnComplete&quot;:true,&quot;delayStart&quot;:0,&quot;actions&quot;:[],&quot;segments&quot;:[],&quot;runImmediately&quot;:true}]" zIndex="2">
             <events>
                 <event type="onKeyShortPress" keyName="Menu">

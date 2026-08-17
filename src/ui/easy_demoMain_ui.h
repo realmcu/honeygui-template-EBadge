@@ -13,6 +13,7 @@
 #include "font_types.h"
 #include "gui_img.h"
 #include "gui_text.h"
+#include "gui_list.h"
 #include "gui_stream.h"
 
 // Component handle declarations
@@ -26,5 +27,10 @@ extern gui_img_t *icon_as;
 extern gui_img_t *icon_cam;
 extern gui_text_t *lbl_1;
 extern gui_stream_t *streaming_1;
+extern gui_img_t *img_18;
+extern gui_img_t *img_19;
+extern gui_img_t *img_1x;
+extern gui_img_t *img_2x;
+extern gui_list_t *lst_mainface;
 
 #endif // EASY_DEMOMAIN_UI_H

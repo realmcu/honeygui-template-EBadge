@@ -63,6 +63,14 @@
             </hg_window>
             <hg_label id="bd_addr_self" x="0" y="312" width="466" height="30" hAlign="CENTER" vAlign="MID" color="#ffffff" letterSpacing="0" lineSpacing="0" wordWrap="false" wordBreak="false" text="11:11:11:11:11:11" fontFile="/font/Inter_24pt_Regular.ttf" fontSize="20" characterSets="[{&quot;type&quot;:&quot;string&quot;,&quot;value&quot;:&quot;01234567890:ABCDEF&quot;}]" zIndex="1" />
         </hg_view>
-        <hg_view id="SelectDevView" x="694" y="612" width="466" height="466" backgroundColor="#000000" borderRadius="20" padding="12" overflow="auto" entry="false" animateStep="466" switchInFunctionName="switch_in_select_dev_view" switchOutFunctionName="switch_out_select_dev_view" zIndex="1" />
+        <hg_view id="SelectDevView" x="694" y="612" width="466" height="466" backgroundColor="#000000" borderRadius="20" padding="12" overflow="auto" entry="false" animateStep="466" switchInFunctionName="switch_in_select_dev_view" switchOutFunctionName="switch_out_select_dev_view" zIndex="1">
+            <hg_list id="lst_bd" x="0" y="0" width="466" height="466" itemWidth="466" itemHeight="78" space="5" direction="VERTICAL" style="LIST_CLASSIC" cardStackLocation="0" noteNum="5" offset="0" outScope="0" autoAlign="true" inertia="false" loop="false" createBar="false" enableAreaDisplay="false" keepNoteAlive="false" useUserNoteDesign="true" userNoteDesignFunc="list_bd_note_design" zIndex="1" showOverflow="true">
+                <hg_list_item id="lst_bd_item_0" x="0" y="0" width="466" height="78" index="0" zIndex="0" />
+                <hg_list_item id="lst_bd_item_1" x="0" y="83" width="466" height="78" index="1" zIndex="1" />
+                <hg_list_item id="lst_bd_item_2" x="0" y="166" width="466" height="78" index="2" zIndex="2" />
+                <hg_list_item id="lst_bd_item_3" x="0" y="249" width="466" height="78" index="3" zIndex="3" />
+                <hg_list_item id="lst_bd_item_4" x="0" y="332" width="466" height="78" index="4" zIndex="4" />
+            </hg_list>
+        </hg_view>
     </view>
 </hml>

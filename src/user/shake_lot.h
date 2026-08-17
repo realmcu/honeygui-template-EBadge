@@ -14,14 +14,13 @@ extern "C" {
 #endif
 
 /**
- * @brief 摇签(shake-lot)小应用入口。
+ * Create the shake-lot application under the supplied GUI object.
  *
- * 在 @p parent 下构建"摇晃识别 → 播放 lite-video 动画 → 按概率出签"的控件树，
- * 参考 spatial_wallpaper()，作为一张独立表盘挂载（mainface 类型 SRC_SHAKE_LOT）。
- * 自带 g-sensor 采样 timer 与状态机，调用方无需再驱动。
+ * The view samples the accelerometer, plays a lite-video animation while the
+ * device is shaken, and selects a weighted result after movement stops.
  *
- * @param parent 父 GUI 对象（switch_mainface 里为 win 下新建的容器）。
- * @return 0 成功。
+ * @param parent Parent object that owns the shake-lot controls.
+ * @return 0 on success.
  */
 int shake_lot(gui_obj_t *parent);
 

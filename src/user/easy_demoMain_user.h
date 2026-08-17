@@ -14,26 +14,6 @@
 #define  MAINFACE_NUM_MAX  30
 #define  BD_NUM_MAX        10
 
-#define COLOR_TRANSITION_SRGB          0
-#define COLOR_TRANSITION_GAMMA_LINEAR  1
-#define COLOR_TRANSITION_HSL           2
-#define COLOR_TRANSITION_CIELAB        3
-#define COLOR_TRANSITION_OKLAB         4
-
-#ifndef COLOR_TRANSITION_METHOD
-#define COLOR_TRANSITION_METHOD COLOR_TRANSITION_GAMMA_LINEAR
-#endif
-
-#define COLOR_EASING_LINEAR             0
-#define COLOR_EASING_SMOOTHSTEP         1
-#define COLOR_EASING_EASE_IN_OUT_CUBIC  2
-#define COLOR_EASING_EASE_OUT_CUBIC     3
-
-#ifndef COLOR_TRANSITION_EASING
-#define COLOR_TRANSITION_EASING COLOR_EASING_EASE_IN_OUT_CUBIC
-#endif
-
-
 typedef enum
 {
     SRC_IMG = 0,
@@ -44,6 +24,7 @@ typedef enum
     SRC_FLIP_COIN,
     
     SRC_SHAKE_LOT,
+    SRC_DICE
 } MAINFACE_SRC_TYPE;
 
 #pragma pack(push, 1)  
@@ -86,6 +67,7 @@ typedef enum
     CAST_STOP,
     CONNECT_DEV,
     DISCONNECT_DEV,
+    REMOTE_CHANGE,
 
 } UI_SUBEVENT_TYPE;
 
@@ -132,6 +114,10 @@ void click_delete_icon(void *obj, gui_event_t *e);
 void click_delete_icon_detail(void *obj, gui_event_t *e);
 void click_back_icon(void *obj, gui_event_t *e);
 void click_camera_ctl_icon(void *obj, gui_event_t *e);
+void click_camera_shutter(void *obj, gui_event_t *e);
+void click_camera_1x(void *obj, gui_event_t *e);
+void click_camera_2x(void *obj, gui_event_t *e);
+
 
 void switch_in_mainface_0(gui_view_t *view);
 void switch_in_mainface_1(gui_view_t *view);
@@ -140,6 +126,8 @@ void switch_out_mainface(gui_view_t *view);
 void switch_in_top_view(gui_view_t *view);
 void switch_in_mainface_list(gui_view_t *view);
 void switch_in_view_cam_ctl(gui_view_t *view);
+
+void lst_mainface_note_design(gui_obj_t *obj, void *param);
 
 /* Interact api */ 
 uint8_t mainface_list_init(void **data_list, uint32_t n); //ret: user's mainface num

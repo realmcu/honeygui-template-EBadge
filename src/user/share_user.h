@@ -15,6 +15,7 @@
 void click_share_image_button(void *obj, gui_event_t *e);
 void click_receive_image_button(void *obj, gui_event_t *e);
 
+void list_bd_note_design(gui_obj_t *obj, void *param);
 void switch_in_share_view(gui_view_t *view);
 void switch_out_share_view(gui_view_t *view);
 void switch_in_select_dev_view(gui_view_t *view);

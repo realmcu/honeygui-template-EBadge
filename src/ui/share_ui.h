@@ -14,6 +14,7 @@
 #include "font_types.h"
 #include "gui_img.h"
 #include "gui_text.h"
+#include "gui_list.h"
 
 // Component handle declarations
 extern gui_img_t *img_4;
@@ -27,5 +28,6 @@ extern gui_win_t *win_share;
 extern gui_img_t *img_8;
 extern gui_img_t *img_9;
 extern gui_text_t *bd_addr_self;
+extern gui_list_t *lst_bd;
 
 #endif // SHARE_UI_H
