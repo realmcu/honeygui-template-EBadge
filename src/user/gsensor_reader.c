@@ -1,31 +1,49 @@
-#include <stdbool.h>
-#include <stdint.h>
+#include "gsensor_reader.h"
 
-#ifdef _HONEYGUI_SIMULATOR_
-    // TODO
-#else
-#include "posix.h"
+#ifndef _HONEYGUI_SIMULATOR_
 #include "ioctls/posix_ioctl_gsensor.h"
+#include "posix.h"
+#endif
 
 bool gsensor_sc7a20_read_xyz(int16_t *x, int16_t *y, int16_t *z)
 {
-    static posix_fd_t s_fd = POSIX_FD_NULL;
+#ifdef _HONEYGUI_SIMULATOR_
+    (void)x;
+    (void)y;
+    (void)z;
+    return false;
+#else
+    static posix_fd_t fd = POSIX_FD_NULL;
 
-    if (s_fd == POSIX_FD_NULL) {
-        s_fd = posix_open("/dev/gsensor0");
-        if (s_fd == POSIX_FD_NULL) { return false; }
+    if (fd == POSIX_FD_NULL)
+    {
+        fd = posix_open("/dev/gsensor0");
+        if (fd == POSIX_FD_NULL)
+        {
+            return false;
+        }
     }
 
     posix_gsensor_axis_t axis;
-    posix_ssize_t        n = posix_read(s_fd, &axis, sizeof(axis));
-    if (n < 0) { return false; }
+    posix_ssize_t bytes_read = posix_read(fd, &axis, sizeof(axis));
+    if (bytes_read < 0)
+    {
+        return false;
+    }
 
-    if (x) { *x = (int16_t)axis.x; }
-    if (y) { *y = (int16_t)axis.y; }
-    if (z) { *z = (int16_t)axis.z; }
+    if (x != NULL)
+    {
+        *x = (int16_t)axis.x;
+    }
+    if (y != NULL)
+    {
+        *y = (int16_t)axis.y;
+    }
+    if (z != NULL)
+    {
+        *z = (int16_t)axis.z;
+    }
+
     return true;
-}
 #endif
-
-
-
+}

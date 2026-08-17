@@ -4,53 +4,44 @@
  * SPDX-License-Identifier: MIT
  */
 
-/*============================================================================*
- *                          Shake-Lot (摇签) Demo
+/**
+ * Shake-lot demo.
  *
- * 摇一摇求签小应用。三态状态机：
- *   IDLE    等待摇晃（动画停、签图隐藏）
- *   SHAKING 识别到摇晃 -> 循环播放 lite-video 动画表示"摇签中"
- *   RESULT  停止摇晃   -> 按概率抽一支签，停动画、显示签面图
- * RESULT 态再次摇晃即重抽（清签 -> 重播动画 -> 停下再出新签）。
+ * The application uses a three-state workflow:
+ * - IDLE waits for a shake with the animation stopped and result hidden.
+ * - SHAKING loops the lite-video animation while movement continues.
+ * - RESULT selects a weighted result and displays its image after movement stops.
  *
- * 姿态输入 —— 3 轴 g-sensor（gsensor_sc7a20_read_xyz，单位 mg）：
- *   与 spatial_wallpaper（测姿态倾角）不同，本应用设备竖握、双手合十夹于掌心，
- *   设备 z 轴指向水平方向，来回摇动发生在"垂直于 z 轴"的 sensor x-y 平面内。
- *   先低通估出重力基线、raw 减重力得用户线性加速度，再取 x-y 平面主导轴的带
- *   符号分量。
+ * The device is held vertically, so the back-and-forth motion occurs in the
+ * sensor X-Y plane. A low-pass filter estimates gravity, and the remaining
+ * linear acceleration is projected onto the dominant in-plane axis.
  *
- * 识别用"漏桶"计分——只在主导轴线性加速度**方向翻转（过零）**时才 +1（强翻转
- * +2），故计分 ≈ 半周期往复次数：一次性单向运动（拿起 / 调姿 / 走路颠簸）不
- * 累积、不误触发，真正来回摇动快速累积。累计到 START_SCORE 判"开始摇"，连续
- * STOP_QUIET 个静止拍判"停止摇"。整体放宽阈值 / 计分以提高识别率。
- *
- * 资源为临时占位（当前 assets 仅有 1 个视频 / 数张图），集中在下方两个数组，
- * 后续整批替换即可。
- *============================================================================*/
+ * A leaky score counts direction reversals instead of one-way movement. This
+ * avoids triggers from picking up or repositioning the device while allowing
+ * repeated shaking to reach the start threshold quickly.
+ */
 
-#include <string.h>
-#include <stdbool.h>
-#include <stdint.h>
-#include "guidef.h"
-#include "gui_api.h"
-#include "gui_obj.h"
-#include "gui_img.h"
-#include "gui_fb.h"
-#include "gui_lite_video.h"
 #include "shake_lot.h"
 
+#include <stdbool.h>
+#include <stdint.h>
+#include <string.h>
+
+#include "gsensor_reader.h"
+#include "gui_api.h"
+#include "gui_fb.h"
+#include "gui_img.h"
+#include "gui_lite_video.h"
+
 /*============================================================================*
- *                       Resources（临时占位，后续替换）
+ * Resources
  *============================================================================*/
 
- #define SL_IMG_START_PATH   "/image/shake_lot/lot_start.bin"
-/* 摇签动画 */
-#define SL_VIDEO_PATH   "/image/shake_lot/stick.avi"
+#define SL_IMG_START_PATH "/image/shake_lot/lot_start.bin"
+#define SL_VIDEO_PATH     "/image/shake_lot/stick.avi"
+#define SL_LOT_COUNT      7
 
-#define SL_LOT_COUNT    7   /* 签的种类数 */
-
-/* 7 种签的签面图。当前 assets 图片不足 7 张，先用现有图循环占位。 */
-static const char *const k_lot_img[SL_LOT_COUNT] =
+static const char *const lot_image_paths[SL_LOT_COUNT] =
 {
     "/image/shake_lot/lot_dj.bin",
     "/image/shake_lot/lot_j.bin",
@@ -61,338 +52,338 @@ static const char *const k_lot_img[SL_LOT_COUNT] =
     "/image/shake_lot/lot_dx.bin",
 };
 
-/* 7 种签的默认概率权重（任意正整数，按总和归一化）。。 */
-static uint16_t k_lot_weight[SL_LOT_COUNT] =
+/* Relative probability weights; the values are normalized by their sum. */
+static const uint16_t lot_weights[SL_LOT_COUNT] =
 {
-    20, 22, 25, 18, 10, 4, 1,   /* 和 = 100 */
+    20, 22, 25, 18, 10, 4, 1,
 };
 
 /*============================================================================*
- *                       Shake-detection tunables（可调）
+ * Shake-detection configuration
  *
- * 单位：加速度阈值为 mg（千分之一 g，1g≈1000）；计数单位为采样拍
- * （1 拍 = SL_TICK_MS）。mg 标度与已验证的 win_timer_gsensor_cb（同颗
- * SC7A20，阈值 300/400/80）一致。
- *
- * "摇 = 往复"：只在 x-y 平面线性加速度的**主导轴方向翻转（过零）**时才计分，
- * 因此计分值 ≈ 半周期往复次数。这样"拿起设备 / 调整握姿 / 走路颠簸"等一次性
- * 单向运动不累积、不误触发，而真正来回摇动会快速累积（放宽识别、提高识别率）。
+ * Acceleration thresholds use mg. Counters use sampling ticks, where one tick
+ * is SL_TICK_MS. A reversal on the dominant X-Y axis adds one point, or two
+ * points for a strong reversal.
  *============================================================================*/
-#define SL_TICK_MS       30    /* 采样 / 驱动周期（~33 Hz，可靠捕捉 3~6 Hz 往复）*/
-#define SL_SHAKE_TH      180   /* 活跃门槛（超过才计入方向；壁纸切页用 300，放宽）*/
-#define SL_STRONG_TH     350   /* 强活跃门槛（一次翻转计 2 分）          */
-#define SL_QUIET_TH      90    /* 静止门槛（低于才算"静"，两阈值间为迟滞区）*/
-#define SL_START_SCORE   3     /* 累计到即判"开始摇"（≈3 次往复翻转，~0.5 s）*/
-#define SL_MAX_SCORE     8     /* 计分上限，限制惯性余量                 */
-#define SL_STOP_QUIET    8     /* 连续静止拍数判"停止摇"（~240 ms）      */
-#define SL_WARMUP_TICKS  8     /* 重力滤波稳定期，期间不识别            */
+
+#define SL_TICK_MS      30  /* Sampling rate: approximately 33 Hz. */
+#define SL_SHAKE_TH     180 /* Minimum acceleration for direction tracking. */
+#define SL_STRONG_TH    350 /* A strong reversal adds two points. */
+#define SL_QUIET_TH     90  /* Motion below this threshold is quiet. */
+#define SL_START_SCORE  3   /* Reversal score required to start shaking. */
+#define SL_MAX_SCORE    8   /* Maximum accumulated reversal score. */
+#define SL_STOP_QUIET   8   /* Quiet ticks required to show a result. */
+#define SL_WARMUP_TICKS 8   /* Filter stabilization period. */
 
 /*============================================================================*
- *                              State
+ * Types and state
  *============================================================================*/
+
 typedef enum
 {
-    SL_IDLE = 0,   /* 等待摇晃           */
-    SL_SHAKING,    /* 摇晃中，播动画     */
-    SL_RESULT,     /* 已出签，显示签图   */
+    SL_IDLE = 0,
+    SL_SHAKING,
+    SL_RESULT,
 } sl_phase_t;
 
 typedef struct
 {
-    gui_obj_t        *root;      /* 承载所有子控件的容器           */
-    gui_img_t        *start;    /* 开始图片    */
-    gui_lite_video_t *video;     /* 摇签动画                       */
-    gui_img_t        *result;    /* 出签图片                       */
-    gui_obj_t        *ctrl;      /* 承载驱动 timer 的隐藏节点      */
+    gui_img_t *start;
+    gui_lite_video_t *video;
+    gui_img_t *result;
+    gui_obj_t *ctrl;
 
     sl_phase_t phase;
 
-    bool     filter_valid;            /* 重力基线是否已建立         */
-    uint8_t  warmup;                  /* 稳定期计数                 */
-    int32_t  grav_x, grav_y, grav_z;  /* 低通估计的重力分量         */
-    int32_t  score;                   /* 漏桶计分                   */
-    int8_t   last_dir;                /* 主导轴线性加速度上次方向（过零检测）*/
-    uint8_t  quiet_cnt;               /* 连续静止拍数               */
+    bool filter_valid;
+    uint8_t warmup;
+    int32_t gravity_x;
+    int32_t gravity_y;
+    int32_t gravity_z;
+    int32_t score;
+    int8_t last_direction;
+    uint8_t quiet_count;
 
-    uint32_t rng;                     /* xorshift32 随机数状态      */
-} sl_ctx_t;
+    uint32_t random_state;
+} sl_context_t;
 
-/* 单例：摇签表盘同时只存在一个。 */
-static sl_ctx_t g_sl;
+/* Only one shake-lot view is active at a time. */
+static sl_context_t shake_lot_context;
 
 /*============================================================================*
- *                        Random / probability
+ * File-local functions
  *============================================================================*/
 
-/* xorshift32：种子在摇晃过程中持续混入 g-sensor 噪声，保证每次结果不同。 */
-static uint32_t sl_rng_next(sl_ctx_t *c)
+static uint32_t random_next(sl_context_t *context)
 {
-    uint32_t x = c->rng ? c->rng : 0x2545F491u;
-    x ^= x << 13;
-    x ^= x >> 17;
-    x ^= x << 5;
-    c->rng = x;
-    return x;
+    uint32_t value = context->random_state != 0u ?
+                     context->random_state : 0x2545F491u;
+
+    value ^= value << 13;
+    value ^= value >> 17;
+    value ^= value << 5;
+    context->random_state = value;
+
+    return value;
 }
 
-/* 按权重的累积分布抽一支签，返回 [0, SL_LOT_COUNT)。 */
-static int sl_pick_lot(sl_ctx_t *c)
+static int pick_lot(sl_context_t *context)
 {
     uint32_t total = 0;
+
     for (int i = 0; i < SL_LOT_COUNT; i++)
     {
-        total += k_lot_weight[i];
+        total += lot_weights[i];
     }
-    if (total == 0)
+    if (total == 0u)
     {
         return 0;
     }
 
-    uint32_t r   = sl_rng_next(c) % total;
-    uint32_t acc = 0;
+    uint32_t selected = random_next(context) % total;
+    uint32_t accumulated = 0;
+
     for (int i = 0; i < SL_LOT_COUNT; i++)
     {
-        acc += k_lot_weight[i];
-        if (r < acc)
+        accumulated += lot_weights[i];
+        if (selected < accumulated)
         {
             return i;
         }
     }
+
     return SL_LOT_COUNT - 1;
 }
 
-/*============================================================================*
- *                        View transitions
- *============================================================================*/
-
-/* 进入 / 回到"摇签中"：显示并从头循环播放动画，隐藏签图。 */
-static void sl_start_anim(sl_ctx_t *c)
+static void start_shake_animation(sl_context_t *context)
 {
-    if (c->result != NULL)
+    if (context->result != NULL)
     {
-        gui_obj_hidden((gui_obj_t *)c->result, true);
+        gui_obj_hidden(GUI_BASE(context->result), true);
     }
-    if (c->video != NULL)
+    if (context->video != NULL)
     {
-        gui_obj_hidden((gui_obj_t *)c->video, false);
-        gui_lite_video_set_repeat_count(c->video, GUI_VIDEO_REPEAT_INFINITE);
-        gui_lite_video_set_state(c->video, GUI_VIDEO_STATE_PLAYING); /* STOP->PLAY 从头播 */
+        gui_obj_hidden(GUI_BASE(context->video), false);
+        gui_lite_video_set_repeat_count(context->video, GUI_VIDEO_REPEAT_INFINITE);
+        gui_lite_video_set_state(context->video, GUI_VIDEO_STATE_PLAYING);
+    }
+    if (context->start != NULL)
+    {
+        gui_obj_hidden(GUI_BASE(context->start), true);
+    }
 
-        gui_obj_hidden((gui_obj_t *)g_sl.start, true);
-    }
     gui_fb_change();
 }
 
-/* 出签：停动画并隐藏，换上抽中的签面图并显示。 */
-static void sl_show_lot(sl_ctx_t *c, int idx)
+static void show_lot(sl_context_t *context, int index)
 {
-    if (c->video != NULL)
+    if (context->video != NULL)
     {
-        gui_lite_video_set_state(c->video, GUI_VIDEO_STATE_STOP);
-        gui_obj_hidden((gui_obj_t *)c->video, true);
+        gui_lite_video_set_state(context->video, GUI_VIDEO_STATE_STOP);
+        gui_obj_hidden(GUI_BASE(context->video), true);
     }
-    if (c->result != NULL)
+    if (context->result != NULL)
     {
-        gui_img_set_src(c->result, (const uint8_t *)k_lot_img[idx], IMG_SRC_FILESYS);
-        gui_img_refresh_size(c->result);   /* 换图后按新文件头更新宽高，避免沿用旧尺寸 */
-        gui_obj_hidden((gui_obj_t *)c->result, false);
+        gui_img_set_src(context->result, (const uint8_t *)lot_image_paths[index],
+                        IMG_SRC_FILESYS);
+        gui_img_refresh_size(context->result);
+        gui_obj_hidden(GUI_BASE(context->result), false);
     }
+
     gui_fb_change();
 }
 
-/*============================================================================*
- *                        Shake detection
- *============================================================================*/
-
-/* 送入一帧原始 g-sensor 样本，更新滤波 / 计分，返回当前是否"活跃摇动"。 */
-static bool sl_update_shake(sl_ctx_t *c, int16_t gx, int16_t gy, int16_t gz)
+/**
+ * Update the filter and reversal score from one accelerometer sample.
+ *
+ * @return true when the score indicates active back-and-forth shaking.
+ */
+static bool update_shake(sl_context_t *context, int16_t gx, int16_t gy, int16_t gz)
 {
-    /* 第一帧建立重力基线 */
-    if (!c->filter_valid)
+    if (!context->filter_valid)
     {
-        c->grav_x = gx;
-        c->grav_y = gy;
-        c->grav_z = gz;
-        c->filter_valid = true;
+        context->gravity_x = gx;
+        context->gravity_y = gy;
+        context->gravity_z = gz;
+        context->filter_valid = true;
         return false;
     }
 
-    /* 低通估重力（/8，与已验证的 win_timer_gsensor_cb 一致，避免右移对负数
-     * 向下取整的偏差）；高通（raw - 重力）= 剔除姿态后的用户线性加速度。 */
-    c->grav_x += ((int32_t)gx - c->grav_x) / 8;
-    c->grav_y += ((int32_t)gy - c->grav_y) / 8;
-    c->grav_z += ((int32_t)gz - c->grav_z) / 8;
+    /*
+     * Estimate gravity with a one-pole low-pass filter. Subtracting that
+     * baseline leaves the user's linear acceleration.
+     */
+    context->gravity_x += ((int32_t)gx - context->gravity_x) / 8;
+    context->gravity_y += ((int32_t)gy - context->gravity_y) / 8;
+    context->gravity_z += ((int32_t)gz - context->gravity_z) / 8;
 
-    int32_t lx = (int32_t)gx - c->grav_x;
-    int32_t ly = (int32_t)gy - c->grav_y;
-    int32_t ax = lx < 0 ? -lx : lx;
-    int32_t ay = ly < 0 ? -ly : ly;
+    int32_t linear_x = (int32_t)gx - context->gravity_x;
+    int32_t linear_y = (int32_t)gy - context->gravity_y;
+    int32_t abs_x = linear_x < 0 ? -linear_x : linear_x;
+    int32_t abs_y = linear_y < 0 ? -linear_y : linear_y;
 
-    /* 设备 z 轴水平，来回摇动落在垂直 z 轴的 x-y 平面：
-     *   amp  = 平面幅度（曼哈顿），用于活跃 / 静止判定；
-     *   proj = 主导轴（当前帧幅度较大者）的带符号分量，用于方向翻转检测。 */
-    int32_t amp  = ax + ay;
-    int32_t proj = (ax >= ay) ? lx : ly;
+    /*
+     * The Manhattan amplitude determines activity, while the signed dominant
+     * axis detects reversals through zero.
+     */
+    int32_t amplitude = abs_x + abs_y;
+    int32_t projection = abs_x >= abs_y ? linear_x : linear_y;
 
-    /* 用样本噪声持续搅动随机种子 */
-    c->rng ^= ((uint32_t)(uint16_t)gx * 31u)
-            ^ ((uint32_t)(uint16_t)gy * 17u)
-            ^ (uint32_t)(uint16_t)gz
-            ^ (c->rng << 1);
+    context->random_state ^= ((uint32_t)(uint16_t)gx * 31u) ^
+                             ((uint32_t)(uint16_t)gy * 17u) ^
+                             (uint32_t)(uint16_t)gz ^
+                             (context->random_state << 1);
 
-    /* 等重力滤波稳定后再识别 */
-    if (c->warmup < SL_WARMUP_TICKS)
+    if (context->warmup < SL_WARMUP_TICKS)
     {
-        c->warmup++;
+        context->warmup++;
         return false;
     }
 
-    /* 静止拍计数（低于静止门槛才算"静"，用于判停止摇） */
-    if (amp < SL_QUIET_TH)
+    if (amplitude < SL_QUIET_TH)
     {
-        if (c->quiet_cnt < 255)
+        if (context->quiet_count < UINT8_MAX)
         {
-            c->quiet_cnt++;
+            context->quiet_count++;
         }
     }
     else
     {
-        c->quiet_cnt = 0;
+        context->quiet_count = 0;
     }
 
-    /* "摇 = 往复"：只在主导轴线性加速度方向翻转（过零）时才计分，故计分值
-     * ≈ 半周期往复次数。这样"拿起设备 / 调整握姿 / 走路颠簸"等一次性单向运动
-     * 不累积、不误触发，而真正来回摇动会快速累积（放宽识别、提高识别率）。
-     * 迟滞区 [QUIET_TH, SHAKE_TH] 内既不计分也不减分也不清方向，抑制过零抖动。 */
-    if (amp > SL_SHAKE_TH)
+    /*
+     * Count only direction reversals. The hysteresis band between the quiet
+     * and active thresholds neither changes the score nor clears direction.
+     */
+    if (amplitude > SL_SHAKE_TH)
     {
-        int8_t dir = (proj >= 0) ? 1 : -1;
-        if (c->last_dir != 0 && dir != c->last_dir)
+        int8_t direction = projection >= 0 ? 1 : -1;
+        if (context->last_direction != 0 && direction != context->last_direction)
         {
-            c->score += (amp > SL_STRONG_TH) ? 2 : 1;
-            if (c->score > SL_MAX_SCORE)
+            context->score += amplitude > SL_STRONG_TH ? 2 : 1;
+            if (context->score > SL_MAX_SCORE)
             {
-                c->score = SL_MAX_SCORE;
+                context->score = SL_MAX_SCORE;
             }
         }
-        c->last_dir = dir;
+        context->last_direction = direction;
     }
-    else if (amp < SL_QUIET_TH)
+    else if (amplitude < SL_QUIET_TH)
     {
-        /* 真正静止：漏桶缓慢泄放并清方向 */
-        if (c->score > 0)
+        if (context->score > 0)
         {
-            c->score--;
+            context->score--;
         }
-        c->last_dir = 0;
+        context->last_direction = 0;
     }
 
-    return c->score >= SL_START_SCORE;
+    return context->score >= SL_START_SCORE;
 }
 
-/*============================================================================*
- *                        Driver tick / state machine
- *============================================================================*/
-static void sl_tick(void *obj)
+static void shake_lot_tick(void *obj)
 {
     GUI_UNUSED(obj);
-    sl_ctx_t *c = &g_sl;
 
-    int16_t gx = 0, gy = 0, gz = 0;
 #ifdef _HONEYGUI_SIMULATOR_
-    /* PC 无传感器：此处可接入仿真数据。暂不识别。 */
+    /* The simulator has no accelerometer source. */
     return;
 #else
-    extern bool gsensor_sc7a20_read_xyz(int16_t *x, int16_t *y, int16_t *z);
+    sl_context_t *context = &shake_lot_context;
+    int16_t gx;
+    int16_t gy;
+    int16_t gz;
+
     if (!gsensor_sc7a20_read_xyz(&gx, &gy, &gz))
     {
-        return;   /* 读失败：保持当前状态 */
+        return;
     }
-#endif
 
-    bool shaking = sl_update_shake(c, gx, gy, gz);
+    bool shaking = update_shake(context, gx, gy, gz);
 
-    switch (c->phase)
+    switch (context->phase)
     {
     case SL_IDLE:
         if (shaking)
         {
-            c->quiet_cnt = 0;   /* 显式复位，勿依赖隐式状态 */
-            sl_start_anim(c);
-            c->phase = SL_SHAKING;
+            context->quiet_count = 0;
+            start_shake_animation(context);
+            context->phase = SL_SHAKING;
         }
         break;
 
     case SL_SHAKING:
-        if (c->quiet_cnt >= SL_STOP_QUIET)
+        if (context->quiet_count >= SL_STOP_QUIET)
         {
-            sl_show_lot(c, sl_pick_lot(c));
-            c->score    = 0;
-            c->last_dir = 0;
-            c->phase    = SL_RESULT;
+            show_lot(context, pick_lot(context));
+            context->score = 0;
+            context->last_direction = 0;
+            context->phase = SL_RESULT;
         }
         break;
 
     case SL_RESULT:
-        /* 再次摇晃 -> 重抽 */
         if (shaking)
         {
-            c->quiet_cnt = 0;
-            sl_start_anim(c);
-            c->phase = SL_SHAKING;
+            context->quiet_count = 0;
+            start_shake_animation(context);
+            context->phase = SL_SHAKING;
         }
         break;
 
     default:
         break;
     }
+#endif
 }
 
 /*============================================================================*
- *                              Entry
+ * Public API
  *============================================================================*/
+
 int shake_lot(gui_obj_t *parent)
 {
-    memset(&g_sl, 0, sizeof(g_sl));
-    g_sl.root  = parent;
-    g_sl.phase = SL_IDLE;
-    g_sl.rng   = 0x2545F491u;   /* 初始种子（会被 g-sensor 噪声持续搅动） */
+    sl_context_t *context = &shake_lot_context;
 
-    uint32_t scr = gui_get_screen_width();
+    memset(context, 0, sizeof(*context));
+    context->phase = SL_IDLE;
+    context->random_state = 0x2545F491u;
 
-    /* 出签图片控件：初始隐藏（占位用第 0 张，出签时再换 src） */
-    g_sl.start = gui_img_create_from_fs(parent, "sl_start",
-                                         (void *)SL_IMG_START_PATH, 0, 0, 0, 0);
-    if (g_sl.start != NULL)
+    uint32_t screen_width = gui_get_screen_width();
+
+    context->start = gui_img_create_from_fs(parent, "sl_start",
+                                            (void *)SL_IMG_START_PATH,
+                                            0, 0, 0, 0);
+    if (context->start != NULL)
     {
-        gui_img_set_mode(g_sl.start, IMG_BYPASS_MODE);
-        gui_obj_hidden((gui_obj_t *)g_sl.start, false);
+        gui_img_set_mode(context->start, IMG_BYPASS_MODE);
+        gui_obj_hidden(GUI_BASE(context->start), false);
     }
 
-    /* 动画控件：先建好，置停止 + 隐藏（进入 SHAKING 才播） */
-    g_sl.video = gui_lite_video_create_from_fs(parent, "sl_video",
-                                               (void *)SL_VIDEO_PATH,
-                                               0, 0, (int16_t)scr, (int16_t)scr);
-    if (g_sl.video != NULL)
+    context->video = gui_lite_video_create_from_fs(parent, "sl_video",
+                                                   (void *)SL_VIDEO_PATH,
+                                                   0, 0,
+                                                   (int16_t)screen_width,
+                                                   (int16_t)screen_width);
+    if (context->video != NULL)
     {
-        gui_lite_video_set_repeat_count(g_sl.video, GUI_VIDEO_REPEAT_INFINITE);
-        gui_lite_video_set_state(g_sl.video, GUI_VIDEO_STATE_STOP);
-        gui_obj_hidden((gui_obj_t *)g_sl.video, true);
+        gui_lite_video_set_repeat_count(context->video, GUI_VIDEO_REPEAT_INFINITE);
+        gui_lite_video_set_state(context->video, GUI_VIDEO_STATE_STOP);
+        gui_obj_hidden(GUI_BASE(context->video), true);
     }
 
-    /* 出签图片控件：初始隐藏（占位用第 0 张，出签时再换 src） */
-    g_sl.result = gui_img_create_from_fs(parent, "sl_result",
-                                         (void *)k_lot_img[0], 0, 0, 0, 0);
-    if (g_sl.result != NULL)
+    context->result = gui_img_create_from_fs(parent, "sl_result",
+                                             (void *)lot_image_paths[0],
+                                             0, 0, 0, 0);
+    if (context->result != NULL)
     {
-        gui_img_set_mode(g_sl.result, IMG_BYPASS_MODE);
-        gui_obj_hidden((gui_obj_t *)g_sl.result, true);
+        gui_img_set_mode(context->result, IMG_BYPASS_MODE);
+        gui_obj_hidden(GUI_BASE(context->result), true);
     }
 
-    /* 驱动 timer：采样 g-sensor + 跑状态机 */
-    g_sl.ctrl = gui_obj_create(parent, "sl_ctrl", 0, 0, 1, 1);
-    gui_obj_create_timer(g_sl.ctrl, SL_TICK_MS, true, sl_tick);
-    gui_obj_start_timer(g_sl.ctrl);
+    context->ctrl = gui_obj_create(parent, "sl_ctrl", 0, 0, 1, 1);
+    gui_obj_create_timer(context->ctrl, SL_TICK_MS, true, shake_lot_tick);
+    gui_obj_start_timer(context->ctrl);
 
     return 0;
 }

@@ -1,57 +1,36 @@
 #include "share_user.h"
+
+#include <stdio.h>
+#include <string.h>
+
+#include "gui_img.h"
+#include "gui_list.h"
 #include "gui_rect.h"
 #include "gui_text.h"
-#include "gui_list.h"
-#include "gui_img.h"
 #include "gui_win.h"
 
-
 /**
- * User-defined implementation
- * This file is generated once only, feel free to modify
+ * User-defined sharing view implementation.
+ *
+ * This file is generated only once and can be modified freely.
  */
 
-// Add custom implementations here
+#ifndef _HONEYGUI_SIMULATOR_
+#define CONN_READY_POLL_MS       20
+#define CONN_READY_TIMEOUT_TICKS 400 /* 400 * 20 ms = 8 s */
 
-/***
- * Template function
- * Distinguish development environments
- */
-// void user_defined_func_called_by_event(void *obj, gui_event_t *e)
-// {
-//     GUI_UNUSED(obj);
-//     GUI_UNUSED(e);
-// #ifdef _HONEYGUI_SIMULATOR_
-//     // TODO
-// #else
-//     // TODO
-// #endif
-// }
+extern bool hmi_ble_central_is_ready(void);
+extern bool hmi_ble_central_is_active(void);
+extern bool hmi_ble_central_start_scan(void);
+extern bool hmi_ble_central_connect(uint8_t idx);
+extern bool hmi_ble_gap_get_local_addr(uint8_t bd_addr[6]);
+#endif
 
-// void user_defined_func_called_by_msg(gui_obj_t *obj, const char *topic, void *data, uint16_t len)
-// {
-//     GUI_UNUSED(obj);
-//     GUI_UNUSED(topic);
-//     GUI_UNUSED(data);
-//     GUI_UNUSED(len);
-// #ifdef _HONEYGUI_SIMULATOR_
-//     // TODO
-// #else
-//     // TODO
-// #endif
-// }
+/*============================================================================*
+ * Device state
+ *============================================================================*/
 
-// void list_note_design(gui_obj_t *obj, void *param)
-// {
-//     GUI_UNUSED(param);
-//     // Cast obj to gui_list_note_t * type
-//     gui_list_note_t *note = (gui_list_note_t *)obj;
-//     uint16_t index = note->index;
-//     GUI_UNUSED(index);
-// }
-
-/* ----------------------------------------------------*/
-char bd_addr_array[BD_NUM_MAX][20] = 
+char bd_addr_array[BD_NUM_MAX][20] =
 {
     "00:10:20:30:40:50",
     "00:10:20:30:40:51",
@@ -60,85 +39,87 @@ char bd_addr_array[BD_NUM_MAX][20] =
     "00:10:20:30:40:51",
     "00:10:20:30:40:52",
 };
-static char bd_addr_str[20] = "11:22:33:44:55:66";
 uint8_t bd_dev_num = 6;
+
+static char bd_addr_str[20] = "11:22:33:44:55:66";
 static bool is_connecting = false;
 
+#ifndef _HONEYGUI_SIMULATOR_
+static uint16_t conn_wait_ticks = 0;
+#endif
+
+/*============================================================================*
+ * File-local functions
+ *============================================================================*/
+
+/* Animate the connection indicator between -45 and 45 degrees. */
 static void wait_conn_animation(gui_img_t *img)
 {
-    static uint8_t cnt = 0;
-    const uint16_t total_cnt_max = 30;
-    
-    const uint16_t seg0_start = 0;
-    const uint16_t seg0_end = 15;
-    const uint16_t seg1_start = 15;
-    const uint16_t seg1_end = 30;
-    
-    cnt++;
-    // Segment 1: 200ms, 1 action(s)
-    if (cnt > seg0_start && cnt <= seg0_end) {
-        uint16_t seg_cnt = cnt - seg0_start;
-        const uint16_t seg_cnt_max = seg0_end - seg0_start;
-        
-            // Adjust rotation: -45° -> 45°
-            const float angle_origin = -45;
-            const float angle_target = 45;
-            float angle_cur = angle_origin + (angle_target - angle_origin) * seg_cnt / seg_cnt_max;
-            gui_img_rotation(img, angle_cur);
-            
+    static uint8_t count = 0;
+    const uint16_t segment_ticks = 15;
+    const uint16_t total_ticks = segment_ticks * 2;
+    float angle_origin;
+    float angle_target;
+    uint16_t segment_count;
+
+    count++;
+    if (count <= segment_ticks)
+    {
+        angle_origin = -45.0f;
+        angle_target = 45.0f;
+        segment_count = count;
     }
-    // Segment 2: 200ms, 1 action(s)
-    else if (cnt > seg1_start && cnt <= seg1_end) {
-        uint16_t seg_cnt = cnt - seg1_start;
-        const uint16_t seg_cnt_max = seg1_end - seg1_start;
-        
-            // Adjust rotation: 45° -> -45°
-            const float angle_origin = 45;
-            const float angle_target = -45;
-            float angle_cur = angle_origin + (angle_target - angle_origin) * seg_cnt / seg_cnt_max;
-            gui_img_rotation(img, angle_cur);
+    else
+    {
+        angle_origin = 45.0f;
+        angle_target = -45.0f;
+        segment_count = count - segment_ticks;
     }
-    
-    if (cnt >= total_cnt_max) {
-        cnt = 0;
+
+    float angle = angle_origin +
+                  (angle_target - angle_origin) * segment_count / segment_ticks;
+    gui_img_rotation(img, angle);
+
+    if (count >= total_ticks)
+    {
+        count = 0;
     }
 }
 
 #ifdef _HONEYGUI_SIMULATOR_
+/* Simulate a successful connection after the loading animation. */
 static void conn_ready_poll_cb(void *obj)
 {
-    static uint8_t cnt = 0;
-    cnt++;
-    gui_img_t *img = (gui_img_t *)gui_list_entry(GUI_BASE(obj)->child_list.prev, gui_obj_t, brother_list);
+    static uint8_t count = 0;
+    gui_img_t *img = (gui_img_t *)gui_list_entry(
+                         GUI_BASE(obj)->child_list.prev, gui_obj_t, brother_list);
+
+    count++;
     wait_conn_animation(img);
-    if (cnt >= 100)
+    if (count < 100)
     {
-        cnt = 0;
-        gui_obj_stop_timer(obj);
-        dev_mode = MODE_SHARE;
-        is_dev_connect = true;
-        is_connecting = false;
-        gui_view_switch_direct(gui_view_get_current(), "view_mainface_list", SWITCH_OUT_NONE_ANIMATION, SWITCH_IN_NONE_ANIMATION);
+        return;
     }
+
+    count = 0;
+    gui_obj_stop_timer(obj);
+    dev_mode = MODE_SHARE;
+    is_dev_connect = true;
+    is_connecting = false;
+    gui_view_switch_direct(gui_view_get_current(), "view_mainface_list",
+                           SWITCH_OUT_NONE_ANIMATION, SWITCH_IN_NONE_ANIMATION);
 }
-
 #else
-/* B: after tapping a device we only *initiate* the connection.  Wait until the
- * central actually reaches READY (link up + HMI service discovered + notify
- * enabled) before entering the file list, instead of jumping there the moment
- * connect() is issued -- otherwise the UI let the user "send" over a not-ready
- * link, the send got rejected, and the progress arc froze at 0. */
-#define CONN_READY_POLL_MS       20
-#define CONN_READY_TIMEOUT_TICKS 400    /* 400 * 20ms = 8s */
-static uint16_t s_conn_wait_ticks = 0;
-
+/*
+ * Wait until the central link and HMI service are ready before opening the
+ * mainface list. Keep the device list visible when connection setup fails.
+ */
 static void conn_ready_poll_cb(void *obj)
 {
-    extern bool hmi_ble_central_is_ready(void);
-    extern bool hmi_ble_central_is_active(void);
+    gui_img_t *img = (gui_img_t *)gui_list_entry(
+                         GUI_BASE(obj)->child_list.prev, gui_obj_t, brother_list);
 
-    s_conn_wait_ticks++;
-    gui_img_t *img = (gui_img_t *)gui_list_entry(GUI_BASE(obj)->child_list.prev, gui_obj_t, brother_list);
+    conn_wait_ticks++;
     wait_conn_animation(img);
 
     if (hmi_ble_central_is_ready())
@@ -148,205 +129,237 @@ static void conn_ready_poll_cb(void *obj)
         is_connecting = false;
         gui_log("central READY -> enter file list\n");
         gui_view_switch_direct(gui_view_get_current(), "view_mainface_list",
-                               SWITCH_OUT_NONE_ANIMATION, SWITCH_IN_NONE_ANIMATION);
+                               SWITCH_OUT_NONE_ANIMATION,
+                               SWITCH_IN_NONE_ANIMATION);
         return;
     }
 
-    /* Link never came up / dropped back to IDLE (e.g. controller rejected with
-     * cause 0x109 = max connections), or discovery stalled past the timeout:
-     * give up and stay on the device list so the user can tap to retry. */
-    if (!hmi_ble_central_is_active() || s_conn_wait_ticks >= CONN_READY_TIMEOUT_TICKS)
+    if (!hmi_ble_central_is_active() ||
+        conn_wait_ticks >= CONN_READY_TIMEOUT_TICKS)
     {
         gui_obj_stop_timer((gui_obj_t *)obj);
         is_dev_connect = false;
         is_connecting = false;
         gui_obj_tree_free_async(obj);
         gui_list_enable_scroll(lst_bd, true);
-        gui_log("central connect failed/timeout (active=%d, ticks=%d), stay on dev list\n",
-                hmi_ble_central_is_active(), s_conn_wait_ticks);
-        /* Deliberately no view switch: SelectDevView stays up for a retry tap. */
-        return;
+        gui_log("central connect failed/timeout (active=%d, ticks=%d), "
+                "stay on dev list\n",
+                hmi_ble_central_is_active(), conn_wait_ticks);
     }
 }
 #endif
 
-static void re_scan_dev(void *obj, gui_event_t *e)
+/* Create the modal loading overlay used while establishing a connection. */
+static void create_connection_overlay(gui_view_t *view, uint16_t screen_size,
+                                      uint32_t timer_period_ms)
 {
-    GUI_UNUSED(obj);
-    GUI_UNUSED(e);
-    if (dev_mode == MODE_DEFAULT)
-    {
-        gui_obj_t *parent = ((gui_obj_t *)obj)->parent;
-        gui_obj_child_free(parent);
-        dev_mode = MODE_SHARE;
-        gui_view_create(parent, "ShareConnView", 0, 0, 0, 0);
-    }
-}
-
-void switch_in_share_view(gui_view_t *view)
-{
-    GUI_UNUSED(view);
-    if (dev_mode == MODE_SHARE)
-    {
-        gui_obj_create_timer((gui_obj_t *)win_share, 10, true, win_share_timer_0_cb);
-#ifndef _HONEYGUI_SIMULATOR_
-        extern bool hmi_ble_central_start_scan(void);
-        hmi_ble_central_start_scan(); 
-        gui_log("hmi_ble_central_start_scan....\n");
-#endif
-    }
-
-#ifndef _HONEYGUI_SIMULATOR_
-    extern bool hmi_ble_gap_get_local_addr(uint8_t bd_addr[6]);
-    uint8_t bd_local_addr[6];
-    hmi_ble_gap_get_local_addr(bd_local_addr);
-    sprintf(bd_addr_str, "%02x:%02x:%02x:%02x:%02x:%02x", bd_local_addr[5]&0xff, bd_local_addr[4]&0xff, bd_local_addr[3]&0xff,bd_local_addr[2]&0xff, bd_local_addr[1]&0xff, bd_local_addr[0]&0xff);
-
-    // extern bool hmi_ble_gap_get_local_name(char *buf, uint8_t buf_len);
-    // char local_name[32];
-    // hmi_ble_gap_get_local_name(local_name, sizeof(local_name));
-    // gui_log("local name %s\n", local_name);
-    // gui_log("local addr %02x:%02x:%02x:%02x:%02x:%02x\n", bd_local_addr[5]&0xff, bd_local_addr[4]&0xff, bd_local_addr[3]&0xff,bd_local_addr[2]&0xff, bd_local_addr[1]&0xff, bd_local_addr[0]&0xff);
-#endif
-    gui_text_content_set(bd_addr_self, bd_addr_str, strlen(bd_addr_str));
-
-    gui_obj_add_event_cb(view, (gui_event_cb_t)re_scan_dev, GUI_EVENT_TOUCH_CLICKED, NULL);
-}
-
-void switch_out_share_view(gui_view_t *view)
-{
-    GUI_UNUSED(view);
-
-// #ifndef _HONEYGUI_SIMULATOR_
-//     bool hmi_ble_central_stop_scan(void);
-//     hmi_ble_central_stop_scan();
-// #endif
-    // gui_log("hmi_ble_central_stop_scan....\n");
-    dev_mode = MODE_DEFAULT;
-}
-
-void click_2_conn_dev_by_idx(void *obj, gui_event_t *e)
-{
-    GUI_UNUSED(obj);
-    GUI_UNUSED(e);
-    if (is_connecting) return;
-    is_connecting = true;
-    gui_list_enable_scroll(lst_bd, false);
-    gui_dispdev_t *dc = gui_get_dc();
-    uint16_t screen_size = dc->screen_width;
-    gui_view_t *view = gui_view_get_current();
-#ifdef _HONEYGUI_SIMULATOR_
     gui_win_t *win = gui_win_create(view, 0, 0, 0, 0, 0);
-    gui_img_t *img = gui_img_create_from_fs(win, 0, "/image/A8/circle_360_bg.bin", 0, 0, 0, 0);
+    gui_img_t *img = gui_img_create_from_fs(
+                         win, 0, "/image/A8/circle_360_bg.bin", 0, 0, 0, 0);
     gui_img_set_mode(img, IMG_SRC_OVER_MODE);
     gui_img_set_opacity(img, 122);
-    img = gui_img_create_from_fs(win, 0, "/image/circle_anime.bin", 0, 0, 0, 0);
+
+    img = gui_img_create_from_fs(
+              win, 0, "/image/circle_anime.bin", 0, 0, 0, 0);
     gui_img_set_mode(img, IMG_SRC_OVER_MODE);
     gui_img_set_focus(img, img->base.w / 2, img->base.h / 2);
     gui_img_translate(img, img->base.w / 2, img->base.h / 2);
-    gui_obj_move((void *)img, screen_size / 2 - img->base.w / 2, screen_size / 2 - img->base.h / 2);
+    gui_obj_move(GUI_BASE(img), screen_size / 2 - img->base.w / 2,
+                 screen_size / 2 - img->base.h / 2);
     gui_img_set_quality(img, true);
-    gui_obj_create_timer((gui_obj_t *)win,
-                             10, true, conn_ready_poll_cb);
+
+    gui_obj_create_timer((gui_obj_t *)win, timer_period_ms, true,
+                         conn_ready_poll_cb);
     gui_obj_start_timer((gui_obj_t *)win);
+}
+
+/* Rebuild the device connection view when the idle page is tapped. */
+static void rescan_device_cb(void *obj, gui_event_t *e)
+{
+    GUI_UNUSED(e);
+
+    if (dev_mode != MODE_DEFAULT)
+    {
+        return;
+    }
+
+    gui_obj_t *parent = ((gui_obj_t *)obj)->parent;
+    gui_obj_child_free(parent);
+    dev_mode = MODE_SHARE;
+    gui_view_create(parent, "ShareConnView", 0, 0, 0, 0);
+}
+
+/* Start connecting to the device represented by the selected list entry. */
+static void connect_device_by_index_cb(void *obj, gui_event_t *e)
+{
+    GUI_UNUSED(e);
+
+    if (is_connecting)
+    {
+        return;
+    }
+
+    is_connecting = true;
+    gui_list_enable_scroll(lst_bd, false);
+
+    gui_dispdev_t *dc = gui_get_dc();
+    uint16_t screen_size = dc->screen_width;
+    gui_view_t *view = gui_view_get_current();
+
+#ifdef _HONEYGUI_SIMULATOR_
+    GUI_UNUSED(obj);
+    create_connection_overlay(view, screen_size, 10);
 #else
     gui_list_note_t *note = (gui_list_note_t *)obj;
     uint16_t index = note->index;
 
-    extern bool hmi_ble_central_connect(uint8_t idx);
-    bool res = hmi_ble_central_connect(index);
-    if (res)
+    if (hmi_ble_central_connect(index))
     {
         gui_log("hmi_ble_central_connect initiated, wait for READY...\n");
         dev_mode = MODE_SHARE;
-        /* B: connect() only *started* the link.  Do NOT enter the file list yet
-         * -- poll on this (SelectDev) view until CEN_READY, then advance.  On
-         * failure/timeout conn_ready_poll_cb stays here for a retry tap. */
-        s_conn_wait_ticks = 0;
-        gui_win_t *win = gui_win_create(view, 0, 0, 0, 0, 0);
-        gui_img_t *img = gui_img_create_from_fs(win, 0, "/image/A8/circle_360_bg.bin", 0, 0, 0, 0);
-        gui_img_set_mode(img, IMG_SRC_OVER_MODE);
-        gui_img_set_opacity(img, 122);
-        img = gui_img_create_from_fs(win, 0, "/image/circle_anime.bin", 0, 0, 0, 0);
-        gui_img_set_mode(img, IMG_SRC_OVER_MODE);
-        gui_img_set_focus(img, img->base.w / 2, img->base.h / 2);
-        gui_img_translate(img, img->base.w / 2, img->base.h / 2);
-        gui_obj_move((void *)img, screen_size / 2 - img->base.w / 2, screen_size / 2 - img->base.h / 2);
-        gui_img_set_quality(img, true);
-        gui_obj_create_timer((gui_obj_t *)win,
-                             CONN_READY_POLL_MS, true, conn_ready_poll_cb);
-        gui_obj_start_timer((gui_obj_t *)win);
+        conn_wait_ticks = 0;
+        create_connection_overlay(view, screen_size, CONN_READY_POLL_MS);
     }
     else
     {
+        is_connecting = false;
+        gui_list_enable_scroll(lst_bd, true);
         gui_log("hmi_ble_central_connect %d failed\n", index);
     }
 #endif
 }
 
-static void SelectDevView_key_0_cb(void *obj, gui_event_t *e)
+/* Handle Menu and Home keys while the device list owns input focus. */
+static void select_dev_view_key_cb(void *obj, gui_event_t *e)
 {
     GUI_UNUSED(obj);
-    GUI_UNUSED(e);
-    if (is_connecting) return;
+
+    if (is_connecting)
+    {
+        return;
+    }
+
     if (strcmp(e->indev_name, "Menu") == 0)
     {
-        gui_view_switch_direct(gui_view_get_current(), "top_view", SWITCH_OUT_NONE_ANIMATION, SWITCH_IN_NONE_ANIMATION);
+        gui_view_switch_direct(gui_view_get_current(), "top_view",
+                               SWITCH_OUT_NONE_ANIMATION,
+                               SWITCH_IN_NONE_ANIMATION);
     }
     else if (strcmp(e->indev_name, "Home") == 0)
     {
-        gui_view_switch_direct(gui_view_get_current(), "easy_demoMainView", SWITCH_OUT_NONE_ANIMATION, SWITCH_IN_NONE_ANIMATION);
+        gui_view_switch_direct(gui_view_get_current(), "easy_demoMainView",
+                               SWITCH_OUT_NONE_ANIMATION,
+                               SWITCH_IN_NONE_ANIMATION);
     }
 }
 
-static void SelectDevView_slide_cb(void *obj, gui_event_t *e)
+/* Return to the top view on a quick horizontal slide. */
+static void select_dev_view_slide_cb(void *obj, gui_event_t *e)
 {
     GUI_UNUSED(obj);
     GUI_UNUSED(e);
-    if (is_connecting) return;
-    gui_view_switch_direct(gui_view_get_current(), "top_view", SWITCH_OUT_NONE_ANIMATION, SWITCH_IN_NONE_ANIMATION);
+
+    if (is_connecting)
+    {
+        return;
+    }
+
+    gui_view_switch_direct(gui_view_get_current(), "top_view",
+                           SWITCH_OUT_NONE_ANIMATION,
+                           SWITCH_IN_NONE_ANIMATION);
+}
+
+/*============================================================================*
+ * Public callbacks and APIs
+ *============================================================================*/
+
+void switch_in_share_view(gui_view_t *view)
+{
+    if (dev_mode == MODE_SHARE)
+    {
+        gui_obj_create_timer((gui_obj_t *)win_share, 10, true,
+                             win_share_timer_0_cb);
+#ifndef _HONEYGUI_SIMULATOR_
+        hmi_ble_central_start_scan();
+        gui_log("hmi_ble_central_start_scan....\n");
+#endif
+    }
+
+#ifndef _HONEYGUI_SIMULATOR_
+    uint8_t local_addr[6];
+    hmi_ble_gap_get_local_addr(local_addr);
+    snprintf(bd_addr_str, sizeof(bd_addr_str),
+             "%02x:%02x:%02x:%02x:%02x:%02x",
+             local_addr[5], local_addr[4], local_addr[3],
+             local_addr[2], local_addr[1], local_addr[0]);
+#endif
+
+    gui_text_content_set(bd_addr_self, bd_addr_str, strlen(bd_addr_str));
+    gui_obj_add_event_cb(view, (gui_event_cb_t)rescan_device_cb,
+                         GUI_EVENT_TOUCH_CLICKED, NULL);
+}
+
+void switch_out_share_view(gui_view_t *view)
+{
+    GUI_UNUSED(view);
+    dev_mode = MODE_DEFAULT;
 }
 
 void list_bd_note_design(gui_obj_t *obj, void *param)
 {
     GUI_UNUSED(param);
-    
-    // Cast obj to gui_list_note_t * type
+
     gui_list_note_t *note = (gui_list_note_t *)obj;
     int16_t index = note->index % (bd_dev_num + 1);
-    if (index == 0) return;
-    index -= 1;
+    if (index == 0)
+    {
+        return;
+    }
+    index--;
+
     gui_dispdev_t *dc = gui_get_dc();
     uint16_t screen_size = dc->screen_width;
 
-    gui_rect_create((gui_obj_t *)obj, 0, screen_size / 8, note->base.h, screen_size * 3/4, 4, 0, gui_rgb(97, 103, 107));
+    gui_rect_create(obj, 0, screen_size / 8, note->base.h,
+                    screen_size * 3 / 4, 4, 0, gui_rgb(97, 103, 107));
 
-    gui_text_t *text = gui_text_create((gui_obj_t *)obj, 0, 0, 0, screen_size, note->base.h);
-    gui_text_set(text, bd_addr_array[index], GUI_FONT_SRC_BMP, gui_rgb(255, 255, 255), strlen(bd_addr_array[index]), 24);
-    gui_text_type_set(text, "/font/Inter_24pt_SemiBold_size24_bits4_bitmap.bin", FONT_SRC_FILESYS);
+    gui_text_t *text = gui_text_create(obj, 0, 0, 0,
+                                       screen_size, note->base.h);
+    gui_text_set(text, bd_addr_array[index], GUI_FONT_SRC_BMP,
+                 gui_rgb(255, 255, 255), strlen(bd_addr_array[index]), 24);
+    gui_text_type_set(text,
+                      "/font/Inter_24pt_SemiBold_size24_bits4_bitmap.bin",
+                      FONT_SRC_FILESYS);
     gui_text_mode_set(text, MID_CENTER);
 
-    gui_obj_add_event_cb(obj, (gui_event_cb_t)click_2_conn_dev_by_idx, GUI_EVENT_TOUCH_CLICKED, NULL);
+    gui_obj_add_event_cb(obj, (gui_event_cb_t)connect_device_by_index_cb,
+                         GUI_EVENT_TOUCH_CLICKED, NULL);
 }
 
 void switch_in_select_dev_view(gui_view_t *view)
 {
-    GUI_UNUSED(view);
     is_connecting = false;
-    
-    gui_list_set_note_num(lst_bd, bd_dev_num + 2); // spare space at top and bottom
 
-    gui_obj_add_event_cb((gui_obj_t *)view, (gui_event_cb_t)SelectDevView_slide_cb, GUI_EVENT_TOUCH_LEFT_SLIDE_QUICK, NULL);
-    gui_obj_add_event_cb((gui_obj_t *)view, (gui_event_cb_t)SelectDevView_slide_cb, GUI_EVENT_TOUCH_RIGHT_SLIDE_QUICK, NULL);
-    gui_obj_add_event_cb((gui_obj_t *)view, (gui_event_cb_t)SelectDevView_key_0_cb, GUI_EVENT_KB_SHORT_PRESSED, NULL);
+    /* Add one spacer entry at both the top and bottom of the list. */
+    gui_list_set_note_num(lst_bd, bd_dev_num + 2);
+    gui_obj_add_event_cb((gui_obj_t *)view,
+                         (gui_event_cb_t)select_dev_view_slide_cb,
+                         GUI_EVENT_TOUCH_LEFT_SLIDE_QUICK, NULL);
+    gui_obj_add_event_cb((gui_obj_t *)view,
+                         (gui_event_cb_t)select_dev_view_slide_cb,
+                         GUI_EVENT_TOUCH_RIGHT_SLIDE_QUICK, NULL);
+    gui_obj_add_event_cb((gui_obj_t *)view,
+                         (gui_event_cb_t)select_dev_view_key_cb,
+                         GUI_EVENT_KB_SHORT_PRESSED, NULL);
     gui_obj_focus_set((gui_obj_t *)view);
 }
 
 void switch_out_select_dev_view(gui_view_t *view)
 {
     GUI_UNUSED(view);
-    gui_view_t *view_c = gui_view_get_current();
-    if (strcmp(view_c->base.name, "view_mainface_list") != 0)
+
+    gui_view_t *current_view = gui_view_get_current();
+    if (strcmp(current_view->base.name, "view_mainface_list") != 0)
     {
         dev_mode = MODE_DEFAULT;
     }
@@ -356,25 +369,23 @@ void click_share_image_button(void *obj, gui_event_t *e)
 {
     GUI_UNUSED(obj);
     GUI_UNUSED(e);
-    if (mainface_num == 0) return;
+
+    if (mainface_num == 0)
+    {
+        return;
+    }
+
     dev_mode = MODE_SHARE;
-    gui_view_switch_direct(gui_view_get_current(), "ShareConnView", SWITCH_INIT_STATE, SWITCH_IN_NONE_ANIMATION);
-#ifdef _HONEYGUI_SIMULATOR_
-    // TODO
-#else
-    // TODO
-#endif
+    gui_view_switch_direct(gui_view_get_current(), "ShareConnView",
+                           SWITCH_INIT_STATE, SWITCH_IN_NONE_ANIMATION);
 }
 
 void click_receive_image_button(void *obj, gui_event_t *e)
 {
     GUI_UNUSED(obj);
     GUI_UNUSED(e);
+
     dev_mode = MODE_RECEIVE;
-    gui_view_switch_direct(gui_view_get_current(), "ShareConnView", SWITCH_INIT_STATE, SWITCH_IN_NONE_ANIMATION);
-#ifdef _HONEYGUI_SIMULATOR_
-    // TODO
-#else
-    // TODO
-#endif
+    gui_view_switch_direct(gui_view_get_current(), "ShareConnView",
+                           SWITCH_INIT_STATE, SWITCH_IN_NONE_ANIMATION);
 }

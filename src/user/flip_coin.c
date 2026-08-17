@@ -1,89 +1,103 @@
-#include "easy_demoMain_user.h"
-#include "tp_algo.h"
-#include "gui_vfs.h"
-#include "gui_lite_video.h"
-#include "gui_img.h"
+/*
+ * Copyright (c) 2026, Realtek Semiconductor Corporation
+ *
+ * SPDX-License-Identifier: MIT
+ */
+
+#include <stdbool.h>
 #include <stdint.h>
-#include <stddef.h>
-#include <string.h>
-#include <math.h>
-#include <time.h>
 
-static bool coin_status = true; // true: positive, false: negative
+#include "gsensor_reader.h"
+#include "gui_img.h"
+#include "gui_lite_video.h"
+
+#define COIN_SENSOR_POLL_MS   10
+#define COIN_MOTION_THRESHOLD 500
+
+static bool coin_heads = true;
 static bool coin_flipping = false;
-static uint32_t xorshift_state = 0x2545F491u;
-static gui_lite_video_t *vid = NULL;
+static uint32_t random_state = 0x2545F491u;
+static gui_lite_video_t *flip_video = NULL;
 
-static void gsensor_cb(void *obj);
-static uint32_t xorshift32(void)
+/*============================================================================*
+ * File-local functions
+ *============================================================================*/
+
+static void coin_gsensor_cb(void *obj);
+
+static uint32_t coin_random_next(void)
 {
-    uint32_t x = xorshift_state;
-    x ^= x << 13;
-    x ^= x >> 17;
-    x ^= x << 5;
-    xorshift_state = x;
-    return x;
+    uint32_t value = random_state;
+
+    value ^= value << 13;
+    value ^= value >> 17;
+    value ^= value << 5;
+    random_state = value;
+
+    return value;
 }
 
-static void img_cb(void *obj)
+static void coin_video_poll_cb(void *obj)
 {
-    if (vid->state == GUI_VIDEO_STATE_STOP)
+    if (flip_video != NULL && flip_video->state == GUI_VIDEO_STATE_STOP)
     {
         coin_flipping = false;
-        gui_obj_create_timer(obj, 10, true, gsensor_cb);
+        gui_obj_create_timer(obj, COIN_SENSOR_POLL_MS, true, coin_gsensor_cb);
         gui_obj_start_timer(obj);
         gui_obj_hidden(obj, false);
     }
 }
 
-static void click_flip_coin(void *obj, gui_event_t *e)
+static void flip_coin_cb(void *obj, gui_event_t *event)
 {
-    GUI_UNUSED(obj);
-    GUI_UNUSED(e);
+    GUI_UNUSED(event);
+
     if (coin_flipping)
     {
         return;
     }
-    coin_flipping = true;
-    coin_status = (xorshift32() >> 31) & 1;
 
-    void *vid_addr = "/coin_flip_2_yes.avi";
-    void *img_addr = "/coin_flip_yes.bin";
-    if (!coin_status)
+    coin_flipping = true;
+    coin_heads = ((coin_random_next() >> 31) & 1u) != 0u;
+
+    const char *video_path = "/coin_flip_2_yes.avi";
+    if (!coin_heads)
     {
-        vid_addr = "/coin_flip_2_no.avi";
-        img_addr = "/coin_flip_no.bin";
+        video_path = "/coin_flip_2_no.avi";
     }
-    if (vid == NULL)
+
+    if (flip_video == NULL)
     {
-        vid = gui_lite_video_create_from_fs(GUI_BASE(obj)->parent, 0, vid_addr, 0, 0, 0, 0);
+        flip_video = gui_lite_video_create_from_fs(GUI_BASE(obj)->parent, NULL,
+                                                   (void *)video_path,
+                                                   0, 0, 0, 0);
     }
     else
     {
-        gui_lite_video_set_src(vid, vid_addr, IMG_SRC_FILESYS);
+        gui_lite_video_set_src(flip_video, (void *)video_path, IMG_SRC_FILESYS);
     }
-    gui_lite_video_set_frame_rate(vid, 30.f);
-    gui_lite_video_set_repeat_count(vid, 0); // 0 = play once
-    gui_lite_video_set_state(vid, GUI_VIDEO_STATE_PLAYING);
+
+    gui_lite_video_set_frame_rate(flip_video, 30.0f);
+    gui_lite_video_set_repeat_count(flip_video, 0); /* Play once. */
+    gui_lite_video_set_state(flip_video, GUI_VIDEO_STATE_PLAYING);
 
     gui_obj_hidden(obj, true);
-    gui_obj_create_timer(obj, 10, true, img_cb);
+    gui_obj_create_timer(obj, COIN_SENSOR_POLL_MS, true, coin_video_poll_cb);
     gui_obj_start_timer(obj);
 }
 
-static void gsensor_cb(void *obj)
+static void coin_gsensor_cb(void *obj)
 {
-    GUI_UNUSED(obj);
 #ifndef _HONEYGUI_SIMULATOR_
-    if (coin_flipping) return;
-    extern bool gsensor_sc7a20_read_xyz(int16_t *x, int16_t *y, int16_t *z);
     static bool initialized = false;
     static int32_t gravity_x = 0;
     static int32_t gravity_y = 0;
     static int32_t gravity_z = 0;
-    int16_t gx, gy, gz;
+    int16_t gx;
+    int16_t gy;
+    int16_t gz;
 
-    if (!gsensor_sc7a20_read_xyz(&gx, &gy, &gz))
+    if (coin_flipping || !gsensor_sc7a20_read_xyz(&gx, &gy, &gz))
     {
         return;
     }
@@ -108,39 +122,47 @@ static void gsensor_cb(void *obj)
                      (motion_y < 0 ? -motion_y : motion_y) +
                      (motion_z < 0 ? -motion_z : motion_z);
 
-
-    if (motion >= 500)
+    if (motion >= COIN_MOTION_THRESHOLD)
     {
         initialized = false;
-        click_flip_coin(obj, NULL);
+        flip_coin_cb(obj, NULL);
     }
+#else
+    GUI_UNUSED(obj);
 #endif
 }
+
+/*============================================================================*
+ * Public API
+ *============================================================================*/
 
 void flip_coin_init(gui_obj_t *parent)
 {
 #ifndef _HONEYGUI_SIMULATOR_
-    int16_t gx, gy, gz;
-    extern bool gsensor_sc7a20_read_xyz(int16_t *x, int16_t *y, int16_t *z);
+    int16_t gx;
+    int16_t gy;
+    int16_t gz;
+
     if (gsensor_sc7a20_read_xyz(&gx, &gy, &gz))
     {
-        xorshift_state ^= ((uint32_t)(uint16_t)gx * 31u)
-                        ^ ((uint32_t)(uint16_t)gy * 17u)
-                        ^ (uint32_t)(uint16_t)gz
-                        ^ (xorshift_state << 1);
+        random_state ^= ((uint32_t)(uint16_t)gx * 31u) ^
+                        ((uint32_t)(uint16_t)gy * 17u) ^
+                        (uint32_t)(uint16_t)gz ^
+                        (random_state << 1);
     }
 #endif
-    coin_flipping = false;
-    vid = NULL;
-    void *img_addr = "/coin_flip_yes.bin";
-    if (!coin_status)
-    {
-        img_addr = "/coin_flip_no.bin";
-    }
-    gui_img_t *img = gui_img_create_from_fs(parent, 0, img_addr, 0, 0, 0, 0);
-    gui_img_set_mode(img, IMG_BYPASS_MODE);
-    gui_obj_create_timer((void *)img, 10, true, gsensor_cb);
-    gui_obj_start_timer((void *)img);
 
-    gui_obj_add_event_cb(img, (gui_event_cb_t)click_flip_coin, GUI_EVENT_TOUCH_CLICKED, NULL);
+    coin_flipping = false;
+    flip_video = NULL;
+
+    const char *image_path = coin_heads ? "/coin_flip_yes.bin" : "/coin_flip_no.bin";
+    gui_img_t *coin_image = gui_img_create_from_fs(parent, "coin_image",
+                                                   (void *)image_path,
+                                                   0, 0, 0, 0);
+    gui_img_set_mode(coin_image, IMG_BYPASS_MODE);
+    gui_obj_create_timer(GUI_BASE(coin_image), COIN_SENSOR_POLL_MS, true,
+                         coin_gsensor_cb);
+    gui_obj_start_timer(GUI_BASE(coin_image));
+    gui_obj_add_event_cb(coin_image, (gui_event_cb_t)flip_coin_cb,
+                         GUI_EVENT_TOUCH_CLICKED, NULL);
 }

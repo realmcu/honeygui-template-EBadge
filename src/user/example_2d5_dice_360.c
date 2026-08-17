@@ -4,48 +4,41 @@
  * SPDX-License-Identifier: MIT
  */
 
-#include "guidef.h"
-#include <string.h>
-#include <math.h>
-#include <stdint.h>
 #include <stdbool.h>
-#include "gui_obj.h"
-#include "gui_img.h"
-#include "draw_img.h"
+#include <stdint.h>
+#include <math.h>
+#include <string.h>
+
 #include "acc_api.h"
-#include "gui_matrix.h"
+#include "draw_img.h"
+#include "gsensor_reader.h"
+#include "guidef.h"
 #include "gui_fb.h"
-#include "gui_server.h"
-#include "gui_components_init.h"
-#include "tp_algo.h"
+#include "gui_img.h"
+#include "gui_matrix.h"
+#include "gui_obj.h"
 #include "gui_obj_type.h"
 #include "gui_vfs.h"
+#include "tp_algo.h"
 
-// #include "dice_litegfx/face_1.txt"
-// #include "dice_litegfx/face_2.txt"
-// #include "dice_litegfx/face_3.txt"
-// #include "dice_litegfx/face_4.txt"
-// #include "dice_litegfx/face_5.txt"
-// #include "dice_litegfx/face_6.txt"
-// #include "dice_litegfx/side.txt"
-// #include "dice_litegfx/angle.txt"
-// #include "dice_litegfx/floor_bg_360.txt"
-
-/* ---------------- 物理参数(与 example_3d_dice.c 对齐) ---------------- */
+/*============================================================================*
+ * Physics configuration
+ *============================================================================*/
 #define DICE_NUM        3
 #define PHYS_DT         0.016f
-/* 竞技场半尺寸(世界系,单位≈骰子半径的倍数)。三者共同决定骰子落点范围。
-   360x360 圆屏:缩小到下列值后,3 颗骰子(含身体+倒影)静止投影最大半径≈142
-   (< 圆半径 180),四周留边、不会被圆角裁掉;见 tools/gen_floor_360.py 同款投影验证。 */
-#define WALL_X          4.6f    /* 横向半宽:放宽让三颗骰子充分散开(允许贴边略出圆) */
-#define WALL_Y          4.0f    /* 纵深半深:保持浅,落点垂直方向紧凑不拉长 */
-#define ARENA_CZ        -0.9f   /* 竞技场纵深中心(世界深度):整体前后位置 */
+/*
+ * The arena dimensions use multiples of the die radius. These values keep all
+ * three dice and their reflections inside a 360 x 360 circular display.
+ */
+#define WALL_X          4.6f    /* Horizontal arena half-width. */
+#define WALL_Y          4.0f    /* Depth half-width. */
+#define ARENA_CZ        -0.9f   /* Arena center along world depth. */
 #define RESTITUTION     0.60f
 #define WALL_KICK       15.0f
 #define COLLISION_DAMP  0.90f
 #define COLLISION_ADAMP 0.92f
 #define WALL_SPIN       0.15f
-#define SETTLE_DAMP     0.965f   /* 落地后水平阻尼:偏紧,消除"漂"感 */
+#define SETTLE_DAMP     0.965f  /* Grounded horizontal damping. */
 #define SETTLE_ADAMP    0.94f
 #define ALIGN_VDAMP     0.85f
 #define SPIN_GAIN       0.60f
@@ -60,40 +53,43 @@
 #define MAX_SPEED       52.0f
 #define THROW_VEL       16.0f
 #define THROW_SPIN      20.0f
-/* 重力/滞空同步调:GRAVITY 提到 180 后,起跳峰高 h = THROW_UP²/2G = 900/360 ≈ 2.5 半径
-   与原参数持平(不飞出屏),但滞空时间 2v/g = 0.33s(原 0.5s),下落干脆有重量。 */
-#define THROW_UP        30.0f   /* 起跳竖直速度:配合 GRAVITY 240,峰高维持 ~2.5 半径 */
-#define GRAVITY         240.0f  /* 重力:大幅加重,落体"啵"的一声出得来,不再飘 */
-#define Z_REST          0.28f   /* 落地回弹:只保留 ~8% 高度,一弹即停,消除多次小弹 */
-#define Z_STOP          4.5f    /* 回弹停止阈值:随重力抬高,末端不再碎弹 */
+/*
+ * THROW_UP and GRAVITY keep the peak near 2.5 die radii while shortening the
+ * flight time. The low restitution produces a single firm landing.
+ */
+#define THROW_UP        30.0f
+#define GRAVITY         240.0f
+#define Z_REST          0.28f
+#define Z_STOP          4.5f
 
-/* ---------------- 加速度计驱动(仅甩动触发,倾斜不驱动) ----------------
-   每帧读三轴,做低通得到"重力基线"(设备姿态);当前读数减去基线 = 运动分量,
-   曼哈顿距离超阈值才触发一次"甩动":按其方向给水平冲量 + 向上弹跳。
-   倾斜分量不再驱动骰子滚动 -- 静置时(哪怕板子有小倾斜)骰子始终由 align 弹簧
-   保持面着地。要动就摇,要停就放桌上。 */
-#define ACC_FULLSCALE   1024.0f  /* SC7A20 ±2g/12bit:约 1024 计数/g,用于把原始值归一化到 g */
-#define ACC_IDX_X       0        /* shake 方向映射:哪个轴当"世界左右" */
-#define ACC_IDX_Z       1        /* shake 方向映射:哪个轴当"世界深度" */
-#define ACC_SIGN_X      (1.0f)   /* 甩动方向符号:反了就改 -1 */
+/*============================================================================*
+ * Accelerometer input
+ *
+ * A low-pass filter estimates gravity. A shake is triggered only when the
+ * Manhattan magnitude of the remaining motion exceeds SHAKE_THRESHOLD. Tilt
+ * does not move the dice; the alignment spring keeps a face on the table.
+ *============================================================================*/
+#define ACC_IDX_X       0        /* Sensor axis mapped to world X. */
+#define ACC_IDX_Z       1        /* Sensor axis mapped to world depth. */
+#define ACC_SIGN_X      (1.0f)   /* Change to -1 to reverse world X. */
 #define ACC_SIGN_Z      (1.0f)
-#define SHAKE_THRESHOLD 1500     /* 甩动触发阈值(运动分量三轴曼哈顿距离,~1.5g 峰值等价);
-                                    抬得比原 500 高很多,静态噪声(几十计数)+ 小晃动都过不了,
-                                    只有"甩"这种主动动作才能触发 */
-#define SHAKE_SCALE     900.0f   /* 甩动强度归一:motion / 此值 得 strength(≈1 为一次有力甩) */
+#define SHAKE_THRESHOLD 1500     /* Motion magnitude required to trigger a throw. */
+#define SHAKE_SCALE     900.0f   /* Converts motion magnitude to throw strength. */
 
-/* 模拟器预览(无加速度计):按住/拖拽=把"桌面"朝手指方向倾斜,点击一下=朝手指方向甩一把 */
-#define SIM_DEPTH_SIGN  (1.0f)   /* 屏幕纵向拖拽映射到深度的符号(手感不对就改 -1) */
+/* Simulator clicks throw the dice away from the display center. */
+#define SIM_DEPTH_SIGN  (1.0f)
 
-/* ---------------- 渲染参数(2.5D 投影) ---------------- */
-#define DICE_IMG_WH     64          /* LiteGfx 点数面图尺寸(Face0X.png) */
-#define SIDE_W          64          /* Side.png 棱条 */
+/*============================================================================*
+ * 2.5D rendering configuration
+ *============================================================================*/
+#define DICE_IMG_WH     64          /* Face texture size. */
+#define SIDE_W          64          /* Edge texture width. */
 #define SIDE_H          12
-#define ANGLE_W         16          /* Angle.png 角贴片 */
+#define ANGLE_W         16          /* Corner texture width. */
 #define ANGLE_H         16
 
 
-/* 逐面光照(世界系平行光):Lambert + Blinn-Phong */
+/* Per-face directional lighting: Lambert plus Blinn-Phong. */
 #define LIGHT_X         (-0.30f)
 #define LIGHT_Y         ( 0.60f)
 #define LIGHT_Z         (-0.70f)
@@ -104,27 +100,28 @@
 #define HALF_X          (-0.1556f)
 #define HALF_Y          ( 0.5426f)
 #define HALF_Z          (-0.8274f)
-/* 棱/角面:沿用面的环境/漫反射(LIGHT_AMBIENT/LIGHT_DIFFUSE,连续着色)+ 柔化高光 → 倒角自然过渡 */
-#define EDGE_SPEC       0.28f       /* 比面(0.55)弱,倒角略带光泽而不刺眼 */
+/* Edges use the same diffuse model with a softer highlight. */
+#define EDGE_SPEC       0.28f
 
-/* ---------------- 针孔透视相机 ----------------
-   与地板烘焙相机(tools/gen_litegfx_dice.py 的 FLOOR_PITCH/CAM_H/CAM_BACK/FOCAL/CAM_CY_FRAC)
-   保持一致:骰子正好贴在木纹平面上;更俯视→透视更弱、地平线移到屏外、骰子可铺满整屏。 */
-#define CAM_PITCH       0.52f    /* = FLOOR_PITCH,与地板同俯角 */
+/*
+ * Pinhole camera parameters match the floor-image baking tool so the dice sit
+ * directly on the wood surface.
+ */
+#define CAM_PITCH       0.52f    /* Matches the baked floor pitch. */
 #define CAM_H           9.1f
 #define CAM_BACK        18.2f
 #define FOCAL           560.0f
-#define CAM_CY_FRAC     0.62f    /* 主点下移:把落地骰子平面压到屏幕垂直中心(与 gen_floor_360.py 一致) */
+#define CAM_CY_FRAC     0.62f    /* Moves the grounded plane toward screen center. */
 
-/* 木纹背景尺寸(需与 floor_bg_360.txt / 圆屏一致) */
+/* Background dimensions match the circular display asset. */
 #define BG_W            360
 #define BG_H            360
 
-/* ---------------- 倒影(桌面 Y=0 镜像反射) ---------------- */
+/* Reflection across the table plane at world Y = 0. */
 #define REFL_DIM        0.32f
 #define REFL_H_FADE     0.13f
 
-/* ---------------- 骰子状态 ---------------- */
+/* Dice state. */
 typedef struct
 {
     float pos[3];
@@ -135,18 +132,9 @@ typedef struct
 
 static dice_state_t g_dice[DICE_NUM];
 
-static int s_thrown = 0;
 static int s_prev_press = 0;
 
-/* 本帧的倾斜输入(g 分量, [-1,1]),由 dice_handle_input 每帧写入、physics_step 读取。
-   g_tilt_gx→世界左右(pos[0]),g_tilt_gz→世界深度(pos[1]);落在死区内时为 0。
-   g_tilt_active: Schmitt trigger 状态,0=当前在"静止"区间(align 弹簧起作用),
-   1=当前在"倾斜"区间(tilt 分支强赋 omega)。用高/低阈值形成迟滞,避免临界噪声二值抖动。 */
-static float g_tilt_gx = 0.0f;
-static float g_tilt_gz = 0.0f;
-static int   g_tilt_active = 0;
-
-/* ---------------- 小工具 ---------------- */
+/* File-local random and quaternion helpers. */
 static unsigned int s_rng = 0x1234abcdu;
 static float frand(float lo, float hi)
 {
@@ -224,7 +212,7 @@ static int wall_bounce(float *p, float *v, float lo, float hi)
     return 0;
 }
 
-/* 静止对齐:把最接近桌面法线(+Y)的本地轴贴到 ±Y,使某面平贴桌面。 */
+/* Align the local axis nearest table-normal +Y so one face lies flat. */
 static void quat_face_up(const float q[4], float out[4])
 {
     float m[3][3];
@@ -271,7 +259,7 @@ static void quat_error_vec(const float q[4], const float tgt[4], float err[3])
     err[0] = s * ex; err[1] = s * ey; err[2] = s * ez;
 }
 
-/* ---------------- 初始化:场地内随机撒开、静置 ---------------- */
+/* Initialize stationary dice at random positions inside the arena. */
 static void dice_physics_init(void)
 {
     const float rx = WALL_X - DIE_R;
@@ -309,7 +297,7 @@ static void dice_physics_init(void)
     }
 }
 
-/* ---------------- 每帧一步物理 ---------------- */
+/* Advance physics by one frame. */
 static void physics_step(dice_state_t *dice, int n)
 {
     const float dt = PHYS_DT;
@@ -360,13 +348,12 @@ static void physics_step(dice_state_t *dice, int n)
             d->vel[0] *= f; d->vel[1] *= f;
         }
 
-        float tilt_mag2 = g_tilt_gx * g_tilt_gx + g_tilt_gz * g_tilt_gz;
-        (void)tilt_mag2;
-        (void)g_tilt_active;
         if (on_ground)
         {
-            /* 只有 shake_impulse 才让骰子动 -- tilt 分支已删。
-               静止(含板子小倾斜)时:一直走这条 align 弹簧,骰子牢牢面着地。 */
+            /*
+             * Only shake impulses move the dice. While grounded, damping and
+             * the alignment spring keep one face firmly on the table.
+             */
             d->vel[0] *= SETTLE_DAMP; d->vel[1] *= SETTLE_DAMP;
             for (int k = 0; k < 3; k++) { d->omega[k] *= SETTLE_ADAMP; }
 
@@ -400,7 +387,7 @@ static void physics_step(dice_state_t *dice, int n)
         }
     }
 
-    /* 骰子两两碰撞(XY 平面,随姿态膨胀的方块包围盒) */
+    /* Resolve pairwise collisions with orientation-expanded XY bounds. */
     float hx[DICE_NUM], hy[DICE_NUM];
     for (int i = 0; i < n; i++)
     {
@@ -459,7 +446,7 @@ static void physics_step(dice_state_t *dice, int n)
 }
 
 /* ====================================================================== *
- *                         2.5D 立方体贴图渲染                             *
+ *                         2.5D cube rendering                              *
  * ====================================================================== */
 
 static const gui_vertex_t s_cube_v[8] =
@@ -470,12 +457,12 @@ static const gui_vertex_t s_cube_v[8] =
 
 static const int   s_face_idx[6][4] =
 {
-    {0, 3, 2, 1},   /* FRONT  法线(0,0,-1) → 1 点 */
-    {4, 5, 6, 7},   /* BACK   法线(0,0, 1) → 6 点 */
-    {5, 1, 2, 6},   /* UP     法线(1,0, 0) → 2 点 */
-    {0, 4, 7, 3},   /* DOWN   法线(-1,0,0) → 5 点 */
-    {7, 6, 2, 3},   /* LEFT   法线(0,1, 0) → 3 点 */
-    {0, 1, 5, 4},   /* RIGHT  法线(0,-1,0) → 4 点 */
+    {0, 3, 2, 1},   /* Front: normal (0, 0, -1), face 1. */
+    {4, 5, 6, 7},   /* Back:  normal (0, 0,  1), face 6. */
+    {5, 1, 2, 6},   /* Up:    normal (1, 0,  0), face 2. */
+    {0, 4, 7, 3},   /* Down:  normal (-1, 0, 0), face 5. */
+    {7, 6, 2, 3},   /* Left:  normal (0, 1,  0), face 3. */
+    {0, 1, 5, 4},   /* Right: normal (0, -1, 0), face 4. */
 };
 static const gui_vertex_t s_face_n[6] =
 {
@@ -487,19 +474,18 @@ static const gui_vertex_t s_face_n[6] =
 #define N_EDGE        12
 #define N_CORNER      8
 #define N_QUAD        (N_FACE + N_EDGE + N_CORNER)   /* 26 */
-/* 倒角带宽:面边 = 12:64(与 LiteGfx 的 Side 64x12 贴图比例一致),
-   反解 2(1-BEVEL) = 5.33*sqrt(2)*BEVEL → BEVEL≈0.20,Side 贴上去不被压扁。 */
+/* BEVEL matches the 64 x 12 edge texture without compressing it. */
 #define BEVEL         0.20f
-/* grow 全归 1:面/棱/角顶点严格共享同一套倒角立方体顶点 → 天然贴合、无错位。 */
+/* Shared unit growth keeps face, edge, and corner vertices aligned. */
 #define FACE_GROW        1.0f
 #define EDGE_GROW        1.0f
 #define EDGE_GROW_ALONG  1.0f
 #define CORNER_GROW      1.0f
-/* 点数面/倒角 side 贴图外沿有约 1~2px 抗锯齿渐变(不透明区内缩了)。不动几何四边形,
-   而是把它当作纹理内缩矩形 [inset,w-inset] 的映射目标(见 face_set_matrix_inset):
-   不透明区顶到几何边、外圈渐变溢到边外盖缝,相邻块不透明体"相接"而非"重叠"。
-   单位=纹理像素,按 img_w/img_h 逐轴换算(薄条 side y 向内缩比例更大)。可微调:
-   太大→轮廓胖/边虚,太小→缝没盖住。 */
+/*
+ * Face and edge textures have a 1-2 pixel antialiasing fringe. Mapping an
+ * inset texture rectangle to the geometry lets that fringe cover seams while
+ * keeping opaque neighboring regions adjacent instead of overlapping.
+ */
 #define EDGE_INSET_PX    1.5f
 
 static gui_vertex_t s_qv[N_QUAD][4];
@@ -700,8 +686,7 @@ static float face_brightness(const float n[3])
 
 static float edge_brightness(const float n[3])
 {
-    /* 与 face_brightness 同一套环境/漫反射(连续),外加柔化高光:
-       倒角法线介于两相邻面之间 → 亮度自然过渡,不再是包边暗框。 */
+    /* Use face lighting with a softer highlight across beveled normals. */
     float ndl = n[0] * LIGHT_X + n[1] * LIGHT_Y + n[2] * LIGHT_Z;
     if (ndl < 0.0f) { ndl = 0.0f; }
     float ndh = n[0] * HALF_X + n[1] * HALF_Y + n[2] * HALF_Z;
@@ -736,17 +721,19 @@ static void face_set_matrix(gui_obj_t *obj, draw_img_t *img, gui_vertex_t rv[4])
     draw_img_new_area(img, NULL);
 }
 
-/* 同 face_set_matrix,但把几何四边形 rv 当作纹理内缩矩形 [inset,w-inset]×[inset,h-inset]
-   的映射目标:用双线性把 rv(参数 (0,0)(1,0)(1,1)(0,1))外推出整张图 4 角 E,再照常建矩阵。
-   于是纹理不透明区顶到几何边,外沿抗锯齿渐变落到 rv 之外(盖缝),不透明体相邻"相接"不"重叠"。
-   在纹理空间偏移——除以常量、不求交,近侧视薄条也不会算爆;各向异性由 w/h 天然处理。 */
+/*
+ * Build a face matrix while treating rv as the inset texture rectangle. The
+ * extrapolated image corners place the antialiasing fringe outside the
+ * geometry, covering seams without overlapping opaque regions.
+ */
 static void face_set_matrix_inset(gui_obj_t *obj, draw_img_t *img, gui_vertex_t rv[4], float inset)
 {
     float w = (float)img->img_w, h = (float)img->img_h;
     float dw = w - 2.0f * inset, dh = h - 2.0f * inset;
     if (dw < 1.0f) { dw = 1.0f; }
     if (dh < 1.0f) { dh = 1.0f; }
-    float sN = inset / dw, tN = inset / dh;     /* 纹理 x=0→s=-sN, x=w→1+sN;y 同理 */
+    float sN = inset / dw;
+    float tN = inset / dh;
     const float ss[4] = { -sN, 1.0f + sN, 1.0f + sN, -sN };
     const float tt[4] = { -tN, -tN, 1.0f + tN, 1.0f + tN };
     gui_vertex_t E[4];
@@ -770,8 +757,7 @@ static void face_set_matrix_inset(gui_obj_t *obj, draw_img_t *img, gui_vertex_t 
     draw_img_new_area(img, NULL);
 }
 
-/* Angle.png 里不透明等边三角(尖朝上)的 3 个顶点,单位:图像像素(原点左上)。
-   量自 alpha 掩膜:尖 (7.5,0.5)、左底 (2.5,10.5)、右底 (13.5,10.5)。 */
+/* Opaque triangle vertices measured from Angle.png's alpha mask. */
 #define ANGLE_APEX_X 7.5f
 #define ANGLE_APEX_Y 0.5f
 #define ANGLE_BL_X   2.5f
@@ -779,11 +765,11 @@ static void face_set_matrix_inset(gui_obj_t *obj, draw_img_t *img, gui_vertex_t 
 #define ANGLE_BR_X   13.5f
 #define ANGLE_BR_Y   10.5f
 
-/* 倒角三角面用退化四边形 {px,py,pz,px} 表示。HoneyGUI 只能把图像 4 角映射到 4 顶点,
-   而三角纹理的 3 个尖点在图像内部,直接映射会错位露黑。
-   这里反过来:先按“三角纹理 3 顶点 → 倒角面 3 投影点(s0,s1,s2)”定一个仿射,
-   再用它把图像 4 角映射出去,得到 rv[4]。这样整张图仿射贴合,三角刚好盖住角面,
-   透明区落在角面之外(露出先画的棱/木纹,而非黑缝)。s0/s1/s2 对应 px/py/pz。 */
+/*
+ * Corner faces use degenerate quads, but the opaque triangle lies inside the
+ * texture. Derive an affine transform from its three alpha-mask vertices to
+ * the projected corner, then map the full image through that transform.
+ */
 static void corner_affine_rv(const gui_vertex_t *s0, const gui_vertex_t *s1,
                              const gui_vertex_t *s2, gui_vertex_t rv[4])
 {
@@ -797,17 +783,18 @@ static void corner_affine_rv(const gui_vertex_t *s0, const gui_vertex_t *s1,
     for (int k = 0; k < 4; k++)
     {
         float dx = cx[k] - u0x, dy = cy[k] - u0y;
-        float a = (dx * e2y - e2x * dy) / det;   /* 沿 e1(→左底)分量 */
-        float b = (e1x * dy - dx * e1y) / det;   /* 沿 e2(→右底)分量 */
+        float a = (dx * e2y - e2x * dy) / det;
+        float b = (e1x * dy - dx * e1y) / det;
         rv[k].x = s0->x + a * (s1->x - s0->x) + b * (s2->x - s0->x);
         rv[k].y = s0->y + a * (s1->y - s0->y) + b * (s2->y - s0->y);
         rv[k].z = 0.0f;
     }
 }
 
-/* 一次"甩动":按 (dirx,dirz) 方向给所有骰子水平冲量 + 向上弹跳。
-   dir 为世界水平面单位向量(可为 0=纯竖直甩),strength≈1 为一次有力甩动。
-   与随机掷不同:方向由三轴甩动分量决定,只叠一点随机让三颗略有差异。 */
+/*
+ * Apply one directional horizontal impulse and an upward bounce to every die.
+ * Small random offsets keep the three trajectories from matching exactly.
+ */
 static void dice_shake_impulse(float dirx, float dirz, float strength)
 {
     if (strength > 1.5f) { strength = 1.5f; }
@@ -820,18 +807,14 @@ static void dice_shake_impulse(float dirx, float dirz, float strength)
         d->vel[2]  = THROW_UP * (0.5f + 0.6f * strength) * frand(0.85f, 1.15f);
         for (int k = 0; k < 3; k++) { d->omega[k] = frand(-THROW_SPIN, THROW_SPIN) * strength; }
     }
-    s_thrown = 1;
 }
 
 static void dice_handle_input(void)
 {
 #ifdef _HONEYGUI_SIMULATOR_
-    /* 模拟器:点击的上升沿 = 朝手指方向甩一把(离屏心方向为甩动向量)。
-       tilt-roll 已废弃 -- 静止时任何倾斜(含桌面不平/加速度计噪声)都不驱动骰子。 */
+    /* A simulator press throws the dice away from the screen center. */
     touch_info_t *tp = tp_get_info();
     int pressing = (tp && tp->pressing) ? 1 : 0;
-    g_tilt_gx = 0.0f; g_tilt_gz = 0.0f;
-    g_tilt_active = 0;
     if (pressing && !s_prev_press)
     {
         float nx = ((float)tp->x - BG_W * 0.5f) / (BG_W * 0.5f);
@@ -843,12 +826,10 @@ static void dice_handle_input(void)
     }
     s_prev_press = pressing;
 #else
-    /* 板子:仅 shake 触发动作,倾斜不驱动。
-       1) 低通(/8)跟踪 gravity 基线(即当前设备姿态);
-       2) 当前读数减去基线 = 运动分量,曼哈顿距离超阈值 → 按其方向甩一把。
-       静置时(哪怕板子有 10 度小倾斜)不会有任何位移或滚动,骰子由 align 弹簧
-       持续锁在"面着地"上。 */
-    extern bool gsensor_sc7a20_read_xyz(int16_t *x, int16_t *y, int16_t *z);
+    /*
+     * Track gravity with a low-pass filter and trigger only on the remaining
+     * motion. Static tilt does not move the dice.
+     */
     static bool    initialized = false;
     static int32_t grav[3] = { 0, 0, 0 };
     int16_t gx, gy, gz;
@@ -865,12 +846,7 @@ static void dice_handle_input(void)
 
     for (int k = 0; k < 3; k++) { grav[k] += (raw[k] - grav[k]) / 8; }
 
-    /* 兼容变量,现只做诊断用:tilt 分支已删,physics_step 不再读它们。 */
-    g_tilt_gx = 0.0f;
-    g_tilt_gz = 0.0f;
-    g_tilt_active = 0;
-
-    /* 运动分量 → 甩动检测与方向 */
+    /* Convert the linear-motion component into throw direction and strength. */
     int32_t m[3];
     for (int k = 0; k < 3; k++) { m[k] = raw[k] - grav[k]; }
     int32_t motion = (m[0] < 0 ? -m[0] : m[0]) + (m[1] < 0 ? -m[1] : m[1])
@@ -882,7 +858,8 @@ static void dice_handle_input(void)
         float dn = sqrtf(dx * dx + dz * dz);
         if (dn > 1e-3f) { dx /= dn; dz /= dn; } else { dx = 0.0f; dz = 0.0f; }
         dice_shake_impulse(dx, dz, (float)motion / SHAKE_SCALE);
-        initialized = false;   /* 重置重力基线,避免甩动余震连续触发 */
+        /* Reset the baseline to avoid retriggering on residual movement. */
+        initialized = false;
     }
     (void)s_prev_press;
 #endif
@@ -928,15 +905,13 @@ static void dice2d5_prepare(gui_obj_t *obj)
             if (facing < 0.0f)
             {
                 float br = (q < N_FACE) ? face_brightness(nw) : edge_brightness(nw);
-                /* 面/棱/角统一走 SRC_MODE:opacity 作亮度缩放,逐像素 alpha 同时驱动
-                   src-over(角贴图透明三角自动保留)。角用 edge_brightness,与倒角棱条同调。 */
+                /* Opacity carries lighting while preserving per-pixel alpha. */
                 this->draw_img[d][q].opacity_value = (uint8_t)(br * 255.0f);
 
                 gui_vertex_t rv[4];
                 if (q >= N_FACE + N_EDGE)
                 {
-                    /* 角:退化四边形前 3 点 px,py,pz 是倒角三角面的 3 顶点,
-                       用仿射把 Angle 三角纹理贴到这三点上。 */
+                    /* Affine-map the corner triangle texture to its first three points. */
                     gui_vertex_t s[3];
                     for (int kk = 0; kk < 3; kk++)
                     {
@@ -1000,7 +975,7 @@ static void dice2d5_prepare(gui_obj_t *obj)
                             cam_project(pwr, &sx, &sy);
                             rv[kk].x = sx; rv[kk].y = sy; rv[kk].z = 0.0f;
                         }
-                        /* 反射同样用纹理内缩:不透明体"相接"不"重叠",半透明 src-over 不再累加白线。 */
+                        /* Reflections use the same inset mapping to avoid bright seams. */
                     }
                     if (quad_area(rv) < 4.0f) { this->nz_refl[d][q] = 0.0f; }
                     else if (q >= N_FACE + N_EDGE) { face_set_matrix(obj, &this->draw_img_refl[d][q], rv); }
@@ -1025,7 +1000,7 @@ static void dice2d5_draw(gui_obj_t *obj)
     gui_dice_t *this = (gui_dice_t *)obj;
     gui_dispdev_t *dc = gui_get_dc();
 
-    /* 木纹背景已由独立的 gui_img 子控件(在本对象之前创建)绘制,这里只画骰子。 */
+    /* A preceding image child draws the wood background. */
 
     int order[DICE_NUM];
     for (int i = 0; i < DICE_NUM; i++) { order[i] = i; }
@@ -1039,7 +1014,7 @@ static void dice2d5_draw(gui_obj_t *obj)
     for (int k = 0; k < DICE_NUM; k++)
     {
         int d = order[k];
-        /* 倒影层:先于本体画,只画朝向镜像相机的 26 块 */
+        /* Draw reflection quads facing the mirrored camera before the dice. */
         for (int q = 0; q < N_QUAD; q++)
         {
             if (this->nz_refl[d][q] > 0.0f)
@@ -1052,7 +1027,7 @@ static void dice2d5_draw(gui_obj_t *obj)
     for (int k = 0; k < DICE_NUM; k++)
     {
         int d = order[k];
-        /* 本体层:只画背面剔除后可见(nz>0)的 26 块 */
+        /* Draw only body quads that survive back-face culling. */
         for (int q = 0; q < N_QUAD; q++)
         {
             if (this->nz[d][q] > 0.0f)
@@ -1074,11 +1049,15 @@ static void dice2d5_cb(gui_obj_t *obj, T_OBJ_CB_TYPE cb_type)
     }
 }
 
-/* 点数面贴图:对面之和为 7(前1后6 / 上2下5 / 左3右4) */
+/* Opposite face values sum to seven. */
 static const void *s_face_img[6] =
 {
-    (const void *)"/image/dice/Face01.bin", (const void *)"/image/dice/Face06.bin", (const void *)"/image/dice/Face02.bin",
-    (const void *)"/image/dice/Face05.bin", (const void *)"/image/dice/Face03.bin", (const void *)"/image/dice/Face04.bin",
+    (const void *)"/image/dice/Face01.bin",
+    (const void *)"/image/dice/Face06.bin",
+    (const void *)"/image/dice/Face02.bin",
+    (const void *)"/image/dice/Face05.bin",
+    (const void *)"/image/dice/Face03.bin",
+    (const void *)"/image/dice/Face04.bin",
 };
 
 static gui_dice_t *dice2d5_create(gui_obj_t *parent)
@@ -1089,7 +1068,7 @@ static gui_dice_t *dice2d5_create(gui_obj_t *parent)
 
     gui_obj_t *base = (gui_obj_t *)this;
     gui_obj_ctor(base, parent, "dice-2d5-litegfx", 0, 0, 0, 0);
-    base->type = VG_LITE_SOCCER;   /* 复用 2.5D 贴图类型 */
+    base->type = VG_LITE_SOCCER;   /* Reuse the existing 2.5D textured type. */
     base->obj_cb = dice2d5_cb;
     base->has_prepare_cb = true;
     base->has_draw_cb = true;
@@ -1098,18 +1077,35 @@ static gui_dice_t *dice2d5_create(gui_obj_t *parent)
     {
         for (int q = 0; q < N_QUAD; q++)
         {
-            /* q<6 点数主面(64x64);6..17 棱面(Side 64x12);18..25 角面(Angle 16x16) */
-            const void *tex; int tw, th;
-            // int is_corner = (q >= N_FACE + N_EDGE);
-            if (q < N_FACE)                 { tex = s_face_img[q];        tw = th = DICE_IMG_WH; }
-            else if (q < N_FACE + N_EDGE)   { tex = (const void *)"/image/dice/Side.bin";  tw = SIDE_W;  th = SIDE_H;  }
-            else                            { tex = (const void *)"/image/dice/Angle.bin"; tw = ANGLE_W; th = ANGLE_H; }
+            /* Quads 0-5 are faces, 6-17 edges, and 18-25 corners. */
+            const void *texture;
+            int texture_width;
+            int texture_height;
 
-            const void *img_data = gui_vfs_get_file_address(tex);
-            if (!img_data)
+            if (q < N_FACE)
             {
-                /* Fallback: read file into memory */
-                gui_vfs_file_t *f = gui_vfs_open(tex, GUI_VFS_READ);
+                texture = s_face_img[q];
+                texture_width = DICE_IMG_WH;
+                texture_height = DICE_IMG_WH;
+            }
+            else if (q < N_FACE + N_EDGE)
+            {
+                texture = (const void *)"/image/dice/Side.bin";
+                texture_width = SIDE_W;
+                texture_height = SIDE_H;
+            }
+            else
+            {
+                texture = (const void *)"/image/dice/Angle.bin";
+                texture_width = ANGLE_W;
+                texture_height = ANGLE_H;
+            }
+
+            const void *img_data = gui_vfs_get_file_address(texture);
+            if (img_data == NULL)
+            {
+                /* Fall back to loading the texture into allocated memory. */
+                gui_vfs_file_t *f = gui_vfs_open(texture, GUI_VFS_READ);
                 GUI_ASSERT(f != NULL);
                 gui_vfs_seek(f, 0, GUI_VFS_SEEK_END);
                 int size = gui_vfs_tell(f);
@@ -1117,22 +1113,20 @@ static gui_dice_t *dice2d5_create(gui_obj_t *parent)
                 if (size <= 0)
                 {
                     gui_vfs_close(f);
-                    return;
+                    return NULL;
                 }
                 gui_vfs_seek(f, 0, GUI_VFS_SEEK_SET);
                 img_data = gui_malloc(size);
                 GUI_ASSERT(img_data != NULL);
                 gui_vfs_read(f, (void *)img_data, size);
                 gui_vfs_close(f);
-                // gui_log("dice2d5_create: loaded %s (%d bytes) into memory\n", (const char *)tex, size);
-
             }
 
 
 
             this->draw_img[d][q].data  = (void *)img_data;
-            this->draw_img[d][q].img_w = tw;
-            this->draw_img[d][q].img_h = th;
+            this->draw_img[d][q].img_w = texture_width;
+            this->draw_img[d][q].img_h = texture_height;
             this->draw_img[d][q].opacity_value = UINT8_MAX;
 #ifdef _HONEYGUI_SIMULATOR_
             this->draw_img[d][q].blend_mode = IMG_SRC_OVER_MODE;
@@ -1142,12 +1136,11 @@ static gui_dice_t *dice2d5_create(gui_obj_t *parent)
             this->draw_img[d][q].high_quality = true;
 
             this->draw_img_refl[d][q].data  = (void *)img_data;
-            this->draw_img_refl[d][q].img_w = tw;
-            this->draw_img_refl[d][q].img_h = th;
+            this->draw_img_refl[d][q].img_w = texture_width;
+            this->draw_img_refl[d][q].img_h = texture_height;
             this->draw_img_refl[d][q].opacity_value = 0;
             this->draw_img_refl[d][q].blend_mode = IMG_SRC_OVER_MODE;
 
-            // gui_log("data 0x%x 0x%x\n", this->draw_img[d][q].data, this->draw_img_refl[d][q].data);
         }
     }
 
