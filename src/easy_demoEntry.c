@@ -22,8 +22,8 @@ static int app_init(void)
     // Add user initialization code here (runs before the main view is created)
 #ifndef _HONEYGUI_SIMULATOR_
 
-    extern int posix_port_init_all(void);
-    posix_port_init_all();
+    // extern int posix_port_init_all(void);
+    // posix_port_init_all();
 
     extern int flashdb_prepare(void);
     flashdb_prepare();
@@ -40,8 +40,6 @@ static int app_init(void)
     if (win_view == NULL)
     {
         win_view = gui_win_create(gui_obj_get_root(), "win_view", 0, 0, 0, 0);
-        extern void win_timer_gsensor_cb(void *obj);
-        gui_obj_create_timer((void *)win_view, 30, true, win_timer_gsensor_cb);
     }
     gui_view_enable_precache_snapshot(false);
     /* @protected end app_init_pre */

@@ -5,7 +5,6 @@
 #include <stdint.h>
 #include <string.h>
 
-#include "gsensor_reader.h"
 #include "gui_arc.h"
 #include "gui_list.h"
 #include "gui_lite3d.h"
@@ -32,15 +31,11 @@
 gui_win_t *win_view = NULL;
 
 uint8_t mainface_idx = 0;
-uint8_t mainface_num = 8;
+uint8_t mainface_num = 4;
 mainface_src_t mainface_list[MAINFACE_NUM_MAX] =
 {
     {"/image/565/wallpaper_danmu.bin",      SRC_DANMU,       NULL, "/user/hello_0040F8.bin", 0xff0040F8},
     {"/user/gltf_desc_Fox.bin",             SRC_3D,          NULL, "/user/fox_40A840.bin",   0xff40A840},
-    {"/foreground_360.bin",                 SRC_IMG_SPATIAL, NULL, "/user/eva_D0C9B9.bin",  0xffD0C9B9},
-    {"/image/shake_lot/lot_start.bin",      SRC_SHAKE_LOT,   NULL, "/user/lot_BC0500.bin",  0xffBC0500},
-    {"/coin_flip_2_yes.avi",                SRC_FLIP_COIN,   NULL, "/user/coin_F8E446.bin", 0xffffffff},
-    {"/coin_flip_2_yes.avi",                SRC_DICE,        NULL, "/user/dice_582808.bin", 0xff582808},
     {"/wallpaper_video.avi",                SRC_VIDEO,       NULL, "/user/wsq_F4EFD9.bin",  0xffF4EFD9},
     {"/image/565/wallpaper_static_img.bin", SRC_IMG,         NULL, "/user/pig_F8C8C8.bin",  0xffF8C8C8},
 };
@@ -419,14 +414,6 @@ static void switch_mainface(gui_obj_t *parent)
         gui_lite3d_on_click(lite3d_fox, fox_animation_update_cb, NULL);
         break;
     }
-    case SRC_IMG_SPATIAL:
-    {
-        /* code */
-        extern int spatial_wallpaper(gui_obj_t *parent);
-        gui_obj_t *sw_root = gui_obj_create(win, "sw_root", 0, 0, 0, 0);
-        spatial_wallpaper(sw_root);
-        break;
-    }
     case SRC_DANMU:
     {
 #ifdef _HONEYGUI_SIMULATOR_
@@ -467,30 +454,6 @@ static void switch_mainface(gui_obj_t *parent)
         //     }
         //     gui_view_set_bg_color((gui_view_t *)parent, bg_color);
         // }
-        break;
-    }
-    case SRC_SHAKE_LOT:
-    {
-        /*
-         * Standalone shake-lot mainface: play the video while shaking,
-         * then select a result by probability after motion stops.
-         */
-        extern int shake_lot(gui_obj_t *parent);
-        gui_obj_t *sl_root = gui_obj_create(win, "sl_root", 0, 0, 0, 0);
-        shake_lot(sl_root);
-        break;
-    }
-    case SRC_FLIP_COIN:
-    {
-        extern void flip_coin_init(gui_obj_t *parent);
-        flip_coin_init((void *)win);
-        break;
-    }
-    case SRC_DICE:
-    {
-        extern void dice_demo(gui_obj_t *parent);
-        gui_obj_t *dice_root = gui_obj_create(win, "dice_root", 0, 0, 0, 0);
-        dice_demo((void *)dice_root);
         break;
     }
 
@@ -1126,266 +1089,6 @@ void win_timer_0_cb(void *obj)
         // gui_log("touch released\n");
     }
 }
-
-/*
- * Process accelerometer samples and switch the mainface after a complete
- * left/right flip gesture.
- */
-void win_timer_gsensor_cb(void *obj)
-{
-    GUI_UNUSED(obj);
-
-#ifndef _HONEYGUI_SIMULATOR_
-    static bool filter_valid = false;
-    static bool shake_locked = false;
-    static bool return_seen = false;
-    static uint8_t filter_warmup_count = 0;
-    static uint8_t shake_sample_count = 0;
-    static uint8_t shake_window_count = 0;
-    static uint8_t quiet_sample_count = 0;
-    static uint8_t lock_sample_count = 0;
-    static int8_t shake_direction = 0;
-    static int32_t gesture_start_gravity_y = 0;
-    static int32_t gesture_gravity_excursion = 0;
-    static int32_t gravity_x = 0, gravity_y = 0, gravity_z = 0;
-    static int16_t previous_x = 0, previous_y = 0, previous_z = 0;
-    int16_t gx = 0, gy = 0, gz = 0;
-
-    if (!enable_switch_mainface || !is_displaying_mainface ||
-            mainface_list[mainface_idx].type == SRC_SHAKE_LOT ||
-            mainface_list[mainface_idx].type == SRC_FLIP_COIN)
-    {
-        shake_sample_count = 0;
-        shake_window_count = 0;
-        quiet_sample_count = 0;
-        lock_sample_count = 0;
-        shake_direction = 0;
-        shake_locked = false;
-        return_seen = false;
-        filter_valid = false;
-        filter_warmup_count = 0;
-        return;
-    }
-
-    if (gsensor_sc7a20_read_xyz(&gx, &gy, &gz))
-    {
-        if (!filter_valid)
-        {
-            gravity_x = gx;
-            gravity_y = gy;
-            gravity_z = gz;
-            previous_x = gx;
-            previous_y = gy;
-            previous_z = gz;
-            filter_valid = true;
-            return;
-        }
-
-        /* Phone-style shake detection: low-pass estimates gravity and the
-         * remaining high-pass component is the user's linear acceleration.
-         * It therefore also works while the device is held vertically. */
-        gravity_x += ((int32_t)gx - gravity_x) / 8;
-        gravity_y += ((int32_t)gy - gravity_y) / 8;
-        gravity_z += ((int32_t)gz - gravity_z) / 8;
-
-        int32_t linear_x = (int32_t)gx - gravity_x;
-        int32_t linear_y = (int32_t)gy - gravity_y;
-        int32_t linear_z = (int32_t)gz - gravity_z;
-        int32_t abs_x = linear_x < 0 ? -linear_x : linear_x;
-        int32_t abs_y = linear_y < 0 ? -linear_y : linear_y;
-        int32_t abs_z = linear_z < 0 ? -linear_z : linear_z;
-        int32_t delta_x = (int32_t)gx - previous_x;
-        int32_t delta_y = (int32_t)gy - previous_y;
-        int32_t delta_z = (int32_t)gz - previous_z;
-        int32_t abs_delta_x = delta_x < 0 ? -delta_x : delta_x;
-        int32_t abs_delta_y = delta_y < 0 ? -delta_y : delta_y;
-        int32_t abs_delta_z = delta_z < 0 ? -delta_z : delta_z;
-        previous_x = gx;
-        previous_y = gy;
-        previous_z = gz;
-
-        /* This callback is registered with a 30 ms timer. Keep all timing
-         * parameters expressed as sample counts derived from that period. */
-        const uint8_t gsensor_period_ms = 30;
-        const int32_t shake_threshold = 140;
-        const int32_t return_threshold = 120;
-        const int32_t still_delta_threshold = 80;
-        const int32_t quiet_linear_threshold = 180;
-        const int32_t impact_threshold = 1400;
-        const int32_t gravity_excursion_threshold = 240;
-        const uint8_t filter_warmup_samples = 240 / gsensor_period_ms; /* 240 ms */
-        const uint8_t gesture_window_samples = 600 / gsensor_period_ms;/* 600 ms */
-        const uint8_t lock_hold_samples = 150 / gsensor_period_ms;    /* 150 ms */
-        const uint8_t quiet_confirm_samples = 300 / gsensor_period_ms;/* 300 ms */
-        const uint8_t fallback_quiet_samples = 600 / gsensor_period_ms;/* 600 ms */
-
-        /* Let the gravity filter settle for about 240 ms after startup. */
-        if (filter_warmup_count < filter_warmup_samples)
-        {
-            filter_warmup_count++;
-            return;
-        }
-
-        if (shake_locked)
-        {
-            if (lock_sample_count < lock_hold_samples)
-            {
-                lock_sample_count++;
-                return;
-            }
-
-            /* A normal hand return produces acceleration opposite to the
-             * triggering direction. Ignore that movement, then rearm quickly
-             * once it settles. Also allow a slow return with no clear peak. */
-            if (!return_seen &&
-                ((shake_direction > 0 && linear_y <= -return_threshold) ||
-                 (shake_direction < 0 && linear_y >= return_threshold)))
-            {
-                return_seen = true;
-                quiet_sample_count = 0;
-            }
-
-            /* Raw sample deltas show that the hand has stopped immediately;
-             * unlike high-pass values, they do not wait for gravity to settle. */
-            bool is_still = abs_delta_y < still_delta_threshold &&
-                            abs_delta_x < still_delta_threshold * 2 &&
-                            abs_delta_z < still_delta_threshold * 2 &&
-                            abs_y < quiet_linear_threshold;
-            if (is_still)
-            {
-                quiet_sample_count++;
-                uint8_t required_quiet = return_seen ? quiet_confirm_samples :
-                                         fallback_quiet_samples;
-                if (quiet_sample_count >= required_quiet)
-                {
-                    shake_locked = false;
-                    return_seen = false;
-                    quiet_sample_count = 0;
-                    lock_sample_count = 0;
-                    shake_direction = 0;
-                }
-            }
-            else
-            {
-                quiet_sample_count = 0;
-            }
-            return;
-        }
-
-        /* Keep processing LOCKED during the view animation so recovery can be
-         * observed, but never start a new switch while a view is transitioning. */
-        if (gui_view_get_next() != NULL)
-        {
-            shake_sample_count = 0;
-            shake_window_count = 0;
-            shake_direction = 0;
-            return;
-        }
-
-        /* Reject only saturation-like impacts. Normal flips in the captured
-         * logs can reach about 970 on x/z, while pickup impact reached 2604. */
-        if (abs_x >= impact_threshold || abs_y >= impact_threshold ||
-            abs_z >= impact_threshold)
-        {
-            shake_sample_count = 0;
-            shake_window_count = 0;
-            shake_direction = 0;
-            gravity_x = gx;
-            gravity_y = gy;
-            gravity_z = gz;
-            return;
-        }
-
-        /* A deliberate left/right flip has two phases: acceleration toward one
-         * side, followed by opposite acceleration while the hand brakes. */
-        int8_t direction = linear_y > 0 ? 1 : -1;
-        int32_t max_cross_axis = abs_x > abs_z ? abs_x : abs_z;
-        bool is_lateral_peak = abs_y >= shake_threshold &&
-                               abs_y * 2 >= max_cross_axis;
-
-        if (shake_window_count > 0)
-        {
-            int32_t gravity_delta = gravity_y - gesture_start_gravity_y;
-            int32_t abs_gravity_delta = gravity_delta < 0 ?
-                                        -gravity_delta : gravity_delta;
-            if (abs_gravity_delta > gesture_gravity_excursion)
-            {
-                gesture_gravity_excursion = abs_gravity_delta;
-            }
-
-            if (++shake_window_count > gesture_window_samples)
-            {
-                shake_sample_count = 0;
-                shake_window_count = 0;
-                shake_direction = 0;
-                gesture_gravity_excursion = 0;
-            }
-        }
-
-        if (is_lateral_peak)
-        {
-            if (shake_sample_count == 0)
-            {
-                shake_direction = direction;
-                shake_sample_count = 1;
-                shake_window_count = 1;
-                gesture_start_gravity_y = gravity_y;
-                gesture_gravity_excursion = 0;
-            }
-            else if (direction == -shake_direction)
-            {
-                int32_t gravity_y_abs = gravity_y < 0 ? -gravity_y : gravity_y;
-                int32_t start_gravity_y_abs = gesture_start_gravity_y < 0 ?
-                                              -gesture_start_gravity_y :
-                                              gesture_start_gravity_y;
-                bool crossed_side_tilt = gravity_y * gesture_start_gravity_y < 0 &&
-                                         gravity_y_abs >= gravity_excursion_threshold / 2 &&
-                                         start_gravity_y_abs >= gravity_excursion_threshold / 2;
-                bool reached_side_tilt = gesture_gravity_excursion >=
-                                         gravity_excursion_threshold &&
-                                         (gravity_y_abs >= gravity_excursion_threshold / 2 ||
-                                          start_gravity_y_abs >= gravity_excursion_threshold / 2);
-                if (crossed_side_tilt || reached_side_tilt)
-                {
-                    shake_sample_count = 2;
-                }
-                else
-                {
-                    shake_sample_count = 0;
-                    shake_window_count = 0;
-                    shake_direction = 0;
-                }
-            }
-        }
-
-        if (shake_sample_count >= 2)
-        {
-            gui_view_t *view_current = gui_view_get_current();
-            const char *view_l = view_current->on_event[3]->descriptor->name;
-            const char *view_r = view_current->on_event[2]->descriptor->name;
-            gui_view_set_animate_step(view_current, view_current->base.w / 25);
-            shake_locked = true;
-            return_seen = false;
-            lock_sample_count = 0;
-            shake_sample_count = 0;
-            shake_window_count = 0;
-            gesture_gravity_excursion = 0;
-            quiet_sample_count = 0;
-            if (shake_direction < 0)
-            {
-                gui_view_switch_direct(view_current, view_r, SWITCH_INIT_STATE,
-                                       SWITCH_IN_ANIMATION_RASTER_HORIZONTAL_REVERSE);
-            }
-            else
-            {
-                gui_view_switch_direct(view_current, view_l, SWITCH_INIT_STATE,
-                                       SWITCH_IN_ANIMATION_RASTER_HORIZONTAL);
-            }
-        }
-    }
-#endif
-}
-
 
 void click_auto_sleep_icon(void *obj, gui_event_t *e)
 {
