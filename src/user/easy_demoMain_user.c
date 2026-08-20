@@ -136,14 +136,11 @@ static void mainface_list_view_timer_cb(void *obj);
 static void on_remote_state_changed(void);
 static void on_remote_shot_ready(uint16_t shot_id);
 static void on_remote_ctrl_result(uint8_t key, uint8_t code);
+void ui_remote_change(uint32_t payload);
 
 /*============================================================================*
  * Common view and 3D helpers
  *============================================================================*/
-
-
-
-
 
 /*
  * Rotate the 3D model from horizontal drag deltas.
@@ -433,6 +430,7 @@ static void switch_mainface(gui_obj_t *parent)
         gui_img_set_mode(img_0, IMG_BYPASS_MODE);
         int16_t img_y = (screen_size - img_0->base.h) / 2;
         gui_obj_move((void *)img_0, screen_size, img_y);
+        img_0->need_clip = false;
         // {
         //     const void *src_data = gui_img_get_image_data(img_0);
         //     uint32_t src_color = get_img_color((uint8_t *)src_data);
