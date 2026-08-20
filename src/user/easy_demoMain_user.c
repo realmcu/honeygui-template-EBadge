@@ -1432,6 +1432,8 @@ void ui_add_resource(uint32_t payload)
 }
 void ui_jump_streaming(void)
 {
+    gui_view_t *view_c = gui_view_get_current();
+    if (view_c && (strcmp(view_c->base.name, "view_cam_ctl") == 0)) return;
     gui_msg_t msg = {.event = GUI_EVENT_USER_DEFINE, .sub_event = CAST_START, .cb = (gui_msg_cb)ui_process_msg};
     gui_send_msg_to_server(&msg);
 }
@@ -1652,7 +1654,7 @@ int app_stream_transport_init(void)
     cfg.align              = 8;
     cfg.classes            = s_stream_classes;
     cfg.class_count        = 1;
-    cfg.drop_mode          = STP_DROP_NONE;   /* MSV1: oldest-first, never drop */
+    cfg.drop_mode          = STP_DROP_UNCONDITIONAL;   /* MSV1: oldest-first, never drop */
     cfg.allow_oversize_fit = true;
 
     s_stream_tp = stp_instance_create(&cfg);
