@@ -1256,7 +1256,7 @@ void click_camera_2x(void *obj, gui_event_t *e)
 uint8_t mainface_list_init(void **data_list, uint32_t n)
 {
     uint8_t idx = 0;
-    uint8_t reserved = 6;
+    uint8_t reserved = mainface_num;
     if (data_list == NULL || !n) return idx;
 
 
