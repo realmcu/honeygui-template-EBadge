@@ -48,6 +48,10 @@
     "image/stream": {
       "format": "ARGB8565",
       "compression": "adaptive"
+    },
+    "image/565": {
+      "compression": "rle",
+      "format": "RGB565"
     }
   }
 }
